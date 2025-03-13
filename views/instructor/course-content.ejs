@@ -1,0 +1,784 @@
+<%- include('../partials/head', { title: 'Manage Course Content - LearnHub' }) %>
+<body class="bg-black text-white">
+  <%- include('../partials/navbar') %>
+
+  <div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex items-center mb-6">
+      <a href="/instructor/courses" class="text-gray-400 hover:text-gray-200 mr-4">
+        <i class="fas fa-arrow-left"></i>
+      </a>
+      <h1 class="text-2xl font-bold">Manage Course Content: <%= course.title %></h1>
+    </div>
+    
+    <!-- Alerts -->
+    <% if(success_msg && success_msg.length > 0) { %>
+      <div class="bg-green-800 border border-green-600 text-green-300 px-4 py-3 rounded mb-4">
+        <%= success_msg %>
+      </div>
+    <% } %>
+    <% if(error_msg && error_msg.length > 0) { %>
+      <div class="bg-red-800 border border-red-600 text-red-300 px-4 py-3 rounded mb-4">
+        <%= error_msg %>
+      </div>
+    <% } %>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Module Sidebar -->
+      <div class="md:col-span-1">
+        <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden sticky top-6">
+          <div class="p-4 border-b border-gray-700">
+            <h2 class="text-lg font-semibold">Course Structure</h2>
+          </div>
+          
+          <div class="p-4">
+            <div class="flex justify-between items-center mb-4">
+              <span class="text-sm text-gray-400"><%= course.modules.length %> modules</span>
+              <button id="add-module-btn" class="text-blue-400 hover:text-blue-300 text-sm">
+                <i class="fas fa-plus-circle mr-1"></i> Add Module
+              </button>
+            </div>
+            
+            <div id="modules-list" class="space-y-4">
+              <% course.modules.forEach(function(module, moduleIndex) { %>
+                <div class="border border-gray-700 rounded-md overflow-hidden module-item" data-module-id="<%= module.id %>">
+                  <!-- Module Header -->
+                  <div class="bg-gray-700 p-3 flex justify-between items-center cursor-pointer module-header">
+                    <h3 class="font-medium"><%= module.title %></h3>
+                    <div class="flex items-center">
+                      <span class="text-xs text-gray-400 mr-2"><%= module.lessons.length %> lessons</span>
+                      <i class="fas fa-chevron-down text-gray-400"></i>
+                    </div>
+                  </div>
+                  
+                  <!-- Module Content -->
+                  <div class="p-3 hidden module-content">
+                    <div class="space-y-2 mb-3">
+                      <% module.lessons.forEach(function(lesson) { %>
+                        <div class="flex items-center justify-between text-sm">
+                          <div class="flex items-center">
+                            <% if (lesson.type === 'video') { %>
+                              <i class="fas fa-play-circle text-blue-400 mr-2"></i>
+                            <% } else if (lesson.type === 'pdf') { %>
+                              <i class="fas fa-file-pdf text-red-500 mr-2"></i>
+                            <% } else if (lesson.type === 'quiz') { %>
+                              <i class="fas fa-question-circle text-blue-500 mr-2"></i>
+                            <% } else { %>
+                              <i class="fas fa-file-alt text-gray-400 mr-2"></i>
+                            <% } %>
+                            <span><%= lesson.title %></span>
+                          </div>
+                          <div class="flex items-center">
+                            <button class="text-gray-400 hover:text-blue-400 edit-lesson-btn" data-module-id="<%= module.id %>" data-lesson-id="<%= lesson.id %>" data-lesson-title="<%= lesson.title %>" data-lesson-type="<%= lesson.type %>" data-lesson-duration="<%= lesson.duration || '' %>">
+                              <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="text-gray-400 hover:text-red-500 ml-2 delete-lesson-btn" data-module-id="<%= module.id %>" data-lesson-id="<%= lesson.id %>">
+                              <i class="fas fa-trash-alt"></i>
+                            </button>
+                          </div>
+                        </div>
+                      <% }); %>
+                    </div>
+                    
+                    <button class="text-blue-400 hover:text-blue-300 text-sm add-lesson-btn" data-module-id="<%= module.id %>">
+                      <i class="fas fa-plus-circle mr-1"></i> Add Lesson
+                    </button>
+                    
+                    <div class="mt-3 pt-3 border-t border-gray-700 flex justify-between">
+                      <button class="text-gray-400 hover:text-blue-400 text-sm edit-module-btn" data-module-id="<%= module.id %>" data-module-title="<%= module.title %>">
+                        <i class="fas fa-edit mr-1"></i> Edit Module
+                      </button>
+                      <button class="text-gray-400 hover:text-red-500 text-sm delete-module-btn" data-module-id="<%= module.id %>">
+                        <i class="fas fa-trash-alt mr-1"></i> Delete Module
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              <% }); %>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Main Content: Preview & Content Management -->
+      <div class="md:col-span-2">
+        <!-- Course Preview -->
+        <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden mb-6">
+          <div class="p-4 border-b border-gray-700">
+            <h2 class="text-lg font-semibold">Course Preview</h2>
+          </div>
+          
+          <div class="p-6">
+            <div class="flex items-center mb-4">
+              <img src="<%= course.thumbnail %>" alt="<%= course.title %>" class="w-24 h-24 object-cover rounded-md mr-4">
+              <div>
+                <h3 class="text-xl font-bold"><%= course.title %></h3>
+                <p class="text-gray-400"><%= course.category %></p>
+                <div class="flex items-center mt-1">
+                  <span class="text-yellow-500 mr-1">★</span>
+                  <span><%= course.rating %></span>
+                  <span class="text-gray-400 ml-1">(<%= course.students %> students)</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <h4 class="font-medium mb-2">Description</h4>
+              <p class="text-gray-400"><%= course.description %></p>
+            </div>
+            
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="font-bold text-xl">$<%= course.price.toFixed(2) %></span>
+              </div>
+              <div class="flex gap-2">
+                <a href="/instructor/courses/<%= course.id %>/edit" class="bg-gray-700 text-gray-300 px-4 py-2 rounded-md hover:bg-gray-600 transition-colors">
+                  <i class="fas fa-edit mr-1"></i> Edit Details
+                </a>
+                <a href="/courses/<%= course.id %>" target="_blank" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
+                  <i class="fas fa-eye mr-1"></i> View Course
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Content Management Panel -->
+        <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden">
+          <div class="p-4 border-b border-gray-700">
+            <h2 class="text-lg font-semibold">Content Management</h2>
+          </div>
+          
+          <div class="p-6">
+            <div id="content-form-container">
+              <div class="text-center py-8">
+                <i class="fas fa-arrow-left text-3xl text-gray-400 mb-4"></i>
+                <p class="text-gray-400">Select an action from the sidebar or add a new module to get started.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Module Form Template (Hidden) -->
+  <template id="module-form-template">
+    <h3 class="text-lg font-medium mb-4">{{formTitle}}</h3>
+    <form id="module-form" class="space-y-4">
+      <input type="hidden" id="module-id" name="moduleId" value="{{moduleId}}">
+      
+      <div>
+        <label for="module-title" class="block text-sm font-medium text-gray-300 mb-1">Module Title *</label>
+        <input 
+          type="text" 
+          id="module-title" 
+          name="title" 
+          value="{{moduleTitle}}" 
+          required
+          class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
+        >
+      </div>
+      
+      <div class="flex justify-end gap-2">
+        <button type="button" id="cancel-module-btn" class="bg-gray-600 text-gray-300 px-4 py-2 rounded-md hover:bg-gray-500 transition-colors">
+          Cancel
+        </button>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
+          {{submitText}}
+        </button>
+      </div>
+    </form>
+  </template>
+  
+  <!-- Lesson Form Template (Hidden) -->
+  <template id="lesson-form-template">
+    <h3 class="text-lg font-medium mb-4">{{formTitle}}</h3>
+    <form id="lesson-form" class="space-y-4" enctype="multipart/form-data">
+      <input type="hidden" id="module-id" name="moduleId" value="{{moduleId}}">
+      <input type="hidden" id="lesson-id" name="lessonId" value="{{lessonId}}">
+      
+      <div>
+        <label for="lesson-title" class="block text-sm font-medium text-gray-300 mb-1">Lesson Title *</label>
+        <input 
+          type="text" 
+          id="lesson-title" 
+          name="title" 
+          value="{{lessonTitle}}" 
+          required
+          class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
+        >
+      </div>
+      
+      <div>
+        <label for="lesson-type" class="block text-sm font-medium text-gray-300 mb-1">Lesson Type *</label>
+        <select 
+          id="lesson-type" 
+          name="type" 
+          required
+          class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
+        >
+          <option value="video" {{videoSelected}}>Video</option>
+          <option value="pdf" {{pdfSelected}}>PDF Document</option>
+          <option value="quiz" {{quizSelected}}>Quiz</option>
+          <option value="assignment" {{assignmentSelected}}>Assignment</option>
+        </select>
+      </div>
+      
+      <div id="duration-field">
+        <label for="lesson-duration" class="block text-sm font-medium text-gray-300 mb-1">Duration (for videos)</label>
+        <input 
+          type="text" 
+          id="lesson-duration" 
+          name="duration" 
+          value="{{lessonDuration}}" 
+          placeholder="e.g. 10:30"
+          class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
+        >
+        <p class="text-xs text-gray-400 mt-1">Format: MM:SS (e.g. 10:30 for 10 minutes and 30 seconds)</p>
+      </div>
+      
+      <div>
+        <label for="lesson-file" class="block text-sm font-medium text-gray-300 mb-1">File {{fileRequired}}</label>
+        <input 
+          type="file" 
+          id="lesson-file" 
+          name="file" 
+          {{fileRequired}}
+          class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
+        >
+        <p class="text-xs text-gray-400 mt-1">Upload video, PDF, or other relevant files for this lesson.</p>
+      </div>
+      
+      <div class="flex justify-end gap-2">
+        <button type="button" id="cancel-lesson-btn" class="bg-gray-600 text-gray-300 px-4 py-2 rounded-md hover:bg-gray-500 transition-colors">
+          Cancel
+        </button>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
+          {{submitText}}
+        </button>
+      </div>
+    </form>
+  </template>
+
+  <%- include('../partials/footer') %>
+  <%- include('../partials/scripts') %>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Toggle module content
+      document.querySelectorAll('.module-header').forEach(header => {
+        header.addEventListener('click', function() {
+          const content = this.nextElementSibling;
+          const icon = this.querySelector('i');
+          
+          content.classList.toggle('hidden');
+          
+          if (content.classList.contains('hidden')) {
+            icon.classList.remove('fa-chevron-up');
+            icon.classList.add('fa-chevron-down');
+          } else {
+            icon.classList.remove('fa-chevron-down');
+            icon.classList.add('fa-chevron-up');
+          }
+        });
+      });
+      
+      // Add Module
+      document.getElementById('add-module-btn').addEventListener('click', function() {
+        showModuleForm('add');
+      });
+      
+      // Edit Module
+      document.querySelectorAll('.edit-module-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const moduleId = this.getAttribute('data-module-id');
+          const moduleTitle = this.getAttribute('data-module-title');
+          showModuleForm('edit', moduleId, moduleTitle);
+        });
+      });
+      
+      // Delete Module
+      document.querySelectorAll('.delete-module-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const moduleId = this.getAttribute('data-module-id');
+          if (confirm('Are you sure you want to delete this module and all its lessons? This action cannot be undone.')) {
+            // Send delete request
+            fetch(`/instructor/courses/<%= course.id %>/modules/${moduleId}?_method=DELETE`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Remove module from DOM
+                document.querySelector(`.module-item[data-module-id="${moduleId}"]`).remove();
+                alert('Module deleted successfully');
+              } else {
+                alert(data.message || 'Failed to delete module');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('An error occurred while deleting the module');
+            });
+          }
+        });
+      });
+      
+      // Add Lesson
+      document.querySelectorAll('.add-lesson-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const moduleId = this.getAttribute('data-module-id');
+          showLessonForm('add', moduleId);
+        });
+      });
+      
+      // Edit Lesson
+      document.querySelectorAll('.edit-lesson-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const moduleId = this.getAttribute('data-module-id');
+          const lessonId = this.getAttribute('data-lesson-id');
+          const lessonTitle = this.getAttribute('data-lesson-title');
+          const lessonType = this.getAttribute('data-lesson-type');
+          const lessonDuration = this.getAttribute('data-lesson-duration');
+          showLessonForm('edit', moduleId, lessonId, lessonTitle, lessonType, lessonDuration);
+        });
+      });
+      
+      // Delete Lesson
+      document.querySelectorAll('.delete-lesson-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const moduleId = this.getAttribute('data-module-id');
+          const lessonId = this.getAttribute('data-lesson-id');
+          if (confirm('Are you sure you want to delete this lesson? This action cannot be undone.')) {
+            // Send delete request
+            fetch(`/instructor/courses/<%= course.id %>/modules/${moduleId}/lessons/${lessonId}?_method=DELETE`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Remove lesson from DOM
+                const lessonElement = document.querySelector(`.edit-lesson-btn[data-lesson-id="${lessonId}"]`).closest('.flex.items-center.justify-between');
+                lessonElement.remove();
+                alert('Lesson deleted successfully');
+              } else {
+                alert(data.message || 'Failed to delete lesson');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('An error occurred while deleting the lesson');
+            });
+          }
+        });
+      });
+      
+      // Show Module Form
+      function showModuleForm(action, moduleId = '', moduleTitle = '') {
+        const container = document.getElementById('content-form-container');
+        const template = document.getElementById('module-form-template');
+        let html = template.innerHTML;
+        
+        if (action === 'add') {
+          html = html.replace('{{formTitle}}', 'Add New Module');
+          html = html.replace('{{submitText}}', 'Add Module');
+        } else {
+          html = html.replace('{{formTitle}}', 'Edit Module');
+          html = html.replace('{{submitText}}', 'Update Module');
+        }
+        
+        html = html.replace('{{moduleId}}', moduleId);
+        html = html.replace('{{moduleTitle}}', moduleTitle);
+        
+        container.innerHTML = html;
+        
+        // Cancel button
+        document.getElementById('cancel-module-btn').addEventListener('click', function() {
+          resetContentForm();
+        });
+        
+        // Form submission
+        document.getElementById('module-form').addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const formData = new FormData(this);
+          const moduleId = formData.get('moduleId');
+          const title = formData.get('title');
+          
+          if (action === 'add') {
+            // Add module
+            fetch('/instructor/courses/<%= course.id %>/modules', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ title }),
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Add module to DOM
+                const modulesList = document.getElementById('modules-list');
+                const moduleHtml = `
+                  <div class="border rounded-md overflow-hidden module-item" data-module-id="${data.module.id}">
+                    <div class="bg-gray-50 p-3 flex justify-between items-center cursor-pointer module-header">
+                      <h3 class="font-medium">${data.module.title}</h3>
+                      <div class="flex items-center">
+                        <span class="text-xs text-gray-500 mr-2">0 lessons</span>
+                        <i class="fas fa-chevron-down text-gray-500"></i>
+                      </div>
+                    </div>
+                    
+                    <div class="p-3 hidden module-content">
+                      <div class="space-y-2 mb-3">
+                        <!-- Lessons will be added here -->
+                      </div>
+                      
+                      <button class="text-primary hover:text-primary-dark text-sm add-lesson-btn" data-module-id="${data.module.id}">
+                        <i class="fas fa-plus-circle mr-1"></i> Add Lesson
+                      </button>
+                      
+                      <div class="mt-3 pt-3 border-t flex justify-between">
+                        <button class="text-gray-500 hover:text-primary text-sm edit-module-btn" data-module-id="${data.module.id}" data-module-title="${data.module.title}">
+                          <i class="fas fa-edit mr-1"></i> Edit Module
+                        </button>
+                        <button class="text-gray-500 hover:text-red-500 text-sm delete-module-btn" data-module-id="${data.module.id}">
+                          <i class="fas fa-trash-alt mr-1"></i> Delete Module
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                `;
+                modulesList.insertAdjacentHTML('beforeend', moduleHtml);
+                
+                // Add event listeners to new elements
+                const newModule = modulesList.lastElementChild;
+                
+                newModule.querySelector('.module-header').addEventListener('click', function() {
+                  const content = this.nextElementSibling;
+                  const icon = this.querySelector('i');
+                  
+                  content.classList.toggle('hidden');
+                  
+                  if (content.classList.contains('hidden')) {
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                  } else {
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                  }
+                });
+                
+                newModule.querySelector('.add-lesson-btn').addEventListener('click', function(e) {
+                  e.stopPropagation();
+                  const moduleId = this.getAttribute('data-module-id');
+                  showLessonForm('add', moduleId);
+                });
+                
+                newModule.querySelector('.edit-module-btn').addEventListener('click', function(e) {
+                  e.stopPropagation();
+                  const moduleId = this.getAttribute('data-module-id');
+                  const moduleTitle = this.getAttribute('data-module-title');
+                  showModuleForm('edit', moduleId, moduleTitle);
+                });
+                
+                newModule.querySelector('.delete-module-btn').addEventListener('click', function(e) {
+                  e.stopPropagation();
+                  const moduleId = this.getAttribute('data-module-id');
+                  if (confirm('Are you sure you want to delete this module and all its lessons? This action cannot be undone.')) {
+                    // Send delete request
+                    fetch(`/instructor/courses/<%= course.id %>/modules/${moduleId}?_method=DELETE`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                      if (data.success) {
+                        // Remove module from DOM
+                        document.querySelector(`.module-item[data-module-id="${moduleId}"]`).remove();
+                        alert('Module deleted successfully');
+                      } else {
+                        alert(data.message || 'Failed to delete module');
+                      }
+                    })
+                    .catch(error => {
+                      console.error('Error:', error);
+                      alert('An error occurred while deleting the module');
+                    });
+                  }
+                });
+                
+                resetContentForm();
+                alert('Module added successfully');
+              } else {
+                alert(data.message || 'Failed to add module');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('An error occurred while adding the module');
+            });
+          } else {
+            // Update module
+            fetch(`/instructor/courses/<%= course.id %>/modules/${moduleId}?_method=PUT`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ title }),
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Update module in DOM
+                const moduleElement = document.querySelector(`.module-item[data-module-id="${moduleId}"]`);
+                moduleElement.querySelector('h3').textContent = title;
+                moduleElement.querySelector('.edit-module-btn').setAttribute('data-module-title', title);
+                
+                resetContentForm();
+                alert('Module updated successfully');
+              } else {
+                alert(data.message || 'Failed to update module');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('An error occurred while updating the module');
+            });
+          }
+        });
+      }
+      
+      // Show Lesson Form
+      function showLessonForm(action, moduleId, lessonId = '', lessonTitle = '', lessonType = 'video', lessonDuration = '') {
+        const container = document.getElementById('content-form-container');
+        const template = document.getElementById('lesson-form-template');
+        let html = template.innerHTML;
+        
+        if (action === 'add') {
+          html = html.replace('{{formTitle}}', 'Add New Lesson');
+          html = html.replace('{{submitText}}', 'Add Lesson');
+          html = html.replace('{{fileRequired}}', 'required');
+        } else {
+          html = html.replace('{{formTitle}}', 'Edit Lesson');
+          html = html.replace('{{submitText}}', 'Update Lesson');
+          html = html.replace('{{fileRequired}}', '(leave empty to keep current)');
+        }
+        
+        html = html.replace('{{moduleId}}', moduleId);
+        html = html.replace('{{lessonId}}', lessonId);
+        html = html.replace('{{lessonTitle}}', lessonTitle);
+        html = html.replace('{{lessonDuration}}', lessonDuration);
+        
+        // Set selected option
+        html = html.replace('{{videoSelected}}', lessonType === 'video' ? 'selected' : '');
+        html = html.replace('{{pdfSelected}}', lessonType === 'pdf' ? 'selected' : '');
+        html = html.replace('{{quizSelected}}', lessonType === 'quiz' ? 'selected' : '');
+        html = html.replace('{{assignmentSelected}}', lessonType === 'assignment' ? 'selected' : '');
+        
+        container.innerHTML = html;
+        
+        // Show/hide duration field based on lesson type
+        const lessonTypeSelect = document.getElementById('lesson-type');
+        const durationField = document.getElementById('duration-field');
+        
+        function toggleDurationField() {
+          if (lessonTypeSelect.value === 'video') {
+            durationField.style.display = 'block';
+          } else {
+            durationField.style.display = 'none';
+          }
+        }
+        
+        toggleDurationField();
+        lessonTypeSelect.addEventListener('change', toggleDurationField);
+        
+        // Cancel button
+        document.getElementById('cancel-lesson-btn').addEventListener('click', function() {
+          resetContentForm();
+        });
+        
+        // Form submission
+        document.getElementById('lesson-form').addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const formData = new FormData(this);
+          
+          if (action === 'add') {
+            // Add lesson
+            fetch(`/instructor/courses/<%= course.id %>/modules/${moduleId}/lessons`, {
+              method: 'POST',
+              body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Add lesson to DOM
+                const moduleElement = document.querySelector(`.module-item[data-module-id="${moduleId}"]`);
+                const lessonsContainer = moduleElement.querySelector('.space-y-2');
+                
+                let icon = '';
+                if (data.lesson.type === 'video') {
+                  icon = '<i class="fas fa-play-circle text-primary mr-2"></i>';
+                } else if (data.lesson.type === 'pdf') {
+                  icon = '<i class="fas fa-file-pdf text-red-500 mr-2"></i>';
+                } else if (data.lesson.type === 'quiz') {
+                  icon = '<i class="fas fa-question-circle text-blue-500 mr-2"></i>';
+                } else {
+                  icon = '<i class="fas fa-file-alt text-gray-500 mr-2"></i>';
+                }
+                
+                const lessonHtml = `
+                  <div class="flex items-center justify-between text-sm">
+                    <div class="flex items-center">
+                      ${icon}
+                      <span>${data.lesson.title}</span>
+                    </div>
+                    <div class="flex items-center">
+                      <button class="text-gray-500 hover:text-primary edit-lesson-btn" data-module-id="${moduleId}" data-lesson-id="${data.lesson.id}" data-lesson-title="${data.lesson.title}" data-lesson-type="${data.lesson.type}" data-lesson-duration="${data.lesson.duration || ''}">
+                        <i class="fas fa-edit"></i>
+                      </button>
+                      <button class="text-gray-500 hover:text-red-500 ml-2 delete-lesson-btn" data-module-id="${moduleId}" data-lesson-id="${data.lesson.id}">
+                        <i class="fas fa-trash-alt"></i>
+                      </button>
+                    </div>
+                  </div>
+                `;
+                
+                lessonsContainer.insertAdjacentHTML('beforeend', lessonHtml);
+                
+                // Update lesson count
+                const lessonCountElement = moduleElement.querySelector('.text-xs.text-gray-500.mr-2');
+                const currentCount = parseInt(lessonCountElement.textContent);
+                lessonCountElement.textContent = `${currentCount + 1} lessons`;
+                
+                // Add event listeners to new elements
+                const newLesson = lessonsContainer.lastElementChild;
+                
+                newLesson.querySelector('.edit-lesson-btn').addEventListener('click', function(e) {
+                  e.stopPropagation();
+                  const moduleId = this.getAttribute('data-module-id');
+                  const lessonId = this.getAttribute('data-lesson-id');
+                  const lessonTitle = this.getAttribute('data-lesson-title');
+                  const lessonType = this.getAttribute('data-lesson-type');
+                  const lessonDuration = this.getAttribute('data-lesson-duration');
+                  showLessonForm('edit', moduleId, lessonId, lessonTitle, lessonType, lessonDuration);
+                });
+                
+                newLesson.querySelector('.delete-lesson-btn').addEventListener('click', function(e) {
+                  e.stopPropagation();
+                  const moduleId = this.getAttribute('data-module-id');
+                  const lessonId = this.getAttribute('data-lesson-id');
+                  if (confirm('Are you sure you want to delete this lesson? This action cannot be undone.')) {
+                    // Send delete request
+                    fetch(`/instructor/courses/<%= course.id %>/modules/${moduleId}/lessons/${lessonId}?_method=DELETE`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                      if (data.success) {
+                        // Remove lesson from DOM
+                        newLesson.remove();
+                        
+                        // Update lesson count
+                        const lessonCountElement = moduleElement.querySelector('.text-xs.text-gray-500.mr-2');
+                        const currentCount = parseInt(lessonCountElement.textContent);
+                        lessonCountElement.textContent = `${currentCount - 1} lessons`;
+                        
+                        alert('Lesson deleted successfully');
+                      } else {
+                        alert(data.message || 'Failed to delete lesson');
+                      }
+                    })
+                    .catch(error => {
+                      console.error('Error:', error);
+                      alert('An error occurred while deleting the lesson');
+                    });
+                  }
+                });
+                
+                resetContentForm();
+                alert('Lesson added successfully');
+              } else {
+                alert(data.message || 'Failed to add lesson');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('An error occurred while adding the lesson');
+            });
+          } else {
+            // Update lesson
+            fetch(`/instructor/courses/<%= course.id %>/modules/${moduleId}/lessons/${lessonId}?_method=PUT`, {
+              method: 'POST',
+              body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // Update lesson in DOM
+                const lessonElement = document.querySelector(`.edit-lesson-btn[data-lesson-id="${lessonId}"]`).closest('.flex.items-center.justify-between');
+                const lessonTitleElement = lessonElement.querySelector('span');
+                const editButton = lessonElement.querySelector('.edit-lesson-btn');
+                
+                lessonTitleElement.textContent = data.lesson.title;
+                editButton.setAttribute('data-lesson-title', data.lesson.title);
+                editButton.setAttribute('data-lesson-type', data.lesson.type);
+                editButton.setAttribute('data-lesson-duration', data.lesson.duration || '');
+                
+                // Update icon if type changed
+                const iconElement = lessonElement.querySelector('i:first-child');
+                if (data.lesson.type === 'video' && !iconElement.classList.contains('fa-play-circle')) {
+                  iconElement.className = 'fas fa-play-circle text-primary mr-2';
+                } else if (data.lesson.type === 'pdf' && !iconElement.classList.contains('fa-file-pdf')) {
+                  iconElement.className = 'fas fa-file-pdf text-red-500 mr-2';
+                } else if (data.lesson.type === 'quiz' && !iconElement.classList.contains('fa-question-circle')) {
+                  iconElement.className = 'fas fa-question-circle text-blue-500 mr-2';
+                } else if (data.lesson.type === 'assignment' && !iconElement.classList.contains('fa-file-alt')) {
+                  iconElement.className = 'fas fa-file-alt text-gray-500 mr-2';
+                }
+                
+                resetContentForm();
+                alert('Lesson updated successfully');
+              } else {
+                alert(data.message || 'Failed to update lesson');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('An error occurred while updating the lesson');
+            });
+          }
+        });
+      }
+      
+      // Reset content form
+      function resetContentForm() {
+        const container = document.getElementById('content-form-container');
+        container.innerHTML = `
+          <div class="text-center py-8">
+            <i class="fas fa-arrow-left text-3xl text-gray-400 mb-4"></i>
+            <p class="text-gray-600">Select an action from the sidebar or add a new module to get started.</p>
+          </div>
+        `;
+      }
+    });
+  </script>
+</body>
+</html>

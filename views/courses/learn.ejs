@@ -1,0 +1,388 @@
+<%- include('../partials/head', { title: 'Learning: ' + course.title + ' - LearnHub' }) %>
+<body class="bg-gray-100">
+  <div class="flex flex-col h-screen">
+    <!-- Header -->
+    <header class="bg-white border-b">
+      <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center">
+          <a href="/dashboard" class="text-gray-600 hover:text-gray-900 mr-4">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <h1 class="text-xl font-bold truncate max-w-md"><%= course.title %></h1>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="hidden md:block">
+            <div class="flex items-center">
+              <div class="w-48 bg-gray-200 rounded-full h-2.5 mr-2">
+                <div class="bg-primary h-2.5 rounded-full" style="width: <%= progress %>%"></div>
+              </div>
+              <span class="text-sm font-medium"><%= progress %>%</span>
+            </div>
+          </div>
+          <button id="sidebar-toggle" class="md:hidden text-gray-600 hover:text-gray-900">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden">
+      <!-- Sidebar -->
+      <div id="sidebar" class="hidden md:block w-full md:w-80 bg-white border-r overflow-y-auto transform transition-transform duration-300 ease-in-out">
+        <div class="p-4 border-b">
+          <h2 class="font-bold text-lg">Course Content</h2>
+          <div class="flex items-center text-sm text-gray-600 mt-1">
+            <span><%= course.modules.length %> modules • </span>
+            <span><%= course.modules.reduce((total, module) => total + module.lessons.length, 0) %> lessons • </span>
+            <span><%= completedLessons.length %> completed</span>
+          </div>
+        </div>
+
+        <div class="divide-y">
+          <% course.modules.forEach(function(module) { %>
+            <div class="p-4">
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="font-semibold"><%= module.title %></h3>
+                <% 
+                  const totalLessons = module.lessons.length;
+                  const completedModuleLessons = module.lessons.filter(lesson => 
+                    completedLessons.includes(lesson.id)
+                  ).length;
+                  const isModuleCompleted = totalLessons === completedModuleLessons && totalLessons > 0;
+                %>
+                <% if (isModuleCompleted) { %>
+                  <span class="text-green-500 text-sm">
+                    <i class="fas fa-check-circle"></i> Completed
+                  </span>
+                <% } else if (completedModuleLessons > 0) { %>
+                  <span class="text-blue-500 text-sm">
+                    <%= completedModuleLessons %>/<%= totalLessons %>
+                  </span>
+                <% } %>
+              </div>
+              
+              <div class="space-y-2 pl-2">
+                <% module.lessons.forEach(function(lesson) { %>
+                  <a 
+                    href="/courses/<%= course.id %>/learn?lesson=<%= lesson.id %>" 
+                    class="flex items-center p-2 rounded-md <%= currentLesson.id === lesson.id ? 'bg-primary-light text-primary' : 'hover:bg-gray-100' %>"
+                  >
+                    <% if (completedLessons.includes(lesson.id)) { %>
+                      <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                    <% } else if (lesson.type === 'video') { %>
+                      <i class="fas fa-play-circle text-gray-500 mr-2"></i>
+                    <% } else if (lesson.type === 'pdf') { %>
+                      <i class="fas fa-file-pdf text-red-500 mr-2"></i>
+                    <% } else if (lesson.type === 'quiz') { %>
+                      <i class="fas fa-question-circle text-blue-500 mr-2"></i>
+                    <% } else { %>
+                      <i class="fas fa-file-alt text-gray-500 mr-2"></i>
+                    <% } %>
+                    <span class="<%= currentLesson.id === lesson.id ? 'font-medium' : '' %>"><%= lesson.title %></span>
+                    <% if (lesson.duration) { %>
+                      <span class="ml-auto text-xs text-gray-500"><%= lesson.duration %></span>
+                    <% } %>
+                  </a>
+                <% }); %>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="flex-1 overflow-y-auto">
+        <div class="container mx-auto px-4 py-6 max-w-4xl">
+          <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+            <% if (currentLesson.type === 'video') { %>
+              <div class="aspect-w-16 aspect-h-9 bg-black flex items-center justify-center">
+                <% if (currentLesson.file) { %>
+                  <video 
+                    id="lesson-video" 
+                    class="w-full h-full" 
+                    controls 
+                    poster="/img/video-poster.jpg"
+                  >
+                    <source src="<%= currentLesson.file %>" type="video/mp4">
+                    Your browser does not support the video tag.
+                  </video>
+                <% } else { %>
+                  <div class="text-white text-center p-8">
+                    <i class="fas fa-film text-5xl mb-4"></i>
+                    <p class="text-xl">Video content would be displayed here</p>
+                    <p class="text-sm opacity-75 mt-2">This is a placeholder for demonstration purposes</p>
+                  </div>
+                <% } %>
+              </div>
+            <% } else if (currentLesson.type === 'pdf') { %>
+              <div class="aspect-w-16 aspect-h-9 bg-gray-100 flex items-center justify-center p-8">
+                <div class="text-center">
+                  <i class="fas fa-file-pdf text-red-500 text-5xl mb-4"></i>
+                  <h3 class="text-xl font-semibold mb-2"><%= currentLesson.title %></h3>
+                  <p class="text-gray-600 mb-4">PDF document</p>
+                  <a 
+                    href="<%= currentLesson.file || '#' %>" 
+                    class="inline-flex items-center bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors"
+                    <%= currentLesson.file ? 'download' : '' %>
+                  >
+                    <i class="fas fa-download mr-2"></i> Download PDF
+                  </a>
+                </div>
+              </div>
+            <% } else if (currentLesson.type === 'quiz') { %>
+              <div class="aspect-w-16 aspect-h-9 bg-gray-100 flex items-center justify-center p-8">
+                <div class="text-center">
+                  <i class="fas fa-question-circle text-blue-500 text-5xl mb-4"></i>
+                  <h3 class="text-xl font-semibold mb-2"><%= currentLesson.title %></h3>
+                  <p class="text-gray-600 mb-4">Quiz</p>
+                  <button 
+                    class="inline-flex items-center bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors"
+                    onclick="startQuiz()"
+                  >
+                    <i class="fas fa-play mr-2"></i> Start Quiz
+                  </button>
+                </div>
+              </div>
+            <% } else { %>
+              <div class="aspect-w-16 aspect-h-9 bg-gray-100 flex items-center justify-center p-8">
+                <div class="text-center">
+                  <i class="fas fa-file-alt text-gray-500 text-5xl mb-4"></i>
+                  <h3 class="text-xl font-semibold mb-2"><%= currentLesson.title %></h3>
+                  <p class="text-gray-600 mb-4">Assignment</p>
+                  <a 
+                    href="<%= currentLesson.file || '#' %>" 
+                    class="inline-flex items-center bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors"
+                    <%= currentLesson.file ? 'download' : '' %>
+                  >
+                    <i class="fas fa-download mr-2"></i> Download Instructions
+                  </a>
+                </div>
+              </div>
+            <% } %>
+
+            <div class="p-6">
+              <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold"><%= currentLesson.title %></h2>
+                <% if (completedLessons.includes(currentLesson.id)) { %>
+                  <span class="inline-flex items-center text-green-500">
+                    <i class="fas fa-check-circle mr-1"></i> Completed
+                  </span>
+                <% } %>
+              </div>
+              
+              <div class="prose max-w-none">
+                <p>This lesson covers important concepts and techniques that will help you master the subject matter. Pay close attention to the details and take notes as needed.</p>
+                
+                <% if (currentLesson.type === 'video') { %>
+                  <h3>Video Transcript</h3>
+                  <p>The transcript for this video would appear here, making it easier to follow along and review the content without having to rewatch the entire video.</p>
+                <% } %>
+                
+                <h3>Key Takeaways</h3>
+                <ul>
+                  <li>Understanding the core concepts presented in this lesson</li>
+                  <li>Applying the techniques to real-world scenarios</li>
+                  <li>Building upon previous knowledge to enhance your skills</li>
+                  <li>Preparing for the next lesson in the sequence</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex justify-between items-center mb-8">
+            <% 
+              // Find previous and next lessons
+              let prevLesson = null;
+              let nextLesson = null;
+              let foundCurrent = false;
+              
+              for (let i = 0; i < course.modules.length; i++) {
+                const module = course.modules[i];
+                for (let j = 0; j < module.lessons.length; j++) {
+                  const lesson = module.lessons[j];
+                  
+                  if (foundCurrent) {
+                    nextLesson = lesson;
+                    break;
+                  }
+                  
+                  if (lesson.id === currentLesson.id) {
+                    foundCurrent = true;
+                  } else {
+                    prevLesson = lesson;
+                  }
+                }
+                
+                if (nextLesson) break;
+              }
+            %>
+            
+            <% if (prevLesson) { %>
+              <a 
+                href="/courses/<%= course.id %>/learn?lesson=<%= prevLesson.id %>" 
+                class="inline-flex items-center bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                <i class="fas fa-arrow-left mr-2"></i> Previous Lesson
+              </a>
+            <% } else { %>
+              <div></div> <!-- Empty div for spacing -->
+            <% } %>
+            
+            <div>
+              <% if (!completedLessons.includes(currentLesson.id)) { %>
+                <button 
+                  id="complete-lesson-btn"
+                  class="inline-flex items-center bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors"
+                  onclick="markAsComplete()"
+                >
+                  <i class="fas fa-check mr-2"></i> Mark as Complete
+                </button>
+              <% } %>
+              
+              <% if (nextLesson) { %>
+                <a 
+                  href="/courses/<%= course.id %>/learn?lesson=<%= nextLesson.id %>" 
+                  class="inline-flex items-center bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors ml-2"
+                >
+                  Next Lesson <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+              <% } %>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h3 class="text-xl font-bold mb-4">Discussion</h3>
+            <div class="space-y-4 mb-6">
+              <div class="flex gap-4">
+                <div class="flex-shrink-0">
+                  <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                    <i class="fas fa-user text-gray-500"></i>
+                  </div>
+                </div>
+                <div class="flex-1 bg-gray-50 rounded-lg p-4">
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="font-medium">Sarah Johnson</span>
+                    <span class="text-xs text-gray-500">2 days ago</span>
+                  </div>
+                  <p class="text-gray-700">Great explanation! I was struggling with this concept but now it makes perfect sense.</p>
+                </div>
+              </div>
+              
+              <div class="flex gap-4">
+                <div class="flex-shrink-0">
+                  <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                    <i class="fas fa-user text-gray-500"></i>
+                  </div>
+                </div>
+                <div class="flex-1 bg-gray-50 rounded-lg p-4">
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="font-medium">Michael Wilson</span>
+                    <span class="text-xs text-gray-500">1 day ago</span>
+                  </div>
+                  <p class="text-gray-700">I have a question about the implementation. Would this approach work in a production environment?</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="flex gap-4">
+              <div class="flex-shrink-0">
+                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                  <i class="fas fa-user text-gray-500"></i>
+                </div>
+              </div>
+              <div class="flex-1">
+                <textarea 
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" 
+                  rows="3" 
+                  placeholder="Add to the discussion..."
+                ></textarea>
+                <div class="flex justify-end mt-2">
+                  <button class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">
+                    Post Comment
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../partials/scripts') %>
+  <script>
+    // Toggle sidebar on mobile
+    document.getElementById('sidebar-toggle').addEventListener('click', function() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('hidden');
+      sidebar.classList.toggle('absolute');
+      sidebar.classList.toggle('z-10');
+      sidebar.classList.toggle('h-screen');
+      sidebar.classList.toggle('w-3/4');
+    });
+    
+    // Mark lesson as complete
+    function markAsComplete() {
+      const completeBtn = document.getElementById('complete-lesson-btn');
+      completeBtn.disabled = true;
+      completeBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
+      
+      fetch('/courses/<%= course.id %>/lessons/<%= currentLesson.id %>/complete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Update UI to show completion
+          completeBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Completed';
+          completeBtn.classList.remove('bg-primary', 'hover:bg-primary-dark');
+          completeBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+          
+          // Update progress bar
+          const progressBars = document.querySelectorAll('.bg-primary.h-2\\.5.rounded-full');
+          progressBars.forEach(bar => {
+            bar.style.width = `${data.progress}%`;
+          });
+          
+          // Update progress text
+          const progressTexts = document.querySelectorAll('.text-sm.font-medium');
+          progressTexts.forEach(text => {
+            text.textContent = `${data.progress}%`;
+          });
+          
+          // Reload page after a short delay to update the UI completely
+          setTimeout(() => {
+            window.location.reload();
+          }, 1500);
+        } else {
+          completeBtn.innerHTML = '<i class="fas fa-times-circle mr-2"></i> Error';
+          completeBtn.disabled = false;
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        completeBtn.innerHTML = '<i class="fas fa-times-circle mr-2"></i> Error';
+        completeBtn.disabled = false;
+      });
+    }
+    
+    // Start quiz function
+    function startQuiz() {
+      alert('Quiz functionality would be implemented here.');
+    }
+    
+    // Video completion tracking
+    const video = document.getElementById('lesson-video');
+    if (video) {
+      video.addEventListener('ended', function() {
+        if (!document.getElementById('complete-lesson-btn').disabled) {
+          markAsComplete();
+        }
+      });
+    }
+  </script>
+</body>
+</html>
