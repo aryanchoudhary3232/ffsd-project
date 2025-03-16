@@ -46,7 +46,7 @@
                   </div>
                   <div class="md:w-1/4 flex flex-col justify-between items-end">
                     <div class="text-xl font-bold">$<%= item.course.price.toFixed(2) %></div>
-                    <form action="/cart/remove" method="POST" class="mt-2">
+                    <form action="/cart/remove" method="POST" class="mt-2 remove-from-cart-form">
                       <input type="hidden" name="courseId" value="<%= item.course.id %>">
                       <button type="submit" class="text-red-400 hover:text-red-600">
                         <i class="fas fa-trash-alt mr-1"></i> Remove
@@ -111,5 +111,7 @@
 
   <%- include('../partials/footer') %>
   <%- include('../partials/scripts') %>
+  
+  <!-- No need for inline script anymore as it's been moved to cart-operations.js -->
 </body>
 </html>

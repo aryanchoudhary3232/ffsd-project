@@ -34,8 +34,7 @@
       "enrolledCourses": [
         "1",
         "2",
-        "4",
-        "3"
+        "4"
       ],
       "completedCourses": []
     },
@@ -587,9 +586,20 @@
       "courseId": "4",
       "progress": 0,
       "completedLessons": []
+    },
+    {
+      "userId": "3",
+      "courseId": "3",
+      "progress": 0,
+      "completedLessons": []
     }
   ],
-  "carts": [],
+  "carts": [
+    {
+      "userId": "3",
+      "items": []
+    }
+  ],
   "orders": [
     {
       "id": "1",
