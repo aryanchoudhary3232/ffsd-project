@@ -60,176 +60,19 @@
         "1"
       ],
       "completedCourses": []
+    },
+    {
+      "id": "1742016793116",
+      "name": "aryan ",
+      "email": "aryan@test.com",
+      "password": "$2b$10$kT7qw.eDTu5og3CEZze.kOiuysucN2t.3tRN9TJ1g32zuYq/ljfPO",
+      "role": "instructor",
+      "joinDate": "2025-03-15",
+      "enrolledCourses": [],
+      "completedCourses": []
     }
   ],
   "courses": [
-    {
-      "id": "1",
-      "title": "Complete Web Development Bootcamp",
-      "description": "Learn web development from scratch with this comprehensive bootcamp covering HTML, CSS, JavaScript, React, Node.js, and more.",
-      "category": "Web Development",
-      "price": 89.99,
-      "instructorId": "2",
-      "instructor": "Jane Smith",
-      "thumbnail": "/img/courses/web-dev.jpg",
-      "rating": 4.8,
-      "students": 1245,
-      "createdAt": "2023-01-20",
-      "updatedAt": "2023-10-15",
-      "featured": true,
-      "modules": [
-        {
-          "id": "m1",
-          "title": "Introduction to Web Development",
-          "lessons": [
-            {
-              "id": "l1",
-              "title": "Course Overview",
-              "type": "video",
-              "duration": "10:15",
-              "file": "/videos/course-overview.mp4"
-            },
-            {
-              "id": "l2",
-              "title": "Setting Up Your Development Environment",
-              "type": "video",
-              "duration": "15:30",
-              "file": "/videos/dev-setup.mp4"
-            },
-            {
-              "id": "l3",
-              "title": "Web Development Basics",
-              "type": "video",
-              "duration": "12:45",
-              "file": "/videos/web-basics.mp4"
-            },
-            {
-              "id": "l4",
-              "title": "Introduction Quiz",
-              "type": "quiz",
-              "duration": "10 questions",
-              "file": null
-            }
-          ]
-        },
-        {
-          "id": "m2",
-          "title": "HTML Fundamentals",
-          "lessons": [
-            {
-              "id": "l5",
-              "title": "HTML Document Structure",
-              "type": "video",
-              "duration": "14:20",
-              "file": "/videos/html-structure.mp4"
-            },
-            {
-              "id": "l6",
-              "title": "HTML Elements and Attributes",
-              "type": "video",
-              "duration": "18:45",
-              "file": "/videos/html-elements.mp4"
-            },
-            {
-              "id": "l7",
-              "title": "HTML Forms",
-              "type": "video",
-              "duration": "20:10",
-              "file": "/videos/html-forms.mp4"
-            },
-            {
-              "id": "l8",
-              "title": "HTML Cheat Sheet",
-              "type": "pdf",
-              "duration": "",
-              "file": "/docs/html-cheatsheet.pdf"
-            }
-          ]
-        },
-        {
-          "id": "m3",
-          "title": "CSS Styling",
-          "lessons": [
-            {
-              "id": "l9",
-              "title": "CSS Selectors",
-              "type": "video",
-              "duration": "16:30",
-              "file": "/videos/css-selectors.mp4"
-            },
-            {
-              "id": "l10",
-              "title": "CSS Box Model",
-              "type": "video",
-              "duration": "15:15",
-              "file": "/videos/css-box-model.mp4"
-            },
-            {
-              "id": "l11",
-              "title": "CSS Flexbox",
-              "type": "video",
-              "duration": "22:40",
-              "file": "/videos/css-flexbox.mp4"
-            },
-            {
-              "id": "l12",
-              "title": "CSS Grid",
-              "type": "video",
-              "duration": "25:10",
-              "file": "/videos/css-grid.mp4"
-            },
-            {
-              "id": "l13",
-              "title": "CSS Assignment",
-              "type": "assignment",
-              "duration": "",
-              "file": "/docs/css-assignment.pdf"
-            }
-          ]
-        },
-        {
-          "id": "m4",
-          "title": "JavaScript Basics",
-          "lessons": [
-            {
-              "id": "l14",
-              "title": "JavaScript Introduction",
-              "type": "video",
-              "duration": "18:20",
-              "file": "/videos/js-intro.mp4"
-            },
-            {
-              "id": "l15",
-              "title": "Variables and Data Types",
-              "type": "video",
-              "duration": "20:45",
-              "file": "/videos/js-variables.mp4"
-            },
-            {
-              "id": "l16",
-              "title": "Functions and Scope",
-              "type": "video",
-              "duration": "24:30",
-              "file": "/videos/js-functions.mp4"
-            },
-            {
-              "id": "l17",
-              "title": "DOM Manipulation",
-              "type": "video",
-              "duration": "28:15",
-              "file": "/videos/js-dom.mp4"
-            },
-            {
-              "id": "l18",
-              "title": "JavaScript Practice Exercises",
-              "type": "pdf",
-              "duration": "",
-              "file": "/docs/js-exercises.pdf"
-            }
-          ]
-        }
-      ]
-    },
     {
       "id": "2",
       "title": "Advanced JavaScript Concepts",
@@ -330,7 +173,7 @@
     },
     {
       "id": "3",
-      "title": "React.js for Beginners",
+      "title": "React.js for Beginners : advance to zero ",
       "description": "Learn React.js from scratch and build modern, interactive web applications with the most popular JavaScript library.",
       "category": "React",
       "price": 79.99,
@@ -340,7 +183,7 @@
       "rating": 4.7,
       "students": 1532,
       "createdAt": "2023-03-15",
-      "updatedAt": "2023-12-05",
+      "updatedAt": "2025-03-17T07:32:19.798Z",
       "featured": true,
       "modules": [
         {
@@ -523,6 +366,60 @@
           ]
         }
       ]
+    },
+    {
+      "id": "1742197936274",
+      "title": "backcnkf",
+      "description": "a bacckendj",
+      "category": "Backend",
+      "price": 234,
+      "instructorId": "4",
+      "instructor": "Michael Wilson",
+      "thumbnail": "/uploads/1742197936268-IMG-20240816-WA0030.jpg",
+      "rating": 0,
+      "students": 0,
+      "createdAt": "2025-03-17T07:52:16.274Z",
+      "updatedAt": "2025-03-17T08:00:10.865Z",
+      "modules": [
+        {
+          "id": "1742198130491",
+          "title": "Express js ",
+          "lessons": []
+        },
+        {
+          "id": "1742198410865",
+          "title": "Express",
+          "lessons": []
+        }
+      ],
+      "featured": false
+    },
+    {
+      "id": "1742232123365",
+      "title": "aaaaa",
+      "description": "fsfsfdsgfdsgf",
+      "category": "Web Development",
+      "price": 120,
+      "instructorId": "2",
+      "instructor": "Jane Smith",
+      "thumbnail": "/uploads/1742232123306-IMG_20241203_145239.jpg",
+      "rating": 0,
+      "students": 0,
+      "createdAt": "2025-03-17T17:22:03.365Z",
+      "updatedAt": "2025-03-17T17:23:49.013Z",
+      "modules": [
+        {
+          "id": "1742232186214",
+          "title": "aaaaadd",
+          "lessons": []
+        },
+        {
+          "id": "1742232229013",
+          "title": "fgdfgfd",
+          "lessons": []
+        }
+      ],
+      "featured": false
     }
   ],
   "progress": [

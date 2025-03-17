@@ -18,7 +18,7 @@ const cartRoutes = require("./routes/cart.routes");
 
 // Initialize express app
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 5000;
 
 // Set up EJS as the view engine
 app.set("view engine", "ejs");

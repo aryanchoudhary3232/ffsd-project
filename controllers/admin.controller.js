@@ -121,6 +121,7 @@ const AdminController = {
       user,
       enrolledCourses,
       orders,
+      adminCount: 2,
     });
   },
 
@@ -334,5 +335,4 @@ const AdminController = {
   },
 };
 
-module.exports = AdminController
-
+module.exports = AdminController;

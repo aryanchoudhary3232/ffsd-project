@@ -1,14 +1,20 @@
 const CourseModel = require("../models/course.model");
 const UserModel = require("../models/user.model");
 const OrderModel = require("../models/order.model");
-const ProgressModel = require("../models/progress.model"); // Added import for ProgressModel
-const multer = require("multer");
+const ProgressModel = require("../models/progress.model");
+const fs = require("fs");
 const path = require("path");
+const multer = require("multer");
 
 // Set up multer for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "public/uploads/");
+    const uploadDir = path.join(__dirname, "../public/uploads");
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + "-" + file.originalname);
@@ -254,7 +260,7 @@ const InstructorController = {
   // Add module to course
   addModule: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
+      return res.redirect("/login");
     }
 
     const courseId = req.params.id;
@@ -265,34 +271,123 @@ const InstructorController = {
       const course = CourseModel.getCourseById(courseId);
 
       if (!course || course.instructorId !== instructorId) {
-        return res.status(403).json({
-          success: false,
-          message: "Course not found or you do not have permission to edit it",
-        });
+        req.flash(
+          "error_msg",
+          "Course not found or you do not have permission to edit it"
+        );
+        return res.redirect("/instructor/courses");
       }
 
-      const newModule = CourseModel.addModuleToCourse(courseId, { title });
+      CourseModel.addModuleToCourse(courseId, { title });
 
-      res.json({ success: true, module: newModule });
+      req.flash("success_msg", "Module added successfully");
+      res.redirect(`/instructor/courses/${courseId}/content`);
     } catch (error) {
-      res.status(400).json({ success: false, message: error.message });
+      req.flash("error_msg", error.message);
+      res.redirect(`/instructor/courses/${courseId}/content`);
+    }
+  },
+
+  // Update module
+  updateModule: (req, res) => {
+    if (!req.session.user || req.session.user.role !== "instructor") {
+      return res.redirect("/login");
+    }
+
+    const { id: courseId, moduleId } = req.params;
+    const instructorId = req.session.user.id;
+    const { title } = req.body;
+
+    try {
+      const course = CourseModel.getCourseById(courseId);
+
+      if (!course || course.instructorId !== instructorId) {
+        req.flash(
+          "error_msg",
+          "Course not found or you do not have permission to edit it"
+        );
+        return res.redirect("/instructor/courses");
+      }
+
+      // Find the module
+      const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
+
+      if (moduleIndex === -1) {
+        req.flash("error_msg", "Module not found");
+        return res.redirect(`/instructor/courses/${courseId}/content`);
+      }
+
+      // Update module
+      course.modules[moduleIndex].title = title;
+      course.updatedAt = new Date().toISOString();
+
+      // Save changes
+      CourseModel.updateCourse(courseId, { modules: course.modules });
+
+      req.flash("success_msg", "Module updated successfully");
+      res.redirect(`/instructor/courses/${courseId}/content`);
+    } catch (error) {
+      req.flash("error_msg", error.message);
+      res.redirect(`/instructor/courses/${courseId}/content`);
+    }
+  },
+
+  // Delete module
+  deleteModule: (req, res) => {
+    if (!req.session.user || req.session.user.role !== "instructor") {
+      return res.redirect("/login");
+    }
+
+    const { id: courseId, moduleId } = req.params;
+    const instructorId = req.session.user.id;
+
+    try {
+      const course = CourseModel.getCourseById(courseId);
+
+      if (!course || course.instructorId !== instructorId) {
+        req.flash(
+          "error_msg",
+          "Course not found or you do not have permission to edit it"
+        );
+        return res.redirect("/instructor/courses");
+      }
+
+      // Find the module index
+      const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
+
+      if (moduleIndex === -1) {
+        req.flash("error_msg", "Module not found");
+        return res.redirect(`/instructor/courses/${courseId}/content`);
+      }
+
+      // Remove module
+      course.modules.splice(moduleIndex, 1);
+      course.updatedAt = new Date().toISOString();
+
+      // Save changes
+      CourseModel.updateCourse(courseId, { modules: course.modules });
+
+      req.flash("success_msg", "Module deleted successfully");
+      res.redirect(`/instructor/courses/${courseId}/content`);
+    } catch (error) {
+      req.flash("error_msg", error.message);
+      res.redirect(`/instructor/courses/${courseId}/content`);
     }
   },
 
   // Add lesson to module
   addLesson: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
+      return res.redirect("/login");
     }
 
-    const { courseId, moduleId } = req.params;
+    const { id: courseId, moduleId } = req.params;
     const instructorId = req.session.user.id;
 
     upload.single("file")(req, res, (err) => {
       if (err) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Error uploading file" });
+        req.flash("error_msg", "Error uploading file");
+        return res.redirect(`/instructor/courses/${courseId}/content`);
       }
 
       const { title, type, duration } = req.body;
@@ -301,25 +396,168 @@ const InstructorController = {
         const course = CourseModel.getCourseById(courseId);
 
         if (!course || course.instructorId !== instructorId) {
-          return res.status(403).json({
-            success: false,
-            message:
-              "Course not found or you do not have permission to edit it",
-          });
+          req.flash(
+            "error_msg",
+            "Course not found or you do not have permission to edit it"
+          );
+          return res.redirect("/instructor/courses");
         }
 
-        const newLesson = CourseModel.addLessonToModule(courseId, moduleId, {
+        // Find the module
+        const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
+
+        if (moduleIndex === -1) {
+          req.flash("error_msg", "Module not found");
+          return res.redirect(`/instructor/courses/${courseId}/content`);
+        }
+
+        // Create new lesson
+        const newLesson = {
+          id: Date.now().toString(),
           title,
           type,
-          duration,
+          duration: duration || "",
           file: req.file ? `/uploads/${req.file.filename}` : null,
-        });
+        };
 
-        res.json({ success: true, lesson: newLesson });
+        // Add lesson to module
+        course.modules[moduleIndex].lessons.push(newLesson);
+        course.updatedAt = new Date().toISOString();
+
+        // Save changes
+        CourseModel.updateCourse(courseId, { modules: course.modules });
+
+        req.flash("success_msg", "Lesson added successfully");
+        res.redirect(`/instructor/courses/${courseId}/content`);
       } catch (error) {
-        res.status(400).json({ success: false, message: error.message });
+        req.flash("error_msg", error.message);
+        res.redirect(`/instructor/courses/${courseId}/content`);
       }
     });
+  },
+
+  // Update lesson
+  updateLesson: (req, res) => {
+    if (!req.session.user || req.session.user.role !== "instructor") {
+      return res.redirect("/login");
+    }
+
+    const { id: courseId, moduleId, lessonId } = req.params;
+    const instructorId = req.session.user.id;
+
+    upload.single("file")(req, res, (err) => {
+      if (err) {
+        req.flash("error_msg", "Error uploading file");
+        return res.redirect(`/instructor/courses/${courseId}/content`);
+      }
+
+      const { title, type, duration } = req.body;
+
+      try {
+        const course = CourseModel.getCourseById(courseId);
+
+        if (!course || course.instructorId !== instructorId) {
+          req.flash(
+            "error_msg",
+            "Course not found or you do not have permission to edit it"
+          );
+          return res.redirect("/instructor/courses");
+        }
+
+        // Find the module
+        const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
+
+        if (moduleIndex === -1) {
+          req.flash("error_msg", "Module not found");
+          return res.redirect(`/instructor/courses/${courseId}/content`);
+        }
+
+        // Find the lesson
+        const lessonIndex = course.modules[moduleIndex].lessons.findIndex(
+          (l) => l.id === lessonId
+        );
+
+        if (lessonIndex === -1) {
+          req.flash("error_msg", "Lesson not found");
+          return res.redirect(`/instructor/courses/${courseId}/content`);
+        }
+
+        // Update lesson
+        course.modules[moduleIndex].lessons[lessonIndex] = {
+          ...course.modules[moduleIndex].lessons[lessonIndex],
+          title,
+          type,
+          duration: duration || "",
+          file: req.file
+            ? `/uploads/${req.file.filename}`
+            : course.modules[moduleIndex].lessons[lessonIndex].file,
+        };
+
+        course.updatedAt = new Date().toISOString();
+
+        // Save changes
+        CourseModel.updateCourse(courseId, { modules: course.modules });
+
+        req.flash("success_msg", "Lesson updated successfully");
+        res.redirect(`/instructor/courses/${courseId}/content`);
+      } catch (error) {
+        req.flash("error_msg", error.message);
+        res.redirect(`/instructor/courses/${courseId}/content`);
+      }
+    });
+  },
+
+  // Delete lesson
+  deleteLesson: (req, res) => {
+    if (!req.session.user || req.session.user.role !== "instructor") {
+      return res.redirect("/login");
+    }
+
+    const { id: courseId, moduleId, lessonId } = req.params;
+    const instructorId = req.session.user.id;
+
+    try {
+      const course = CourseModel.getCourseById(courseId);
+
+      if (!course || course.instructorId !== instructorId) {
+        req.flash(
+          "error_msg",
+          "Course not found or you do not have permission to edit it"
+        );
+        return res.redirect("/instructor/courses");
+      }
+
+      // Find the module
+      const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
+
+      if (moduleIndex === -1) {
+        req.flash("error_msg", "Module not found");
+        return res.redirect(`/instructor/courses/${courseId}/content`);
+      }
+
+      // Find the lesson
+      const lessonIndex = course.modules[moduleIndex].lessons.findIndex(
+        (l) => l.id === lessonId
+      );
+
+      if (lessonIndex === -1) {
+        req.flash("error_msg", "Lesson not found");
+        return res.redirect(`/instructor/courses/${courseId}/content`);
+      }
+
+      // Remove lesson
+      course.modules[moduleIndex].lessons.splice(lessonIndex, 1);
+      course.updatedAt = new Date().toISOString();
+
+      // Save changes
+      CourseModel.updateCourse(courseId, { modules: course.modules });
+
+      req.flash("success_msg", "Lesson deleted successfully");
+      res.redirect(`/instructor/courses/${courseId}/content`);
+    } catch (error) {
+      req.flash("error_msg", error.message);
+      res.redirect(`/instructor/courses/${courseId}/content`);
+    }
   },
 
   // Get instructor analytics
