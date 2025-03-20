@@ -90,6 +90,19 @@
       "joinDate": "2025-03-15",
       "enrolledCourses": [],
       "completedCourses": []
+    },
+    {
+      "id": "1742447102288",
+      "name": "snickerdoodle",
+      "email": "admin@gmail.com",
+      "password": "123456",
+      "role": "student",
+      "joinDate": "2025-03-20",
+      "enrolledCourses": [
+        "4",
+        "3"
+      ],
+      "completedCourses": []
     }
   ],
   "courses": [
@@ -617,6 +630,33 @@
       "courseId": "4",
       "progress": 0,
       "completedLessons": []
+    },
+    {
+      "userId": "1742402960408",
+      "courseId": "4",
+      "progress": 0,
+      "completedLessons": []
+    },
+    {
+      "userId": "1742402960408",
+      "courseId": "3",
+      "progress": 0,
+      "completedLessons": []
+    },
+    {
+      "userId": "1742447102288",
+      "courseId": "4",
+      "progress": 22,
+      "completedLessons": [
+        "l1",
+        "l2"
+      ]
+    },
+    {
+      "userId": "1742447102288",
+      "courseId": "3",
+      "progress": 0,
+      "completedLessons": []
     }
   ],
   "carts": [],
@@ -665,6 +705,33 @@
       "paymentMethod": "credit_card",
       "status": "completed",
       "createdAt": "2025-03-13T18:36:09.990Z"
+    },
+    {
+      "id": "1742403034174",
+      "userId": "1742402960408",
+      "courseId": "3",
+      "amount": 79.99,
+      "paymentMethod": "paypal",
+      "status": "completed",
+      "createdAt": "2025-03-19T16:50:34.174Z"
+    },
+    {
+      "id": "1742447339588",
+      "userId": "1742447102288",
+      "courseId": "4",
+      "amount": 74.99,
+      "paymentMethod": "paypal",
+      "status": "completed",
+      "createdAt": "2025-03-20T05:08:59.588Z"
+    },
+    {
+      "id": "1742447339590",
+      "userId": "1742447102288",
+      "courseId": "3",
+      "amount": 79.99,
+      "paymentMethod": "paypal",
+      "status": "completed",
+      "createdAt": "2025-03-20T05:08:59.590Z"
     }
   ]
 }
