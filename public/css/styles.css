@@ -1,6 +1,8 @@
 /* Custom
 ```tsx file="public/css/styles.css"
 /* Custom styles */
+
+/*
 :root {
   --primary-color: #3498db;
   --primary-dark: #2980b9;
@@ -145,7 +147,7 @@ body {
   margin-right: 1rem;
 }
 
-/* Navigation */
+Navigation
 .nav-link {
   color: var(--text-color);
   font-weight: 500;
@@ -157,10 +159,10 @@ body {
   color: var(--primary-color);
 }
 
-/* Course learning page */
+/* Course learning page 
 .aspect-w-16 {
   position: relative;
-  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  padding-bottom: 56.25%; /* 16:9 aspect ratio 
 }
 
 .aspect-h-9 {
@@ -175,7 +177,7 @@ body {
   background-color: var(--primary-light);
 }
 
-/* Line clamp for text truncation */
+/* Line clamp for text truncation 
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -183,7 +185,7 @@ body {
   overflow: hidden;
 }
 
-/* Dark mode styles */
+/* Dark mode styles 
 @media (prefers-color-scheme: dark) {
   :root {
     --text-color: #ffffff;
@@ -206,3 +208,158 @@ body {
     background-color: #3c3c3c;
   }
 }
+*/
+
+/*My edits starts here*/
+
+    /* navbar section */
+    
+    .header {
+      position: sticky;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000; /* Ensures it stays above other content */
+      background-color: white; /* Keeps it visible */
+      padding-top: 5px;
+      padding-bottom: 10px;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Adds subtle shadow */
+    }
+    
+    /* Default styling for large screens */
+    .nav-container {
+      display: flex;
+      justify-content: center; /* Center align the navbar */
+      align-items: center;
+      position: relative;
+      flex-wrap: wrap; /* Allows elements to wrap when needed */
+    }
+    
+    .logo-container {
+      position: absolute;
+      left: 20px;
+    }
+    
+    .logo {
+      width: 100px; /* Default size */
+      height: auto;
+      transition: all 0.3s ease-in-out;
+    }
+    
+    /* Right-align the login button */
+    .login-container {
+      position: absolute;
+      right: 20px;
+    }
+    
+    /* Reduce font size when the screen gets smaller */
+    @media (max-width: 992px) {
+    
+      .logo {
+          width: 80px; /* Slightly smaller */
+      }
+    
+      .nav-pills .nav-link {
+          font-size: 14px; /* Slightly smaller font */
+          padding: 6px 12px; /* Adjust padding */
+      }
+    
+      .login-btn {
+          font-size: 14px;
+          padding: 6px 12px;
+      }
+    }
+    
+    /* When screen becomes very small, shrink navbar even more */
+    @media (max-width: 768px) {
+    
+      .logo {
+          width: 60px; /* Even smaller */
+      }
+      .nav-pills .nav-link {
+          font-size: 12px; /* Smaller font for tiny screens */
+          padding: 4px 8px; /* Reduce padding */
+      }
+    
+      .login-btn {
+          font-size: 12px;
+          padding: 4px 8px;
+      }
+    }
+    
+    /* Extra small screens: Ensure proper spacing */
+    @media (max-width: 576px) {
+      .nav-container {
+          flex-direction: column; /* Stack items */
+          align-items: center;
+      }
+      .logo {
+          width: 50px; /* Minimum size */
+      }
+      .login-container {
+          position: relative;
+          right: auto;
+          margin-top: 5px;
+      }
+    }
+
+
+    /*Login/ Register Page*/
+
+    select.form-control {
+    
+      border-radius: 10px; /* Match input field border-radius */
+      background-color: #f8f9fa; /* Match input field background */
+      border: none; /* Remove border to match input */
+      padding: 12px 16px; /* Same padding as inputs */
+      font-size: 16px; /* Match text size */
+      color: #6c757d; /* Match placeholder text color */
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1); /* Match input shadow */ 
+    }   
+
+    /*banner*/
+    .fade-in {
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+  }
+
+  .visible{
+    opacity: 1;
+  }
+  /*banner end*/
+
+  /*category*/
+  .category-card {
+    background-color: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+  }
+  
+  .category-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .category-card .icon {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+  }
+  /*category end*/
+
+
+  /*Features start*/
+  .feature-card {
+    text-align: center;
+    padding: 2rem;
+  }
+  
+  .feature-card .icon {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+  }
+  /*Features end*/
+/*MY edits end here*/

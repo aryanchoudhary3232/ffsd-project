@@ -1,54 +1,39 @@
-<nav class="bg-gray-900 shadow-md">
-  <div class="container mx-auto px-4">
-    <div class="flex justify-between items-center py-4">
-      <a href="/" class="text-2xl font-bold text-primary">LearnHub</a>
-      <div class="hidden md:flex space-x-4">
-        <a href="/courses" class="nav-link">Courses</a>
-        <% if (user) { %>
-        <a href="/dashboard" class="nav-link">Dashboard</a>
-        <a href="/user/profile" class="nav-link">Profile</a>
-        <% if (user.role === 'student'){ %>
-        <a href="/cart" class="nav-link">Cart</a>
-        <% } else { %> <% } %>
-        <a href="/logout" class="nav-link">Logout</a>
 
-        <% } else { %>
-        <a href="/login" class="nav-link">Login</a>
-        <a href="/register" class="nav-link">Register</a>
-        <% } %>
+<header>
+  <div class="container-fluid mt-3 nav-container">
+
+      <div class="logo-container">
+          <a href="/"><img src="/images/Logo_only.png" alt="Logo" class="logo"></a>
+        </div>
+  
+      <!-- Centered Navbar -->
+      <div class="bg-dark rounded-pill overflow-hidden d-inline-block p-1">
+          <ul class="nav nav-pills d-inline-flex flex-wrap justify-content-center" role="tablist">
+              <li class="nav-item">
+                  <a class="nav-link text-light active rounded-pill" data-bs-toggle="pill" href="/courses">Courses</a>
+              </li>
+              <% if (user) { %>
+              <li class="nav-item">
+                  <a class="nav-link text-light rounded-pill" href="/dashboard">My Page</a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link text-light rounded-pill" data-bs-toggle="pill" href="/user/profile">Profile</a>
+              </li>
+              <% if (user.role === 'student'){ %>
+              <li class="nav-item">
+                  <a class="nav-link text-light rounded-pill" data-bs-toggle="pill" href="/cart">Cart</a>
+              </li>
+              <% }%> 
+              <li class="nav-item">
+                  <a class="nav-link text-light rounded-pill" data-bs-toggle="pill" href="/logout">Logout</a>                    
+              </li>
+          </ul>        
       </div>
-      <div class="md:hidden">
-        <button
-          id="mobile-menu-button"
-          class="text-gray-500 hover:text-gray-600"
-        >
-          <i class="fas fa-bars"></i>
-        </button>
+      <%}%>
+      <!-- Right-aligned Login Button (Large Screens) -->
+      <div class="login-container">
+          <a class="btn btn-dark text-light rounded-pill px-3 login-btn" href="/login">Login / Register</a>
       </div>
-    </div>
+      
   </div>
-  <div id="mobile-menu" class="hidden md:hidden">
-    <a href="/courses" class="block py-2 px-4 text-sm hover:bg-gray-600"
-      >Courses</a
-    >
-    <% if (user) { %>
-    <a href="/dashboard" class="block py-2 px-4 text-sm hover:bg-gray-600"
-      >Dashboard</a
-    >
-    <a href="/user/profile" class="block py-2 px-4 text-sm hover:bg-gray-600"
-      >Profile</a
-    >
-    <% if (user.role === 'student'){ %>
-    <a href="/cart" class="block py-2 px-4 text-sm hover:bg-gray-600">Cart</a>
-    <% } else { %> <% } %>
-    <a href="/logout" class="block py-2 px-4 text-sm hover:bg-gray-600"
-      >Logout</a
-    >
-    <% } else { %>
-    <a href="/login" class="block py-2 px-4 text-sm hover:bg-gray-100">Login</a>
-    <a href="/register" class="block py-2 px-4 text-sm hover:bg-gray-100"
-      >Register</a
-    >
-    <% } %>
-  </div>
-</nav>
+</header>

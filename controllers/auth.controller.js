@@ -135,6 +135,7 @@ const AuthController = {
       return res.render("dashboard/student", {
         enrolledCourses,
         progress,
+        user
       });
     }
   },
