@@ -379,7 +379,7 @@
       "rating": 0,
       "students": 0,
       "createdAt": "2025-03-17T07:52:16.274Z",
-      "updatedAt": "2025-03-17T08:00:10.865Z",
+      "updatedAt": "2025-03-17T18:00:43.219Z",
       "modules": [
         {
           "id": "1742198130491",
@@ -389,6 +389,11 @@
         {
           "id": "1742198410865",
           "title": "Express",
+          "lessons": []
+        },
+        {
+          "id": "1742234443219",
+          "title": "monu",
           "lessons": []
         }
       ],
@@ -406,7 +411,7 @@
       "rating": 0,
       "students": 0,
       "createdAt": "2025-03-17T17:22:03.365Z",
-      "updatedAt": "2025-03-17T17:23:49.013Z",
+      "updatedAt": "2025-03-17T17:57:21.741Z",
       "modules": [
         {
           "id": "1742232186214",
@@ -416,6 +421,33 @@
         {
           "id": "1742232229013",
           "title": "fgdfgfd",
+          "lessons": []
+        },
+        {
+          "id": "1742234241741",
+          "title": "dfdsgfg",
+          "lessons": []
+        }
+      ],
+      "featured": false
+    },
+    {
+      "id": "1742234202380",
+      "title": "gdhghgh",
+      "description": "bfbggfhng",
+      "category": "Web Development",
+      "price": 54,
+      "instructorId": "2",
+      "instructor": "Jane Smith",
+      "thumbnail": "/uploads/1742234202316-IMG_20241203_153311.jpg",
+      "rating": 0,
+      "students": 0,
+      "createdAt": "2025-03-17T17:56:42.380Z",
+      "updatedAt": "2025-03-17T17:59:37.669Z",
+      "modules": [
+        {
+          "id": "1742234377669",
+          "title": "skeldne",
           "lessons": []
         }
       ],
