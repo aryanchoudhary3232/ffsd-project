@@ -1,6 +1,7 @@
 <%- include('../partials/head', { title: user.name + ' - User Details - LearnHub' }) %>
 <body class="bg-black text-white">
   <%- include('../partials/navbar') %>
+  <% var instructorCourses = typeof instructorCourses !== 'undefined' ? instructorCourses : []; %>
 
   <div class="container mx-auto px-4 py-8">
     <!-- Header -->
@@ -163,7 +164,7 @@
                       <div class="flex items-center mt-1">
                         <span class="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs mr-2"><%= course.category %></span>
                         <span class="<%= course.status === 'published' ? 'bg-green-800 text-green-300' : 'bg-yellow-800 text-yellow-300' %> px-2 py-1 rounded-full text-xs">
-                          <%= course.status.charAt(0).toUpperCase() + course.status.slice(1) %>
+                          <%= course.status ? (course.status.charAt(0).toUpperCase() + course.status.slice(1)) : 'N/A' %>
                         </span>
                       </div>
                       <div class="flex items-center mt-1">

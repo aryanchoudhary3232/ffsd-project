@@ -34,7 +34,7 @@
             <div class="flex items-center mb-2">
               <span class="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs mr-2"><%= course.category %></span>
               <span class="<%= course.status === 'published' ? 'bg-green-800 text-green-300' : 'bg-yellow-800 text-yellow-300' %> px-2 py-1 rounded-full text-xs">
-                <%= course.status.charAt(0).toUpperCase() + course.status.slice(1) %>
+                <%= course.status ? (course.status.charAt(0).toUpperCase() + course.status.slice(1)) : 'Not specified' %>
               </span>
             </div>
             <p class="text-gray-400 mb-4"><%= course.instructor %></p>
@@ -59,7 +59,7 @@
             </div>
             
             <div class="flex flex-col gap-2">
-              <a href="/admin/courses/<%= course.id %>/edit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors text-center">
+              <a href="/admin/courses/<%= course.id %>/edit-course" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors text-center">
                 Edit Course
               </a>
               <a href="/courses/<%= course.id %>" target="_blank" class="bg-gray-700 text-gray-300 px-4 py-2 rounded-md hover:bg-gray-600 transition-colors text-center">

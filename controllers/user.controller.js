@@ -40,13 +40,13 @@ getUserProfile: (req, res) => {
 
   if (!user) {
     req.flash("error_msg", "User not found");;
-    return res.redirect("/");;
+    return res.redirect("/");
   }
 
   // Fetch the count of admins
-  const adminCount = UserModel.getAdminCount(); // Ensure you have this function in UserModel
+  const adminCount = UserModel.getAdminCount();
 
-  res.render("user/profile", { user, adminCount, adminCount: 2 });;
+  res.render("user/profile", { user, adminCount, adminCount: 2 });
 },
 
   // Update user profile
@@ -98,7 +98,7 @@ getUserProfile: (req, res) => {
       }
 
       // Update password
-      const hashedPassword = bcrypt.hashSync(newPassword, 10);
+      const hashedPassword = newPassword;
       UserModel.updateUser(userId, { password: hashedPassword });
 
       req.flash("success_msg", "Password changed successfully");

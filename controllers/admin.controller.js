@@ -92,38 +92,49 @@ const AdminController = {
   },
 
   // Get user details
-  getUserDetails: (req, res) => {
-    if (!req.session.user || req.session.user.role !== "admin") {
-      return res.redirect("/login");
-    }
+// Get user details
+getUserDetails: (req, res) => {
+  if (!req.session.user || req.session.user.role !== "admin") {
+    return res.redirect("/login");
+  }
 
-    const userId = req.params.id;
-    const user = UserModel.getUserById(userId);
+  const userId = req.params.id;
+  const user = UserModel.getUserById(userId);
 
-    if (!user) {
-      req.flash("error_msg", "User not found");
-      return res.redirect("/admin/users");
-    }
+  if (!user) {
+    req.flash("error_msg", "User not found");
+    return res.redirect("/admin/users");
+  }
 
-    // Get user's enrolled courses
-    const enrolledCourses = UserModel.getUserEnrolledCourses(userId);
+  // Get user's enrolled courses
+  const enrolledCourses = UserModel.getUserEnrolledCourses(userId);
 
-    // Get user's orders
-    const orders = OrderModel.getOrdersByUser(userId).map((order) => {
-      const course = CourseModel.getCourseById(order.courseId);
-      return {
-        ...order,
-        courseTitle: course ? course.title : "Unknown Course",
-      };
-    });
+  // Get user's orders
+  const orders = OrderModel.getOrdersByUser(userId).map((order) => {
+    const course = CourseModel.getCourseById(order.courseId);
+    return {
+      ...order,
+      courseTitle: course ? course.title : "Unknown Course",
+    };
+  });
 
-    res.render("admin/user-details", {
-      user,
-      enrolledCourses,
-      orders,
-      adminCount: 2,
-    });
-  },
+  // Always define instructorCourses even if it's an empty array
+  let instructorCourses = [];
+  if (user.role === "instructor") {
+    // Adjust the filtering logic according to how courses are linked to instructors.
+    instructorCourses = CourseModel.getAllCourses().filter(
+      (course) => course.instructorId === userId
+    );
+  }
+
+  res.render("admin/user-details", {
+    user,
+    enrolledCourses,
+    instructorCourses, // Make sure this is included!
+    orders,
+    adminCount: 2,
+  });
+},
 
   // Update user
   updateUser: (req, res) => {
