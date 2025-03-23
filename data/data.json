@@ -59,6 +59,36 @@
         "1"
       ],
       "completedCourses": []
+    },
+    {
+      "id": "1742016238405",
+      "name": "Shreyaan",
+      "email": "16shreyaan09@gmail.com",
+      "password": "$2b$10$merngUa3fDDRSloah0XiZ.OeWWy/OUDeZlnUayz8mnQx9L7DtG8ae",
+      "role": "instructor",
+      "joinDate": "2025-03-15",
+      "enrolledCourses": [],
+      "completedCourses": []
+    },
+    {
+      "id": "1742016472032",
+      "name": "Shreyaan",
+      "email": "123@gmail.com",
+      "password": "$2b$10$A8C.GqdslDxT3n69bbvPHOyRp.hRGOWrer6JhUet5CmeG7TMnl096",
+      "role": "instructor",
+      "joinDate": "2025-03-15",
+      "enrolledCourses": [],
+      "completedCourses": []
+    },
+    {
+      "id": "1742017900372",
+      "name": "instruc1",
+      "email": "ins@gmail.com",
+      "password": "instructor",
+      "role": "instructor",
+      "joinDate": "2025-03-15",
+      "enrolledCourses": [],
+      "completedCourses": []
     }
   ],
   "courses": [

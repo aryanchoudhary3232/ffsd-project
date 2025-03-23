@@ -27,22 +27,25 @@ const UserController = {
     })
   },
 
-  // Get user profile
-  getUserProfile: (req, res) => {
-    if (!req.session.user) {
-      return res.redirect("/login")
-    }
+ // Get user profile
+getUserProfile: (req, res) => {
+  if (!req.session.user) {
+    return res.redirect("/login");
+  }
 
-    const userId = req.session.user.id
-    const user = UserModel.getUserById(userId)
+  const userId = req.session.user.id;
+  const user = UserModel.getUserById(userId);
 
-    if (!user) {
-      req.flash("error_msg", "User not found")
-      return res.redirect("/")
-    }
+  if (!user) {
+    req.flash("error_msg", "User not found");
+    return res.redirect("/");
+  }
 
-    res.render("user/profile", { user })
-  },
+  // Fetch the count of admins
+  const adminCount = UserModel.getAdminCount(); // Ensure you have this function in UserModel
+
+  res.render("user/profile", { user, adminCount });
+},
 
   // Update user profile
   updateUserProfile: (req, res) => {

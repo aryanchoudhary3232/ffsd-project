@@ -35,6 +35,12 @@ const UserModel = {
     return data.users.find((user) => user.email === email);
   },
 
+  // Get count of admins
+  getAdminCount: () => {
+    const data = readData();
+    return data.users.filter((user) => user.role === "admin").length;
+  },
+
   // Create new user
   createUser: (userData) => {
     const data = readData();
@@ -114,7 +120,6 @@ const UserModel = {
   // Authenticate user
   authenticateUser: (email, password) => {
     const data = readData();
-    console.log(data.users);
     const user = data.users.find((user) => user.email === email);
 
     if (!user || !(password === user.password)) {
