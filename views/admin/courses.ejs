@@ -47,7 +47,7 @@
               <option value="all" <%= category === 'all' ? 'selected' : '' %>>All Categories</option>
               <% categories.forEach(function(cat) { %>
                 <option value="<%= cat %>" <%= category === cat ? 'selected' : '' %>><%= cat %></option>
-              <% }); %>
+              <% }) %>
             </select>
             <!-- Sort Filter -->
             <select id="sort-filter" class="px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white">
@@ -112,7 +112,9 @@
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <a href="/admin/courses/<%= course.id %>" class="text-indigo-400 hover:text-indigo-200 mr-3">View</a>
                   <a href="/admin/courses/<%= course.id %>/edit" class="text-blue-400 hover:text-blue-200 mr-3">Edit</a>
-                  <button class="text-red-400 hover:text-red-200 delete-course-btn" data-course-id="<%= course.id %>">Delete</button>
+                  <form action="/admin/courses/<%= course.id %>/delete" method="POST" class="inline">
+                    <button type="submit" class="text-red-400 hover:text-red-200" onclick="return confirm('Are you sure you want to delete this course?');">Delete</button>
+                  </form>
                 </td>
               </tr>
             <% }); %>
@@ -147,7 +149,6 @@
   <%- include('../partials/scripts') %>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Search and filter functionality
       const searchInput = document.getElementById('search-input');
       const categoryFilter = document.getElementById('category-filter');
       const sortFilter = document.getElementById('sort-filter');
@@ -159,7 +160,7 @@
         
         let url = '/admin/courses?';
         if (search) url += `search=${encodeURIComponent(search)}&`;
-        if (category !== 'all') url += `category=${category}&`;
+        if (category !== 'all') url += `category=${encodeURIComponent(category)}&`;
         if (sort) url += `sort=${sort}`;
         
         window.location.href = url;
@@ -167,9 +168,7 @@
       
       if (searchInput) {
         searchInput.addEventListener('keypress', function(e) {
-          if (e.key === 'Enter') {
-            applyFilters();
-          }
+          if (e.key === 'Enter') applyFilters();
         });
       }
       
@@ -180,33 +179,6 @@
       if (sortFilter) {
         sortFilter.addEventListener('change', applyFilters);
       }
-      
-      // Delete course functionality
-      document.querySelectorAll('.delete-course-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const courseId = this.getAttribute('data-course-id');
-          if (confirm('Are you sure you want to delete this course? This action cannot be undone.')) {
-            fetch(`/admin/courses/${courseId}?_method=DELETE`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            })
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                window.location.reload();
-              } else {
-                alert(data.message || 'Failed to delete course');
-              }
-            })
-            .catch(error => {
-              console.error('Error:', error);
-              alert('An error occurred while deleting the course');
-            });
-          }
-        });
-      });
     });
   </script>
 </body>
