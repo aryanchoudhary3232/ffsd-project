@@ -99,9 +99,9 @@
             <div class="aspect-video bg-black flex items-center justify-center">
               <% if (currentLesson.file) { %>
               <video 
+                controls 
                 id="lesson-video" 
                 class="w-full h-full" 
-                controls 
                 poster="/img/video-poster.jpg"
               >
                 <source src="<%= currentLesson.file %>" type="video/mp4">
