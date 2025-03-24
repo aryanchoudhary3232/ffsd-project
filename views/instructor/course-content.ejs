@@ -593,13 +593,10 @@
           const formData = new FormData(this);
           console.log("FormData created", formData);
 
-          // Use the action from the outer scope instead of getting it from the form
-           moduleId = formData.get('moduleId');
-           lessonId = formData.get('lessonId'); // This is only used for update
-          // Retrieve necessary values from data attributes on the form
+          // Get values from the form
+          const moduleId = formData.get('moduleId');
+          const lessonId = formData.get('lessonId');
           const action = this.getAttribute('data-action');
-          const moduleId = this.getAttribute('data-module-id');
-          const lessonId = this.getAttribute('data-lesson-id'); // This is only used for update
 
           console.log("Action:", action);
           console.log("Module ID:", moduleId);
@@ -737,6 +734,7 @@
                                 alert('Lesson deleted successfully');
                               } else {
                                 alert(data.message || 'Failed to delete lesson');
+                                console.log(data);
                               }
                             })
                             .catch(error => {

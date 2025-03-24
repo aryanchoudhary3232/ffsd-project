@@ -8,14 +8,14 @@ const multer = require("multer");
 
 // Set up multer for file uploads
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: (_req, _file, cb) => {
     const uploadDir = path.join(__dirname, "../public/uploads");
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
     cb(null, uploadDir);
   },
-  filename: (req, file, cb) => {
+  filename: (_req, file, cb) => {
     cb(null, Date.now() + "-" + file.originalname);
   },
 });
@@ -229,7 +229,7 @@ const InstructorController = {
       const { title, description, category, price } = req.body;
 
       try {
-        const updatedCourse = CourseModel.updateCourse(courseId, {
+        CourseModel.updateCourse(courseId, {
           title,
           description,
           category,
