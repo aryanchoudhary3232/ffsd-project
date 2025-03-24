@@ -8,7 +8,9 @@
       "role": "admin",
       "joinDate": "2023-01-01",
       "enrolledCourses": [
-        "2"
+        "2",
+        "1742757772637",
+        "1742757216231"
       ],
       "completedCourses": []
     },
@@ -683,6 +685,18 @@
     {
       "userId": "1742447102288",
       "courseId": "3",
+      "progress": 0,
+      "completedLessons": []
+    },
+    {
+      "userId": "1",
+      "courseId": "1742757772637",
+      "progress": 0,
+      "completedLessons": []
+    },
+    {
+      "userId": "1",
+      "courseId": "1742757216231",
       "progress": 0,
       "completedLessons": []
     }
