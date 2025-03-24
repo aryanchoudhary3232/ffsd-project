@@ -33,9 +33,7 @@
       "joinDate": "2023-02-01",
       "enrolledCourses": [
         "1",
-        "2",
-        "4",
-        "3"
+        "2"
       ],
       "completedCourses": []
     },
@@ -553,6 +551,28 @@
           ]
         }
       ]
+    },
+    {
+      "id": "1742791944339",
+      "title": "hello",
+      "description": "this is a course",
+      "category": "Web Development",
+      "price": 400,
+      "instructorId": "4",
+      "instructor": "Michael Wilson",
+      "thumbnail": "/uploads/1742791944282-Screenshot 2025-03-04 at 22-50-34 Checkout - GameSir Official Store.png",
+      "rating": 0,
+      "students": 0,
+      "createdAt": "2025-03-24T04:52:24.339Z",
+      "updatedAt": "2025-03-24T05:13:38.561Z",
+      "modules": [
+        {
+          "id": "1742793218561",
+          "title": "sadasd",
+          "lessons": []
+        }
+      ],
+      "featured": false
     }
   ],
   "progress": [

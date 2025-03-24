@@ -105,7 +105,9 @@
                 </div>
               <% }); %>
             </div>
-            
+          </div>
+        </div>
+      </div>
       
       <!-- Main Content: Preview & Content Management -->
       <div class="md:col-span-2">
@@ -436,15 +438,13 @@
             .then(data => {
               console.log(data)
               if (data.success) {
-                // Add module to DOM
-                const modulesList = document.getElementById('modules-list');
                 const moduleHtml = `
-                  <div class="border rounded-md overflow-hidden module-item" data-module-id="${data.module.id}">
-                    <div class="bg-gray-50 p-3 flex justify-between items-center cursor-pointer module-header">
+                  <div class="border border-gray-700 rounded-md overflow-hidden module-item" data-module-id="${data.module.id}">
+                    <div class="bg-gray-700 p-3 flex justify-between items-center cursor-pointer module-header">
                       <h3 class="font-medium">${data.module.title}</h3>
                       <div class="flex items-center">
-                        <span class="text-xs text-gray-500 mr-2">0 lessons</span>
-                        <i class="fas fa-chevron-down text-gray-500"></i>
+                        <span class="text-xs text-gray-400 mr-2">0 lessons</span>
+                        <i class="fas fa-chevron-down text-gray-400"></i>
                       </div>
                     </div>
                     
@@ -453,15 +453,17 @@
                         <!-- Lessons will be added here -->
                       </div>
                       
-                      <button class="text-primary hover:text-primary-dark text-sm add-lesson-btn" data-module-id="${data.module.id}">
+                      <button class="text-blue-400 hover:text-blue-300 text-sm add-lesson-btn" data-module-id="${data.module.id}">
                         <i class="fas fa-plus-circle mr-1"></i> Add Lesson
                       </button>
                       
-                      <div class="mt-3 pt-3 border-t flex justify-between">
-                        <button class="text-gray-500 hover:text-primary text-sm edit-module-btn" data-module-id="${data.module.id}" data-module-title="${data.module.title}">
+                      <div class="mt-3 pt-3 border-t border-gray-700 flex justify-between">
+                        <button class="text-gray-400 hover:text-blue-400 text-sm edit-module-btn" data-module-id="${data.module.id}" data-module-title="${data.module.title}">
                           <i class="fas fa-edit mr-1"></i> Edit Module
                         </button>
-                        <button class="text-gray-500 hover:text-red-500 text-sm delete-module-btn" data-module-id="${data.module.id}">
+                        <button class="text-gray-400 hover:text-red-500 text-sm delete-module-btn" data-module-id="${data.module.id}">
+                          <i class="fas fa-trash-alt mr-1"></i> Delete Module
+                        </button>
                           <i class="fas fa-trash-alt mr-1"></i> Delete Module
                         </button>
                       </div>
@@ -595,9 +597,11 @@
         html = html.replace('{{videoSelected}}', lessonType === 'video' ? 'selected' : '');
         html = html.replace('{{pdfSelected}}', lessonType === 'pdf' ? 'selected' : '');
         html = html.replace('{{quizSelected}}', lessonType === 'quiz' ? 'selected' : '');
-        html = html.replace('{{assignmentSelected}}', lessonType === 'assignment' ? 'selected' : '');
-        
+        // Set form action attribute for proper handling
         container.innerHTML = html;
+        document.getElementById('lesson-form').setAttribute('data-action', action);
+        
+        // Show/hide duration field based on lesson type
         
         // Show/hide duration field based on lesson type
         const lessonTypeSelect = document.getElementById('lesson-type');
@@ -615,10 +619,6 @@
         lessonTypeSelect.addEventListener('change', toggleDurationField);
         
         // Cancel button
-        document.getElementById('cancel-lesson-btn').addEventListener('click', function() {
-          resetContentForm();
-        });
-        
         // Form submission
         document.getElementById('lesson-form').addEventListener('submit', function (e) {
   e.preventDefault();
@@ -628,6 +628,9 @@
   const formData = new FormData(this);
   console.log("FormData created", formData);
 
+  // Use the action from the outer scope instead of getting it from the form
+  const moduleId = formData.get('moduleId');
+  const lessonId = formData.get('lessonId'); // This is only used for update
   // Retrieve necessary values from data attributes on the form
   const action = this.getAttribute('data-action');
   const moduleId = this.getAttribute('data-module-id');
@@ -673,9 +676,8 @@
           } else if (data.lesson.type === 'quiz') {
             icon = '<i class="fas fa-question-circle text-blue-500 mr-2"></i>';
           } else {
-            icon = '<i class="fas fa-file-alt text-gray-500 mr-2"></i>';
+            icon = '<i class="fas fa-file-alt text-gray-400 mr-2"></i>';
           }
-
           // Create lesson HTML to insert into the DOM
           const lessonHtml = `
             <div class="flex items-center justify-between text-sm">
@@ -684,15 +686,15 @@
                 <span>${data.lesson.title}</span>
               </div>
               <div class="flex items-center">
-                <button class="text-gray-500 hover:text-primary edit-lesson-btn" 
+                <button class="text-gray-400 hover:text-blue-400 edit-lesson-btn" 
                         data-module-id="${moduleId}" 
                         data-lesson-id="${data.lesson.id}" 
                         data-lesson-title="${data.lesson.title}" 
-                        data-lesson-type="${data.lesson.type}" 
+                        data-lesson-type="${data.lesson.type}"
                         data-lesson-duration="${data.lesson.duration || ''}">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="text-gray-500 hover:text-red-500 ml-2 delete-lesson-btn" 
+                <button class="text-gray-400 hover:text-red-500 ml-2 delete-lesson-btn" 
                         data-module-id="${moduleId}" 
                         data-lesson-id="${data.lesson.id}">
                   <i class="fas fa-trash-alt"></i>
@@ -701,11 +703,16 @@
             </div>
           `;
           console.log("Appending lesson HTML:", lessonHtml);
+
+          const lessonsContainer = moduleElement.querySelector('.space-y-2');
+          if (!lessonsContainer) {
+            console.error("Lessons container not found inside module element.");
+            return;
+          }
           lessonsContainer.insertAdjacentHTML('beforeend', lessonHtml);
-          console.log("Lesson HTML appended to container");
 
           // Update lesson count if element exists
-          const lessonCountElement = moduleElement.querySelector('.text-xs.text-gray-500.mr-2');
+          const lessonCountElement = moduleElement.querySelector('.text-xs.text-gray-400.mr-2');
           if (lessonCountElement) {
             const currentCount = parseInt(lessonCountElement.textContent);
             lessonCountElement.textContent = `${currentCount + 1} lessons`;
@@ -718,62 +725,64 @@
           const newLesson = lessonsContainer.lastElementChild;
           console.log("New lesson element:", newLesson);
 
-          const editBtn = newLesson.querySelector('.edit-lesson-btn');
-          if (editBtn) {
-            editBtn.addEventListener('click', function (e) {
-              e.stopPropagation();
-              const moduleId = this.getAttribute('data-module-id');
-              const lessonId = this.getAttribute('data-lesson-id');
-              const lessonTitle = this.getAttribute('data-lesson-title');
-              const lessonType = this.getAttribute('data-lesson-type');
-              const lessonDuration = this.getAttribute('data-lesson-duration');
-              console.log("Edit button clicked for lesson:", lessonId);
-              showLessonForm('edit', moduleId, lessonId, lessonTitle, lessonType, lessonDuration);
-            });
-          } else {
-            console.error("Edit button not found in new lesson element");
-          }
+          if (newLesson) {
+            const editBtn = newLesson.querySelector('.edit-lesson-btn');
+            if (editBtn) {
+              editBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                const moduleId = this.getAttribute('data-module-id');
+                const lessonId = this.getAttribute('data-lesson-id');
+                const lessonTitle = this.getAttribute('data-lesson-title');
+                const lessonType = this.getAttribute('data-lesson-type');
+                const lessonDuration = this.getAttribute('data-lesson-duration');
+                console.log("Edit button clicked for lesson:", lessonId);
+                showLessonForm('edit', moduleId, lessonId, lessonTitle, lessonType, lessonDuration);
+              });
+            } else {
+              console.error("Edit button not found in new lesson element");
+            }
 
-          const deleteBtn = newLesson.querySelector('.delete-lesson-btn');
-          if (deleteBtn) {
-            deleteBtn.addEventListener('click', function (e) {
-              e.stopPropagation();
-              const moduleId = this.getAttribute('data-module-id');
-              const lessonId = this.getAttribute('data-lesson-id');
-              console.log("Delete button clicked for lesson:", lessonId);
-              if (confirm('Are you sure you want to delete this lesson? This action cannot be undone.')) {
-                fetch(`/instructor/courses/<%= course.id %>/modules/${moduleId}/lessons/${lessonId}?_method=DELETE`, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                })
-                  .then(response => {
-                    console.log("Received response from delete lesson fetch:", response);
-                    return response.json();
+            const deleteBtn = newLesson.querySelector('.delete-lesson-btn');
+            if (deleteBtn) {
+              deleteBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                const moduleId = this.getAttribute('data-module-id');
+                const lessonId = this.getAttribute('data-lesson-id');
+                console.log("Delete button clicked for lesson:", lessonId);
+                if (confirm('Are you sure you want to delete this lesson? This action cannot be undone.')) {
+                  fetch(`/instructor/courses/<%= course.id %>/modules/${moduleId}/lessons/${lessonId}?_method=DELETE`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
                   })
-                  .then(data => {
-                    console.log("Data from delete lesson:", data);
-                    if (data.success) {
-                      newLesson.remove();
-                      if (lessonCountElement) {
-                        const currentCount = parseInt(lessonCountElement.textContent);
-                        lessonCountElement.textContent = `${currentCount - 1} lessons`;
-                        console.log("Lesson count decreased to:", currentCount - 1);
+                    .then(response => {
+                      console.log("Received response from delete lesson fetch:", response);
+                      return response.json();
+                    })
+                    .then(data => {
+                      console.log("Data from delete lesson:", data);
+                      if (data.success) {
+                        newLesson.remove();
+                        if (lessonCountElement) {
+                          const currentCount = parseInt(lessonCountElement.textContent);
+                          lessonCountElement.textContent = `${currentCount - 1} lessons`;
+                          console.log("Lesson count decreased to:", currentCount - 1);
+                        }
+                        alert('Lesson deleted successfully');
+                      } else {
+                        alert(data.message || 'Failed to delete lesson');
                       }
-                      alert('Lesson deleted successfully');
-                    } else {
-                      alert(data.message || 'Failed to delete lesson');
-                    }
-                  })
-                  .catch(error => {
-                    console.error("Error during lesson deletion:", error);
-                    alert('An error occurred while deleting the lesson');
-                  });
-              }
-            });
-          } else {
-            console.error("Delete button not found in new lesson element");
+                    })
+                    .catch(error => {
+                      console.error("Error during lesson deletion:", error);
+                      alert('An error occurred while deleting the lesson');
+                    });
+                }
+              });
+            } else {
+              console.error("Delete button not found in new lesson element");
+            }
           }
 
           resetContentForm();
@@ -809,23 +818,26 @@
             return;
           }
           const lessonTitleElement = lessonElement.querySelector('span');
+          if (lessonTitleElement) {
+              lessonTitleElement.textContent = data.lesson.title;
+          }
           const editButton = lessonElement.querySelector('.edit-lesson-btn');
-
-          lessonTitleElement.textContent = data.lesson.title;
-          editButton.setAttribute('data-lesson-title', data.lesson.title);
-          editButton.setAttribute('data-lesson-type', data.lesson.type);
-          editButton.setAttribute('data-lesson-duration', data.lesson.duration || '');
-
-          // Update icon based on the new lesson type
+          if (editButton) {
+              editButton.setAttribute('data-lesson-title', data.lesson.title);
+              editButton.setAttribute('data-lesson-type', data.lesson.type);
+              editButton.setAttribute('data-lesson-duration', data.lesson.duration || '');
+          }
           const iconElement = lessonElement.querySelector('i:first-child');
-          if (data.lesson.type === 'video' && !iconElement.classList.contains('fa-play-circle')) {
-            iconElement.className = 'fas fa-play-circle text-primary mr-2';
-          } else if (data.lesson.type === 'pdf' && !iconElement.classList.contains('fa-file-pdf')) {
-            iconElement.className = 'fas fa-file-pdf text-red-500 mr-2';
-          } else if (data.lesson.type === 'quiz' && !iconElement.classList.contains('fa-question-circle')) {
-            iconElement.className = 'fas fa-question-circle text-blue-500 mr-2';
-          } else if (data.lesson.type === 'assignment' && !iconElement.classList.contains('fa-file-alt')) {
-            iconElement.className = 'fas fa-file-alt text-gray-500 mr-2';
+          if (iconElement) {
+            if (data.lesson.type === 'video') {
+              iconElement.className = 'fas fa-play-circle text-blue-400 mr-2';
+            } else if (data.lesson.type === 'pdf') {
+              iconElement.className = 'fas fa-file-pdf text-red-500 mr-2';
+            } else if (data.lesson.type === 'quiz') {
+              iconElement.className = 'fas fa-question-circle text-blue-500 mr-2';
+            } else if (data.lesson.type === 'assignment') {
+              iconElement.className = 'fas fa-file-alt text-gray-400 mr-2';
+            }
           }
 
           resetContentForm();
@@ -841,16 +853,16 @@
         alert('An error occurred while updating the lesson');
       });
   }
-});   
+});
 }
-      
+
       // Reset content form
       function resetContentForm() {
         const container = document.getElementById('content-form-container');
         container.innerHTML = `
           <div class="text-center py-8">
             <i class="fas fa-arrow-left text-3xl text-gray-400 mb-4"></i>
-            <p class="text-gray-600">Select an action from the sidebar or add a new module to get started.</p>
+            <p class="text-gray-400">Select an action from the sidebar or add a new module to get started.</p>
           </div>
         `;
       }
