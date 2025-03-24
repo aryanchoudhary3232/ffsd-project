@@ -237,7 +237,7 @@
           
           <div class="bg-gray-800 rounded-lg shadow-md p-6 mb-8">
             <h3 class="text-xl font-bold mb-4">Discussion</h3>
-            <div class="space-y-4 mb-6">
+            <div class="space-y-4 mb-6 discussion-container">
               <div class="flex gap-4">
                 <div class="flex-shrink-0">
                   <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
@@ -275,12 +275,13 @@
               </div>
               <div class="flex-1">
                 <textarea 
-                  class="w-full p-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-black 
+                  id="comment-text"
+                  class="w-full p-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-black" 
                   rows="3" 
                   placeholder="Add to the discussion..."
                 ></textarea>
                 <div class="flex justify-end mt-2">
-                  <button class="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-colors">
+                  <button id="post-comment-btn" class="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-colors">
                     Post Comment
                   </button>
                 </div>
@@ -394,5 +395,79 @@
         setTimeout(() => { document.body.removeChild(toast); }, 300);
       }, 3000);
     }
+    // Attach event listener to the Post Comment button
+document.getElementById('post-comment-btn').addEventListener('click', postComment);
+
+function postComment() {
+  const commentTextarea = document.getElementById('comment-text');
+  const commentText = commentTextarea.value.trim();
+
+  // If the textarea is empty, show an error toast and exit
+  if (!commentText) {
+    showToast('Please enter a comment.', 'error');
+    return;
+  }
+
+  const postButton = document.getElementById('post-comment-btn');
+  postButton.disabled = true;
+  postButton.innerHTML = 'Posting...';
+
+  // Send the comment to the backend; adjust the endpoint as needed
+  fetch('/courses/<%= course.id %>/lessons/<%= currentLesson.id %>/comments', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+    },
+    body: JSON.stringify({ comment: commentText })
+  })
+  .then(response => {
+    if (!response.ok) throw new Error('Network error');
+    return response.json();
+  })
+  .then(data => {
+    if (data.success) {
+      // Create HTML for the new comment. Adjust properties based on your response structure.
+      const newCommentHTML = `
+        <div class="flex gap-4">
+          <div class="flex-shrink-0">
+            <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
+              <i class="fas fa-user text-gray-300"></i>
+            </div>
+          </div>
+          <div class="flex-1 bg-gray-700 rounded-lg p-4">
+            <div class="flex justify-between items-center mb-2">
+              <span class="font-medium">${data.username || 'You'}</span>
+              <span class="text-xs text-gray-400">${data.timestamp || 'Just now'}</span>
+            </div>
+            <p class="text-gray-300">${data.comment}</p>
+          </div>
+        </div>
+      `;
+      
+      // Append the new comment to the discussion container
+      const discussionContainer = document.querySelector('.discussion-container');
+      if (discussionContainer) {
+        discussionContainer.innerHTML += newCommentHTML;
+      } else {
+        console.error('Discussion container not found');
+        showToast('Error displaying comment', 'error');
+      }
+      
+      // Clear the textarea
+      commentTextarea.value = '';
+    } else {
+      showToast('Error posting comment', 'error');
+    }
+  })
+  .catch(() => {
+    showToast('Network error while posting comment', 'error');
+  })
+  .finally(() => {
+    postButton.disabled = false;
+    postButton.innerHTML = 'Post Comment';
+  });
+}
+
   </script>
 </body>
