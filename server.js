@@ -37,7 +37,7 @@ app.use(
     cookie: { maxAge: 24 * 60 * 60 * 1000 }, // 24 hours
   })
 );
-app.use(express.static("public"));
+// app.use(express.static("public"));
 app.use(flash());
 
 // Global middleware

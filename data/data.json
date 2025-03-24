@@ -8,7 +8,9 @@
       "role": "admin",
       "joinDate": "2023-01-01",
       "enrolledCourses": [
-        "2"
+        "2",
+        "1742757772637",
+        "1742757216231"
       ],
       "completedCourses": []
     },
@@ -91,12 +93,32 @@
       "completedCourses": []
     },
     {
-      "id": "1742016793116",
-      "name": "aryan ",
-      "email": "aryan@test.com",
-      "password": "$2b$10$kT7qw.eDTu5og3CEZze.kOiuysucN2t.3tRN9TJ1g32zuYq/ljfPO",
+      "id": "1742762184387",
+      "name": "mohit",
+      "email": "mohit@gmail.com",
+      "password": "$2b$10$SdH4Ms9d2fesYSqAFaLJp.M1ocZ1tERS7kdbyMwUipzqTn1UcE4lS",
+      "role": "student",
+      "joinDate": "2025-03-23",
+      "enrolledCourses": [],
+      "completedCourses": []
+    },
+    {
+      "id": "1742762615017",
+      "name": "RAbi",
+      "email": "rabi@gmail.com",
+      "password": "$2b$10$Vr5xI6dKU589Pn5Z.ikrAuGSYwNS.qDQTdbOcT7I3eS6m7Z8kLZk6",
+      "role": "student",
+      "joinDate": "2025-03-23",
+      "enrolledCourses": [],
+      "completedCourses": []
+    },
+    {
+      "id": "1742763050357",
+      "name": "Arun",
+      "email": "arunqw@gmail.com",
+      "password": "$2b$10$bWy0ICebFvbpXN/ak8daMuK99B1GXeU9HQbx4UBRvzW/lTyq7vJsO",
       "role": "instructor",
-      "joinDate": "2025-03-15",
+      "joinDate": "2025-03-23",
       "enrolledCourses": [],
       "completedCourses": []
     }
@@ -551,11 +573,36 @@
       "courseId": "3",
       "progress": 0,
       "completedLessons": []
+    },
+    {
+      "userId": "1",
+      "courseId": "1742757772637",
+      "progress": 0,
+      "completedLessons": []
+    },
+    {
+      "userId": "1",
+      "courseId": "1742757216231",
+      "progress": 0,
+      "completedLessons": []
     }
   ],
   "carts": [
     {
       "userId": "3",
+      "items": []
+    },
+    {
+      "userId": "1",
+      "items": [
+        {
+          "courseId": "1742234202380",
+          "addedAt": "2025-03-23T20:33:54.011Z"
+        }
+      ]
+    },
+    {
+      "userId": "1742762184387",
       "items": []
     }
   ],

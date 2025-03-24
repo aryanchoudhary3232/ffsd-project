@@ -307,7 +307,6 @@ const AdminController = {
     }
   },
 
-  // Get revenue management page
   getRevenueManagement: (req, res) => {
     if (!req.session.user || req.session.user.role !== "admin") {
       return res.redirect("/login");
@@ -324,13 +323,36 @@ const AdminController = {
     // Get revenue by month
     const revenueByMonth = OrderModel.getRevenueByMonth();
 
+    // Calculate monthly revenue (revenue for the current month)
+    const currentMonth = new Date().toLocaleString("default", {
+      month: "long",
+    });
+    const monthlyRevenue =
+      revenueByMonth.find((month) => month.month === currentMonth)?.revenue ||
+      0;
+
     // Get recent orders
     const recentOrders = OrderModel.getRecentOrders(10);
 
+    // Calculate revenue by category (example logic - replace with your actual logic)
+    const categoryRevenue = [
+      { name: "Programming", revenue: 30000 },
+      { name: "Design", revenue: 15000 },
+      { name: "Business", revenue: 10000 },
+      { name: "Marketing", revenue: 5000 },
+    ];
+    // const categoryRevenue = Object.keys(revenueByCategory).map((category) => ({
+    //   name: category,
+    //   revenue: revenueByCategory[category],
+    // }));
+
+    // Render the EJS template with the data
     res.render("admin/revenue", {
       totalRevenue,
+      monthlyRevenue,
       chartData: revenueByMonth,
       recentOrders,
+      categoryRevenue,
     });
   },
 };
