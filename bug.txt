@@ -1,0 +1,3 @@
+BUGS:
+
+When user registers, the password is saved after being hashed. When the user logins, it is directly comparing entered password with the hash.

@@ -120,6 +120,24 @@ getUserProfile: (req, res) => {
 
     res.render("user/courses", { enrolledCourses });
   },
+
+  deleteUser: (req, res) => {
+    console.log('Reached controller');
+    if (!req.session.user) {
+      return res.redirect("/login");
+    }
+
+    const userId = req.params.id; // Get user ID from request parameters
+
+    try {
+      UserModel.deleteUser(userId); // Call delete function from userModel
+      req.flash("success_msg", "User deleted successfully");
+      res.redirect("/admin/users"); // Redirect to user management page
+    } catch (error) {
+      req.flash("error_msg", error.message);
+      res.redirect("/admin/users");
+    }
+  }
 };
 
 module.exports = UserController;

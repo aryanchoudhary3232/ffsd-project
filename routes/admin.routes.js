@@ -359,7 +359,10 @@ router.get("/revenue", isAdmin, (req, res) => {
   });
 });
 
+const userController = require('../controllers/user.controller');
+console.log('Reached route');
 // GET: Render manage users page
+router.delete('/users/:id', userController.deleteUser);
 router.get("/users", isAdmin, (req, res) => {
   const data = readData();
   const users = data.users || [];

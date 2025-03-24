@@ -82,16 +82,6 @@
       "joinDate": "2025-03-15",
       "enrolledCourses": [],
       "completedCourses": []
-    },
-    {
-      "id": "1742017900372",
-      "name": "instruc1",
-      "email": "ins@gmail.com",
-      "password": "instructor",
-      "role": "instructor",
-      "joinDate": "2025-03-15",
-      "enrolledCourses": [],
-      "completedCourses": []
     }
   ],
   "courses": [

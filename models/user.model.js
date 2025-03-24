@@ -211,6 +211,24 @@ const UserModel = {
       return joinDate >= thirtyDaysAgo;
     });
   },
+
+  deleteUserById: (userId) => {
+    console.log('Reached model');
+    
+    const db = require("../config/database");
+    const User = require("../models/User");
+
+    return new Promise((resolve, reject) => {
+      db.run("DELETE FROM users WHERE id = ?", [userId], function (err) {
+          if (err) {
+              reject(new Error("Error deleting user: " + err.message));
+              return;
+          }
+          resolve({ message: "User deleted successfully", changes: this.changes });
+      });
+  });
+  }
+  
 };
 
 module.exports = UserModel;
