@@ -55,7 +55,8 @@
       "role": "student",
       "joinDate": "2023-03-01",
       "enrolledCourses": [
-        "1"
+        "1",
+        "4"
       ],
       "completedCourses": []
     },
@@ -606,12 +607,13 @@
     {
       "userId": "5",
       "courseId": "1",
-      "progress": 25,
+      "progress": 28,
       "completedLessons": [
         "l1",
         "l2",
         "l3",
-        "l4"
+        "l4",
+        "l5"
       ]
     },
     {
@@ -634,6 +636,12 @@
     },
     {
       "userId": "2",
+      "courseId": "4",
+      "progress": 0,
+      "completedLessons": []
+    },
+    {
+      "userId": "5",
       "courseId": "4",
       "progress": 0,
       "completedLessons": []
