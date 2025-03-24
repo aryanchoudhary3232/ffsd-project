@@ -10,7 +10,6 @@ const multer = require("multer");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = path.join(__dirname, "../public/uploads");
-    // Create directory if it doesn't exist
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
@@ -25,7 +24,6 @@ const upload = multer({ storage: storage });
 
 // Instructor controller
 const InstructorController = {
-  // Get instructor dashboard
   getInstructorDashboard: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -34,19 +32,16 @@ const InstructorController = {
     const userId = req.session.user.id;
     const instructorCourses = CourseModel.getCoursesByInstructor(userId);
 
-    // Calculate total students and revenue
     let totalStudents = 0;
     let totalRevenue = 0;
 
     for (const course of instructorCourses) {
-      // Count enrollments
       const enrollments = UserModel.getAllUsers().filter((user) =>
         user.enrolledCourses.includes(course.id)
       ).length;
 
       totalStudents += enrollments;
 
-      // Calculate revenue
       const courseOrders = OrderModel.getOrdersByCourse(course.id).filter(
         (order) => order.status === "completed"
       );
@@ -58,7 +53,6 @@ const InstructorController = {
       totalRevenue += courseRevenue;
     }
 
-    // Get recent orders
     const recentOrders = OrderModel.getAllOrders()
       .filter((order) =>
         instructorCourses.some((course) => course.id === order.courseId)
@@ -84,14 +78,38 @@ const InstructorController = {
     });
   },
 
-  // Get instructor courses
   getInstructorCourses: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
     }
 
     const userId = req.session.user.id;
-    const instructorCourses = CourseModel.getCoursesByInstructor(userId);
+    let instructorCourses = CourseModel.getCoursesByInstructor(userId);
+
+    // Apply sorting
+    const sortFilter = req.query.sort || "newest";
+    instructorCourses.sort((a, b) => {
+      if (sortFilter === "newest") {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      } else if (sortFilter === "oldest") {
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      } else if (sortFilter === "title-asc") {
+        return a.title.localeCompare(b.title);
+      } else if (sortFilter === "title-desc") {
+        return b.title.localeCompare(a.title);
+      } else if (sortFilter === "students") {
+        return b.students - a.students;
+      } else if (sortFilter === "revenue") {
+        const revenueA = OrderModel.getOrdersByCourse(a.id)
+          .filter((order) => order.status === "completed")
+          .reduce((sum, order) => sum + order.amount, 0);
+        const revenueB = OrderModel.getOrdersByCourse(b.id)
+          .filter((order) => order.status === "completed")
+          .reduce((sum, order) => sum + order.amount, 0);
+        return revenueB - revenueA;
+      }
+      return 0;
+    });
 
     // Enhance courses with student count and revenue
     const enhancedCourses = instructorCourses.map((course) => {
@@ -115,7 +133,6 @@ const InstructorController = {
     });
   },
 
-  // Get create course form
   getCreateCourseForm: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -127,7 +144,6 @@ const InstructorController = {
     });
   },
 
-  // Create new course
   createCourse: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -164,7 +180,6 @@ const InstructorController = {
     });
   },
 
-  // Get edit course form
   getEditCourseForm: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -188,7 +203,6 @@ const InstructorController = {
     });
   },
 
-  // Update course
   updateCourse: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -234,7 +248,6 @@ const InstructorController = {
     });
   },
 
-  // Get course content management page
   getCourseContentPage: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -257,7 +270,6 @@ const InstructorController = {
     });
   },
 
-  // Add module to course
   addModule: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -288,7 +300,6 @@ const InstructorController = {
     }
   },
 
-  // Update module
   updateModule: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -309,7 +320,6 @@ const InstructorController = {
         return res.redirect("/instructor/courses");
       }
 
-      // Find the module
       const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
 
       if (moduleIndex === -1) {
@@ -317,11 +327,9 @@ const InstructorController = {
         return res.redirect(`/instructor/courses/${courseId}/content`);
       }
 
-      // Update module
       course.modules[moduleIndex].title = title;
       course.updatedAt = new Date().toISOString();
 
-      // Save changes
       CourseModel.updateCourse(courseId, { modules: course.modules });
 
       req.flash("success_msg", "Module updated successfully");
@@ -332,7 +340,6 @@ const InstructorController = {
     }
   },
 
-  // Delete module
   deleteModule: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -352,7 +359,6 @@ const InstructorController = {
         return res.redirect("/instructor/courses");
       }
 
-      // Find the module index
       const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
 
       if (moduleIndex === -1) {
@@ -360,11 +366,9 @@ const InstructorController = {
         return res.redirect(`/instructor/courses/${courseId}/content`);
       }
 
-      // Remove module
       course.modules.splice(moduleIndex, 1);
       course.updatedAt = new Date().toISOString();
 
-      // Save changes
       CourseModel.updateCourse(courseId, { modules: course.modules });
 
       req.flash("success_msg", "Module deleted successfully");
@@ -375,7 +379,6 @@ const InstructorController = {
     }
   },
 
-  // Add lesson to module
   addLesson: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -403,7 +406,6 @@ const InstructorController = {
           return res.redirect("/instructor/courses");
         }
 
-        // Find the module
         const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
 
         if (moduleIndex === -1) {
@@ -411,7 +413,6 @@ const InstructorController = {
           return res.redirect(`/instructor/courses/${courseId}/content`);
         }
 
-        // Create new lesson
         const newLesson = {
           id: Date.now().toString(),
           title,
@@ -420,11 +421,9 @@ const InstructorController = {
           file: req.file ? `/uploads/${req.file.filename}` : null,
         };
 
-        // Add lesson to module
         course.modules[moduleIndex].lessons.push(newLesson);
         course.updatedAt = new Date().toISOString();
 
-        // Save changes
         CourseModel.updateCourse(courseId, { modules: course.modules });
 
         req.flash("success_msg", "Lesson added successfully");
@@ -436,7 +435,6 @@ const InstructorController = {
     });
   },
 
-  // Update lesson
   updateLesson: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -464,7 +462,6 @@ const InstructorController = {
           return res.redirect("/instructor/courses");
         }
 
-        // Find the module
         const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
 
         if (moduleIndex === -1) {
@@ -472,7 +469,6 @@ const InstructorController = {
           return res.redirect(`/instructor/courses/${courseId}/content`);
         }
 
-        // Find the lesson
         const lessonIndex = course.modules[moduleIndex].lessons.findIndex(
           (l) => l.id === lessonId
         );
@@ -482,7 +478,6 @@ const InstructorController = {
           return res.redirect(`/instructor/courses/${courseId}/content`);
         }
 
-        // Update lesson
         course.modules[moduleIndex].lessons[lessonIndex] = {
           ...course.modules[moduleIndex].lessons[lessonIndex],
           title,
@@ -495,7 +490,6 @@ const InstructorController = {
 
         course.updatedAt = new Date().toISOString();
 
-        // Save changes
         CourseModel.updateCourse(courseId, { modules: course.modules });
 
         req.flash("success_msg", "Lesson updated successfully");
@@ -507,7 +501,6 @@ const InstructorController = {
     });
   },
 
-  // Delete lesson
   deleteLesson: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -527,7 +520,6 @@ const InstructorController = {
         return res.redirect("/instructor/courses");
       }
 
-      // Find the module
       const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
 
       if (moduleIndex === -1) {
@@ -535,7 +527,6 @@ const InstructorController = {
         return res.redirect(`/instructor/courses/${courseId}/content`);
       }
 
-      // Find the lesson
       const lessonIndex = course.modules[moduleIndex].lessons.findIndex(
         (l) => l.id === lessonId
       );
@@ -545,11 +536,9 @@ const InstructorController = {
         return res.redirect(`/instructor/courses/${courseId}/content`);
       }
 
-      // Remove lesson
       course.modules[moduleIndex].lessons.splice(lessonIndex, 1);
       course.updatedAt = new Date().toISOString();
 
-      // Save changes
       CourseModel.updateCourse(courseId, { modules: course.modules });
 
       req.flash("success_msg", "Lesson deleted successfully");
@@ -560,7 +549,6 @@ const InstructorController = {
     }
   },
 
-  // Get instructor analytics
   getInstructorAnalytics: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -569,7 +557,6 @@ const InstructorController = {
     const userId = req.session.user.id;
     const instructorCourses = CourseModel.getCoursesByInstructor(userId);
 
-    // Calculate revenue by course
     const revenueByCourseName = {};
     let totalRevenue = 0;
 
@@ -587,7 +574,6 @@ const InstructorController = {
       totalRevenue += courseRevenue;
     }
 
-    // Calculate student engagement (completion rate)
     const courseCompletionRates = instructorCourses.map((course) => {
       const completionRate = ProgressModel.getCourseCompletionRate(course.id);
       return {
@@ -604,7 +590,6 @@ const InstructorController = {
     });
   },
 
-  // Get instructor students
   getInstructorStudents: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -612,23 +597,23 @@ const InstructorController = {
 
     const userId = req.session.user.id;
     const instructorCourses = CourseModel.getCoursesByInstructor(userId);
-    const courseIds = instructorCourses.map((course) => course.id);
+    const courseIds = instructorCourses.map((course) => String(course.id));
 
     // Get all students enrolled in instructor's courses
     const allUsers = UserModel.getAllUsers();
     const students = allUsers.filter(
       (user) =>
         user.role === "student" &&
-        user.enrolledCourses.some((courseId) => courseIds.includes(courseId))
+        user.enrolledCourses.some((courseId) => courseIds.includes(String(courseId)))
     );
 
     // Enhance students with course info
     const enhancedStudents = students.map((student) => {
       const enrolledInstructorCourses = student.enrolledCourses
-        .filter((courseId) => courseIds.includes(courseId))
+        .filter((courseId) => courseIds.includes(String(courseId)))
         .map((courseId) => {
           const course = CourseModel.getCourseById(courseId);
-          const progress = ProgressModel.getProgress(student.id, courseId);
+          const progress = ProgressModel.getProgress(student.id, courseId) || { progress: 0 };
           return {
             ...course,
             progress: progress.progress,
@@ -643,6 +628,7 @@ const InstructorController = {
 
     res.render("instructor/students", {
       students: enhancedStudents,
+      courses: instructorCourses,
     });
   },
 };
