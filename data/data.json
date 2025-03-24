@@ -676,10 +676,13 @@
     {
       "userId": "1742447102288",
       "courseId": "4",
-      "progress": 22,
+      "progress": 56,
       "completedLessons": [
         "l1",
-        "l2"
+        "l2",
+        "l3",
+        "l4",
+        "l5"
       ]
     },
     {

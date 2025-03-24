@@ -111,7 +111,7 @@ const CourseController = {
   getCourseLearningPage: (req, res) => {
     if (!req.session.user) {
       req.flash("error_msg", "Please login to access course content")
-      return res.redirect("/login")
+      //return res.redirect("/login")
     }
 
     const courseId = req.params.id
