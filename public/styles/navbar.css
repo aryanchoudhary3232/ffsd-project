@@ -1,0 +1,90 @@
+    /* navbar section */
+    
+    .header {
+        position: sticky;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1000; /* Ensures it stays above other content */
+        background-color: white; /* Keeps it visible */
+        padding-top: 5px;
+        padding-bottom: 10px;
+        box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Adds subtle shadow */
+      }
+      
+      /* Default styling for large screens */
+      .nav-container {
+        display: flex;
+        justify-content: center; /* Center align the navbar */
+        align-items: center;
+        position: relative;
+        flex-wrap: wrap; /* Allows elements to wrap when needed */
+      }
+      
+      .logo-container {
+        position: absolute;
+        left: 20px;
+      }
+      
+      .logo {
+        width: 100px; /* Default size */
+        height: auto;
+        transition: all 0.3s ease-in-out;
+      }
+      
+      /* Right-align the login button */
+      .login-container {
+        position: absolute;
+        right: 20px;
+      }
+      
+      /* Reduce font size when the screen gets smaller */
+      @media (max-width: 992px) {
+      
+        .logo {
+            width: 80px; /* Slightly smaller */
+        }
+      
+        .nav-pills .nav-link {
+            font-size: 14px; /* Slightly smaller font */
+            padding: 6px 12px; /* Adjust padding */
+        }
+      
+        .login-btn {
+            font-size: 14px;
+            padding: 6px 12px;
+        }
+      }
+      
+      /* When screen becomes very small, shrink navbar even more */
+      @media (max-width: 768px) {
+      
+        .logo {
+            width: 60px; /* Even smaller */
+        }
+        .nav-pills .nav-link {
+            font-size: 12px; /* Smaller font for tiny screens */
+            padding: 4px 8px; /* Reduce padding */
+        }
+      
+        .login-btn {
+            font-size: 12px;
+            padding: 4px 8px;
+        }
+      }
+      
+      /* Extra small screens: Ensure proper spacing */
+      @media (max-width: 576px) {
+        .nav-container {
+            flex-direction: column; /* Stack items */
+            align-items: center;
+        }
+        .logo {
+            width: 50px; /* Minimum size */
+        }
+        .login-container {
+            position: relative;
+            right: auto;
+            margin-top: 5px;
+        }
+      }
