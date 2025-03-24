@@ -1,11 +1,11 @@
 <%- include('../partials/head', { title: 'Learning: ' + course.title + ' - LearnHub' }) %>
-<body class="bg-gray-100">
+<body class="bg-gray-900 text-white">
   <div class="flex flex-col h-screen">
     <!-- Header -->
-    <header class="bg-white border-b">
+    <header class="bg-gray-800 border-b border-gray-700">
       <div class="container mx-auto px-4 py-3 flex justify-between items-center">
         <div class="flex items-center">
-          <a href="/dashboard" class="text-gray-600 hover:text-gray-900 mr-4">
+          <a href="/dashboard" class="text-white hover:text-gray-300 mr-4">
             <i class="fas fa-arrow-left"></i>
           </a>
           <h1 class="text-xl font-bold truncate max-w-md"><%= course.title %></h1>
@@ -13,13 +13,13 @@
         <div class="flex items-center gap-4">
           <div class="hidden md:block">
             <div class="flex items-center">
-              <div class="w-48 bg-gray-200 rounded-full h-2.5 mr-2">
-                <div class="bg-blue-500 h-2.5 rounded-full" style="width: <%= progress %>%"></div>
+              <div class="w-48 bg-gray-600 rounded-full h-2.5 mr-2">
+                <div class="bg-purple-500 h-2.5 rounded-full" style="width: <%= progress %>%"></div>
               </div>
               <span class="text-sm font-medium"><%= progress %>%</span>
             </div>
           </div>
-          <button id="sidebar-toggle" class="md:hidden text-gray-600 hover:text-gray-900">
+          <button id="sidebar-toggle" class="md:hidden text-gray-300 hover:text-gray-100">
             <i class="fas fa-bars"></i>
           </button>
         </div>
@@ -28,17 +28,17 @@
 
     <div class="flex flex-1 overflow-hidden relative">
       <!-- Sidebar -->
-      <div id="sidebar" class="hidden md:block md:relative md:w-80 bg-white border-r overflow-y-auto h-full md:h-auto">
-        <div class="p-4 border-b">
+      <div id="sidebar" class="hidden md:block md:relative md:w-80 bg-gray-800 border-r border-gray-700 overflow-y-auto h-full md:h-auto">
+        <div class="p-4 border-b border-gray-700">
           <h2 class="font-bold text-lg">Course Content</h2>
-          <div class="flex items-center text-sm text-gray-600 mt-1">
+          <div class="flex items-center text-sm text-gray-400 mt-1">
             <span><%= course.modules.length %> modules • </span>
             <span><%= course.modules.reduce((total, m) => total + m.lessons.length, 0) %> lessons • </span>
             <span><%= completedLessons.length %> completed</span>
           </div>
         </div>
 
-        <div class="divide-y">
+        <div class="divide-y divide-gray-700">
           <% course.modules.forEach(function(module, moduleIndex) { %>
           <div class="p-4">
             <div class="flex justify-between items-center mb-2">
@@ -51,11 +51,11 @@
                 const isModuleCompleted = totalLessons === completedModuleLessons && totalLessons > 0;
               %>
               <% if (isModuleCompleted) { %>
-              <span class="text-green-500 text-sm">
+              <span class="text-green-400 text-sm">
                 <i class="fas fa-check-circle"></i> Completed
               </span>
               <% } else if (completedModuleLessons > 0) { %>
-              <span class="text-blue-500 text-sm">
+              <span class="text-purple-400 text-sm">
                 <%= completedModuleLessons %>/<%= totalLessons %>
               </span>
               <% } %>
@@ -64,24 +64,24 @@
               <% module.lessons.forEach(function(lesson) { %>
               <a 
                 href="/courses/<%= course.id %>/learn?lesson=<%= lesson.id %>" 
-                class="flex items-center p-2 rounded-md <%= currentLesson.id === lesson.id ? 'bg-blue-100 text-blue-500' : 'hover:bg-gray-100' %>"
+                class="flex items-center p-2 rounded-md <%= currentLesson.id === lesson.id ? 'bg-purple-700 text-purple-200' : 'hover:bg-gray-700' %>"
               >
                 <% if (completedLessons.includes(lesson.id)) { %>
-                <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                <i class="fas fa-check-circle text-green-400 mr-2"></i>
                 <% } else if (lesson.type === 'video') { %>
-                <i class="fas fa-play-circle text-gray-500 mr-2"></i>
+                <i class="fas fa-play-circle text-gray-400 mr-2"></i>
                 <% } else if (lesson.type === 'pdf') { %>
-                <i class="fas fa-file-pdf text-red-500 mr-2"></i>
+                <i class="fas fa-file-pdf text-red-400 mr-2"></i>
                 <% } else if (lesson.type === 'quiz') { %>
-                <i class="fas fa-question-circle text-blue-500 mr-2"></i>
+                <i class="fas fa-question-circle text-purple-400 mr-2"></i>
                 <% } else { %>
-                <i class="fas fa-file-alt text-gray-500 mr-2"></i>
+                <i class="fas fa-file-alt text-gray-400 mr-2"></i>
                 <% } %>
                 <span class="<%= currentLesson.id === lesson.id ? 'font-medium' : '' %>">
                   <%= lesson.title %>
                 </span>
                 <% if (lesson.duration) { %>
-                <span class="ml-auto text-xs text-gray-500"><%= lesson.duration %></span>
+                <span class="ml-auto text-xs text-gray-400"><%= lesson.duration %></span>
                 <% } %>
               </a>
               <% }); %>
@@ -94,7 +94,7 @@
       <!-- Main Content -->
       <div class="flex-1 overflow-y-auto">
         <div class="container mx-auto px-4 py-6 max-w-4xl">
-          <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+          <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden mb-6">
             <% if (currentLesson.type === 'video') { %>
             <div class="aspect-video bg-black flex items-center justify-center">
               <% if (currentLesson.file) { %>
@@ -115,14 +115,14 @@
               <% } %>
             </div>
             <% } else if (currentLesson.type === 'pdf') { %>
-            <div class="aspect-video bg-gray-100 flex items-center justify-center p-8">
+            <div class="aspect-video bg-gray-700 flex items-center justify-center p-8">
               <div class="text-center">
-                <i class="fas fa-file-pdf text-red-500 text-5xl mb-4"></i>
+                <i class="fas fa-file-pdf text-red-400 text-5xl mb-4"></i>
                 <h3 class="text-xl font-semibold mb-2"><%= currentLesson.title %></h3>
-                <p class="text-gray-600 mb-4">PDF document</p>
+                <p class="text-gray-300 mb-4">PDF document</p>
                 <a 
                   href="<%= currentLesson.file || '#' %>" 
-                  class="inline-flex items-center bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+                  class="inline-flex items-center bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-colors"
                   <%= currentLesson.file ? 'download' : '' %>
                 >
                   <i class="fas fa-download mr-2"></i> Download
@@ -130,13 +130,13 @@
               </div>
             </div>
             <% } else if (currentLesson.type === 'quiz') { %>
-            <div class="aspect-video bg-gray-100 flex items-center justify-center p-8">
+            <div class="aspect-video bg-gray-700 flex items-center justify-center p-8">
               <div class="text-center">
-                <i class="fas fa-question-circle text-blue-500 text-5xl mb-4"></i>
+                <i class="fas fa-question-circle text-purple-400 text-5xl mb-4"></i>
                 <h3 class="text-xl font-semibold mb-2"><%= currentLesson.title %></h3>
-                <p class="text-gray-600 mb-4">Quiz</p>
+                <p class="text-gray-300 mb-4">Quiz</p>
                 <button 
-                  class="inline-flex items-center bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+                  class="inline-flex items-center bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-colors"
                   onclick="startQuiz()"
                 >
                   <i class="fas fa-play mr-2"></i> Start Quiz
@@ -144,14 +144,14 @@
               </div>
             </div>
             <% } else { %>
-            <div class="aspect-video bg-gray-100 flex items-center justify-center p-8">
+            <div class="aspect-video bg-gray-700 flex items-center justify-center p-8">
               <div class="text-center">
-                <i class="fas fa-file-alt text-gray-500 text-5xl mb-4"></i>
+                <i class="fas fa-file-alt text-gray-400 text-5xl mb-4"></i>
                 <h3 class="text-xl font-semibold mb-2"><%= currentLesson.title %></h3>
-                <p class="text-gray-600 mb-4">Assignment</p>
+                <p class="text-gray-300 mb-4">Assignment</p>
                 <a 
                   href="<%= currentLesson.file || '#' %>" 
-                  class="inline-flex items-center bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+                  class="inline-flex items-center bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-colors"
                   <%= currentLesson.file ? 'download' : '' %>
                 >
                   <i class="fas fa-download mr-2"></i> Download
@@ -164,13 +164,13 @@
               <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold"><%= currentLesson.title %></h2>
                 <% if (completedLessons.includes(currentLesson.id)) { %>
-                <span class="inline-flex items-center text-green-500">
+                <span class="inline-flex items-center text-green-400">
                   <i class="fas fa-check-circle mr-1"></i> Completed
                 </span>
                 <% } %>
               </div>
               
-              <div class="prose max-w-none">
+              <div class="prose max-w-none prose-invert">
                 <p>This lesson covers important concepts and techniques.</p>
                 <% if (currentLesson.type === 'video') { %>
                 <h3>Video Transcript</h3>
@@ -207,7 +207,7 @@
             <% if (prevLesson) { %>
             <a 
               href="/courses/<%= course.id %>/learn?lesson=<%= prevLesson.id %>" 
-              class="inline-flex items-center bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50 transition-colors"
+              class="inline-flex items-center bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors"
             >
               <i class="fas fa-arrow-left mr-2"></i> Previous Lesson
             </a>
@@ -218,7 +218,7 @@
               <% if (!completedLessons.includes(currentLesson.id)) { %>
               <button 
                 id="complete-lesson-btn"
-                class="inline-flex items-center bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+                class="inline-flex items-center bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-colors"
                 onclick="markAsComplete()"
               >
                 <i class="fas fa-check mr-2"></i> Mark as Complete
@@ -227,7 +227,7 @@
               <% if (nextLesson) { %>
               <a 
                 href="/courses/<%= course.id %>/learn?lesson=<%= nextLesson.id %>" 
-                class="inline-flex items-center bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors"
+                class="inline-flex items-center bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-colors"
               >
                 Next Lesson <i class="fas fa-arrow-right ml-2"></i>
               </a>
@@ -235,52 +235,52 @@
             </div>
           </div>
           
-          <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+          <div class="bg-gray-800 rounded-lg shadow-md p-6 mb-8">
             <h3 class="text-xl font-bold mb-4">Discussion</h3>
             <div class="space-y-4 mb-6">
               <div class="flex gap-4">
                 <div class="flex-shrink-0">
-                  <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                    <i class="fas fa-user text-gray-500"></i>
+                  <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
+                    <i class="fas fa-user text-gray-300"></i>
                   </div>
                 </div>
-                <div class="flex-1 bg-gray-50 rounded-lg p-4">
+                <div class="flex-1 bg-gray-700 rounded-lg p-4">
                   <div class="flex justify-between items-center mb-2">
                     <span class="font-medium">Sarah Johnson</span>
-                    <span class="text-xs text-gray-500">2 days ago</span>
+                    <span class="text-xs text-gray-400">2 days ago</span>
                   </div>
-                  <p class="text-gray-700">Great explanation!</p>
+                  <p class="text-gray-300">Great explanation!</p>
                 </div>
               </div>
               <div class="flex gap-4">
                 <div class="flex-shrink-0">
-                  <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                    <i class="fas fa-user text-gray-500"></i>
+                  <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
+                    <i class="fas fa-user text-gray-300"></i>
                   </div>
                 </div>
-                <div class="flex-1 bg-gray-50 rounded-lg p-4">
+                <div class="flex-1 bg-gray-700 rounded-lg p-4">
                   <div class="flex justify-between items-center mb-2">
                     <span class="font-medium">Michael Wilson</span>
-                    <span class="text-xs text-gray-500">1 day ago</span>
+                    <span class="text-xs text-gray-400">1 day ago</span>
                   </div>
-                  <p class="text-gray-700">Question about the implementation...</p>
+                  <p class="text-gray-300">Question about the implementation...</p>
                 </div>
               </div>
             </div>
             <div class="flex gap-4">
               <div class="flex-shrink-0">
-                <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                  <i class="fas fa-user text-gray-500"></i>
+                <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
+                  <i class="fas fa-user text-gray-300"></i>
                 </div>
               </div>
               <div class="flex-1">
                 <textarea 
-                  class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                  class="w-full p-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-black 
                   rows="3" 
                   placeholder="Add to the discussion..."
                 ></textarea>
                 <div class="flex justify-end mt-2">
-                  <button class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
+                  <button class="bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-colors">
                     Post Comment
                   </button>
                 </div>
@@ -336,9 +336,9 @@
       .then(data => {
         if (data.success) {
           completeBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Completed';
-          completeBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+          completeBtn.classList.remove('bg-purple-500', 'hover:bg-purple-600');
           completeBtn.classList.add('bg-green-500', 'hover:bg-green-600');
-          document.querySelectorAll('.bg-blue-500.h-2\\.5.rounded-full').forEach(bar => {
+          document.querySelectorAll('.bg-purple-500.h-2\\.5.rounded-full').forEach(bar => {
             bar.style.width = `${data.progress}%`;
           });
           document.querySelectorAll('.text-sm.font-medium').forEach(text => {
@@ -385,7 +385,7 @@
     function showToast(message, type = 'info') {
       const toast = document.createElement('div');
       toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg text-white ${
-        type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+        type === 'error' ? 'bg-red-500' : 'bg-purple-500'
       } shadow-lg z-50 transition-opacity duration-300`;
       toast.textContent = message;
       document.body.appendChild(toast);

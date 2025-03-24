@@ -580,7 +580,7 @@
     {
       "userId": "3",
       "courseId": "1",
-      "progress": 65,
+      "progress": 61,
       "completedLessons": [
         "l1",
         "l2",
@@ -591,7 +591,8 @@
         "l7",
         "l8",
         "l9",
-        "l10"
+        "l10",
+        "l14"
       ]
     },
     {
