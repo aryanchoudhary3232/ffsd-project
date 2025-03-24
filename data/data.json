@@ -10,7 +10,8 @@
       "enrolledCourses": [
         "2",
         "1742757772637",
-        "1742757216231"
+        "1742757216231",
+        "3"
       ],
       "completedCourses": []
     },
@@ -655,6 +656,12 @@
     {
       "userId": "3",
       "courseId": "4",
+      "progress": 0,
+      "completedLessons": []
+    },
+    {
+      "userId": "1",
+      "courseId": "3",
       "progress": 0,
       "completedLessons": []
     }
