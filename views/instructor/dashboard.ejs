@@ -1,0 +1,149 @@
+<%- include('../partials/head', { title: 'Instructor Dashboard - LearnHub' }) %>
+<body>
+  <%- include('../partials/navbar') %>
+
+  <div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold">Instructor Dashboard</h1>
+      <a href="/instructor/courses/new" class="bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark">Create New Course</a>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-gray-700 rounded-lg shadow-md p-6">
+        <h2 class="text-lg font-semibold mb-2">Total Courses</h2>
+        <p class="text-3xl font-bold"><%= courses.length %></p>
+      </div>
+      <div class="bg-gray-700 rounded-lg shadow-md p-6">
+        <h2 class="text-lg font-semibold mb-2">Total Students</h2>
+        <p class="text-3xl font-bold"><%= totalStudents %></p>
+      </div>
+      <div class="bg-gray-700 rounded-lg shadow-md p-6">
+        <h2 class="text-lg font-semibold mb-2">Total Revenue</h2>
+        <p class="text-3xl font-bold">$<%= totalRevenue.toFixed(2) %></p>
+      </div>
+    </div>
+    
+    <div class="mb-8">
+      <h2 class="text-xl font-bold mb-4">My Courses</h2>
+      <% if (courses.length > 0) { %>
+        <div class="bg-gray-700 rounded-lg shadow-md overflow-hidden">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-700">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Course</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Students</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Revenue</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Rating</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-gray-700 divide-y divide-gray-200">
+              <% courses.forEach(function(course) { %>
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0 h-10 w-10">
+                        <img class="h-10 w-10 rounded-full object-cover" src="<%= course.thumbnail %>" alt="<%= course.title %>">
+                      </div>
+                      <div class="ml-4">
+                        <div class="text-sm font-medium text-gray-100"><%= course.title %></div>
+                        <div class="text-sm text-gray-400"><%= course.category %></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-300"><%= course.students %></div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-300">$<%= (course.price * course.students).toFixed(2) %></div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray3900"><%= course.rating %> ★</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <a href="/instructor/courses/<%= course.id %>/edit" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
+                    <a href="/instructor/courses/<%= course.id %>/content" class="text-green-600 hover:text-green-900">Content</a>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="bg-gray-700 rounded-lg shadow-md p-6 text-center">
+          <p class="text-gray-600 mb-4">You haven't created any courses yet.</p>
+          <a href="/instructor/courses/new" class="bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark">Create Your First Course</a>
+        </div>
+      <% } %>
+    </div>
+    
+    <div class="mb-8">
+      <h2 class="text-xl font-bold mb-4">Recent Orders</h2>
+      <% if (recentOrders.length > 0) { %>
+        <div class="bg-gray-700 rounded-lg shadow-md overflow-hidden">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-700">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Student</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Course</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Amount</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
+              </tr>
+            </thead>
+            <tbody class="bg-gray-700 divide-y divide-gray-200">
+              <% recentOrders.forEach(function(order) { %>
+                <tr>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm font-medium text-gray-200"><%= order.userName %></div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-200"><%= order.courseTitle %></div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-200">$<%= order.amount.toFixed(2) %></div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-300"><%= new Date(order.createdAt).toLocaleDateString() %></div>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <p class="text-gray-600">No recent orders.</p>
+      <% } %>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <h2 class="text-xl font-bold mb-4">Quick Links</h2>
+        <div class="bg-gray-700 rounded-lg shadow-md p-6">
+          <ul class="space-y-2">
+            <li><a href="/instructor/courses" class="text-primary hover:underline">Manage Courses</a></li>
+            <li><a href="/instructor/analytics" class="text-primary hover:underline">View Analytics</a></li>
+            <li><a href="/instructor/students" class="text-primary hover:underline">Manage Students</a></li>
+            <li><a href="/user/profile" class="text-primary hover:underline">Edit Profile</a></li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold mb-4">Tips for Success</h2>
+        <div class="bg-gray-700 rounded-lg shadow-md p-6">
+          <ul class="list-disc pl-5 space-y-2 text-gray-200">
+            <li>Create engaging video content with clear audio</li>
+            <li>Structure your course with a logical progression</li>
+            <li>Provide practical exercises and assignments</li>
+            <li>Respond promptly to student questions</li>
+            <li>Update your course content regularly</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+  <%- include('../partials/scripts') %>
+</body>
+</html>
+

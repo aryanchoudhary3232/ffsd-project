@@ -1,0 +1,53 @@
+{
+  "courses": [
+    {
+      "id": "1742757838812",
+      "title": "devops",
+      "category": "devops",
+      "description": "this is course about mastering devops in 6 hrs one shot ",
+      "price": 543,
+      "thumbnail": "/uploads/1742757838589-542249.jpg",
+      "instructor": "Admin Assigned",
+      "instructorId": null,
+      "students": 0,
+      "rating": 0,
+      "revenue": 0,
+      "status": "draft",
+      "createdAt": "2025-03-23T19:23:58.812Z",
+      "updatedAt": "2025-03-23T19:23:58.812Z",
+      "modules": []
+    },
+    {
+      "id": "1742792509912",
+      "title": "wert",
+      "category": "Ai",
+      "description": "zdtfyuhjkl';",
+      "price": 23456,
+      "thumbnail": "/uploads/1742792509901-1707648217743.jpeg",
+      "instructor": "Admin Assigned",
+      "instructorId": null,
+      "students": 0,
+      "rating": 0,
+      "revenue": 0,
+      "status": "draft",
+      "createdAt": "2025-03-24T05:01:49.912Z",
+      "updatedAt": "2025-03-24T05:01:49.912Z",
+      "modules": []
+    },
+    {
+      "id": "course1742852304106",
+      "title": "fvbnm,",
+      "description": "dcfgvbhnjmkgvfcdftvgbhnjm",
+      "category": "Mobile Development",
+      "price": 741,
+      "instructorId": "1",
+      "instructor": "Admin User",
+      "thumbnail": "/uploads/1742852303964-Techno-Geek.png",
+      "createdAt": "2025-03-24T21:38:24.106Z",
+      "updatedAt": "2025-03-24T21:38:24.106Z",
+      "status": "draft",
+      "featured": false,
+      "modules": []
+    }
+  ]
+}

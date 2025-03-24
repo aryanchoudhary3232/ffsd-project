@@ -1,0 +1,271 @@
+<%- include('../partials/head', { title: course.title + ' - LearnHub' }) %>
+<style>
+  /* Global background and text colors */
+  body {
+    background-color: #000;
+    color: #fff;
+  }
+  
+  /* White containers with dark text */
+  .bg-white {
+    background-color: #000 !important;
+    color: #fff;
+  }
+  /* Ensure text and icons inside white containers appear dark */
+  .bg-white .text-gray-600,
+  .bg-white .text-gray-500,
+  .bg-white .text-gray-700,
+  .bg-white .text-gray-50,
+  .bg-white .text-yellow-500,
+  .bg-white .text-green-500,
+  .bg-white .text-red-500,
+  .bg-white .text-blue-500 {
+    color: #fff !important;
+  }
+  
+  /* Inputs, selects and textareas: white background with dark text */
+  input, select, textarea {
+    background-color: #000;
+    color: #fff;
+    border: 1px solid #ccc;
+  }
+  
+  /* Buttons styled as white with black text */
+  .bg-primary {
+    background-color: #000 !important;
+    color: #fff !important;
+  }
+  .hover\:bg-primary-dark:hover {
+    background-color: #f2f2f2 !important;
+    color: #000 !important;
+  }
+  
+  /* Override other light gray backgrounds to white */
+  .bg-gray-50,
+  .bg-gray-100 {
+    background-color: #fff !important;
+    color: #000;
+  }
+  
+  /* (Optional) Override alert boxes to be white with dark text 
+     Note: This removes their original color emphasis */
+  .bg-green-100,
+  .bg-red-100 {
+    background-color: #fff !important;
+    color: #000 !important;
+    border-color: #ccc !important;
+  }
+</style>
+<body>
+  <%- include('../partials/navbar') %>
+
+  <div class="container mx-auto px-4 py-8">
+    <% if(success_msg && success_msg.length > 0) { %>
+      <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+        <%= success_msg %>
+      </div>
+    <% } %>
+    
+    <% if(error_msg && error_msg.length > 0) { %>
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <%= error_msg %>
+      </div>
+    <% } %>
+
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="md:flex">
+        <div class="md:w-2/3 p-6">
+          <h1 class="text-3xl font-bold mb-2"><%= course.title %></h1>
+          <p class="text-gray-600 mb-4"><%= course.description %></p>
+          
+          <div class="flex flex-wrap items-center gap-4 mb-6">
+            <div class="flex items-center">
+              <span class="text-yellow-500 mr-1">★</span>
+              <span class="font-semibold"><%= course.rating %></span>
+              <span class="text-gray-500 ml-1">(<%= course.students %> students)</span>
+            </div>
+            <div class="flex items-center">
+              <i class="fas fa-user-tie text-gray-500 mr-2"></i>
+              <span>Instructor: <%= course.instructor %></span>
+            </div>
+            <div class="flex items-center">
+              <i class="fas fa-calendar-alt text-gray-500 mr-2"></i>
+              <span>Last updated: <%= new Date(course.updatedAt).toLocaleDateString() %></span>
+            </div>
+          </div>
+          
+          <div class="mb-8">
+            <h2 class="text-xl font-bold mb-4">What You'll Learn</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div class="flex items-start">
+                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                <span>Build real-world applications</span>
+              </div>
+              <div class="flex items-start">
+                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                <span>Master core concepts and techniques</span>
+              </div>
+              <div class="flex items-start">
+                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                <span>Understand best practices</span>
+              </div>
+              <div class="flex items-start">
+                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                <span>Gain practical skills for your career</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mb-8">
+            <h2 class="text-xl font-bold mb-4">Course Content</h2>
+            <div class="border rounded-md overflow-hidden">
+              <div class="bg-gray-100 p-4 flex justify-between items-center">
+                <span class="font-semibold">
+                  <%= course.modules.length %> modules • 
+                  <%= course.modules.reduce((total, module) => total + module.lessons.length, 0) %> lessons
+                </span>
+                <span class="text-sm text-gray-600">
+                  <%= course.modules.reduce((total, module) => total + module.lessons.filter(lesson => lesson.type === 'video').length, 0) %> videos • 
+                  <%= course.modules.reduce((total, module) => total + module.lessons.filter(lesson => lesson.type !== 'video').length, 0) %> resources
+                </span>
+              </div>
+              
+              <div class="divide-y">
+                <% course.modules.forEach(function(module, moduleIndex) { %>
+                  <div class="p-4">
+                    <div class="flex justify-between items-center cursor-pointer" onclick="toggleModule(<%= moduleIndex %>)">
+                      <h3 class="font-semibold"><%= module.title %></h3>
+                      <div class="flex items-center">
+                        <span class="text-sm text-gray-600 mr-2"><%= module.lessons.length %> lessons</span>
+                        <i class="fas fa-chevron-down text-gray-500 module-icon-<%= moduleIndex %>"></i>
+                      </div>
+                    </div>
+                    
+                    <div class="mt-4 space-y-2 hidden module-content-<%= moduleIndex %>">
+                      <% module.lessons.forEach(function(lesson) { %>
+                        <div class="flex items-center pl-4">
+                          <% if (lesson.type === 'video') { %>
+                            <i class="fas fa-play-circle text-primary mr-2"></i>
+                          <% } else if (lesson.type === 'pdf') { %>
+                            <i class="fas fa-file-pdf text-red-500 mr-2"></i>
+                          <% } else if (lesson.type === 'quiz') { %>
+                            <i class="fas fa-question-circle text-blue-500 mr-2"></i>
+                          <% } else { %>
+                            <i class="fas fa-file-alt text-gray-500 mr-2"></i>
+                          <% } %>
+                          <span><%= lesson.title %></span>
+                          <% if (lesson.duration) { %>
+                            <span class="ml-auto text-sm text-gray-600"><%= lesson.duration %></span>
+                          <% } %>
+                        </div>
+                      <% }); %>
+                    </div>
+                  </div>
+                <% }); %>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <h2 class="text-xl font-bold mb-4">Requirements</h2>
+            <ul class="list-disc pl-5 space-y-1 text-gray-700">
+              <li>Basic understanding of programming concepts</li>
+              <li>A computer with internet access</li>
+              <li>Enthusiasm to learn and practice</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="md:w-1/3 bg-gray-700 text-white p-6">
+          <div class="sticky top-6">
+            <img src="<%= course.thumbnail %>" alt="<%= course.title %>" class="w-full h-48 object-cover rounded-md mb-4">
+            
+            <div class="text-3xl font-bold mb-4">$<%= course.price.toFixed(2) %></div>
+            
+            <% if (isEnrolled) { %>
+              <div class="mb-4">
+                <div class="flex justify-between text-sm mb-1">
+                  <span>Your progress</span>
+                  <span><%= progress %>%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                  <div class="bg-primary h-2.5 rounded-full" style="width: <%= progress %>%"></div>
+                </div>
+              </div>
+              <a href="/courses/<%= course.id %>/learn" class="block w-full text-center bg-primary text-white py-3 px-4 rounded-md hover:bg-primary-dark transition-colors mb-3">
+                Continue Learning
+              </a>
+            <% } else if (user) { %>
+              <form action="/courses/<%= course.id %>/enroll" method="POST">
+                <button type="submit" class="block w-full text-center bg-primary text-white py-3 px-4 rounded-md hover:bg-primary-dark transition-colors mb-3">
+                  Enroll Now
+                </button>
+              </form>
+              <form action="/cart/add" method="POST">
+                <input type="hidden" name="courseId" value="<%= course.id %>">
+                <button type="submit" class="block w-full text-center bg-white border border-primary text-primary py-3 px-4 rounded-md hover:bg-gray-50 transition-colors">
+                  Add to Cart
+                </button>
+              </form>
+            <% } else { %>
+              <a href="/login" class="block w-full text-center bg-primary text-white py-3 px-4 rounded-md hover:bg-primary-dark transition-colors mb-3">
+                Login to Enroll
+              </a>
+            <% } %>
+            
+            <div class="mt-6">
+              <h3 class="font-semibold mb-2">This course includes:</h3>
+              <ul class="space-y-2">
+                <li class="flex items-center">
+                  <i class="fas fa-video text-gray-500 mr-2"></i>
+                  <span><%= course.modules.reduce((total, module) => total + module.lessons.filter(lesson => lesson.type === 'video').length, 0) %> on-demand videos</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fas fa-file-alt text-gray-500 mr-2"></i>
+                  <span><%= course.modules.reduce((total, module) => total + module.lessons.filter(lesson => lesson.type === 'pdf').length, 0) %> downloadable resources</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fas fa-infinity text-gray-500 mr-2"></i>
+                  <span>Full lifetime access</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fas fa-mobile-alt text-gray-500 mr-2"></i>
+                  <span>Access on mobile and TV</span>
+                </li>
+                <li class="flex items-center">
+                  <i class="fas fa-certificate text-gray-500 mr-2"></i>
+                  <span>Certificate of completion</span>
+                </li>
+              </ul>
+            </div>
+            
+            <div class="mt-6 text-center">
+              <p class="text-sm text-gray-600 mb-2">Not sure? We offer a 30-day money-back guarantee</p>
+              <a href="#" class="text-primary hover:underline text-sm">Gift this course</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+  <%- include('../partials/scripts') %>
+  <script>
+    function toggleModule(moduleIndex) {
+      const content = document.querySelector(`.module-content-${moduleIndex}`);
+      const icon = document.querySelector(`.module-icon-${moduleIndex}`);
+      
+      content.classList.toggle('hidden');
+      
+      if (content.classList.contains('hidden')) {
+        icon.classList.remove('fa-chevron-up');
+        icon.classList.add('fa-chevron-down');
+      } else {
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-up');
+      }
+    }
+  </script>
+</body>
+</html>
