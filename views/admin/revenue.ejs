@@ -1,36 +1,41 @@
-<%- include('../partials/head', { title: 'Revenue Management - LearnHub' }) %>
-<body>
+<%- include('../partials/head', { title: 'Revenue Management - SeekoBharat' }) %>
+<body class="bg-black text-white">
   <%- include('../partials/navbar') %>
 
   <div class="container mx-auto px-4 py-8">
     <h1 class="text-2xl font-bold mb-6">Revenue Management</h1>
     
+    <!-- Revenue Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-sm font-medium text-gray-500 mb-1">Total Revenue</h2>
-        <p class="text-3xl font-bold">$<%= totalRevenue.toLocaleString() %></p>
+      <!-- Total Revenue Card -->
+      <div class="bg-gray-800 rounded-lg shadow-md p-6">
+        <h2 class="text-sm font-medium text-gray-400 mb-1">Total Revenue</h2>
+        <p class="text-3xl font-bold text-white">$<%= totalRevenue.toLocaleString() %></p>
         <p class="text-xs text-gray-500 mt-1">Lifetime earnings</p>
       </div>
       
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-sm font-medium text-gray-500 mb-1">Monthly Revenue</h2>
-        <p class="text-3xl font-bold">$<%= monthlyRevenue?.toLocaleString() %></p>
+      <!-- Monthly Revenue Card -->
+      <div class="bg-gray-800 rounded-lg shadow-md p-6">
+        <h2 class="text-sm font-medium text-gray-400 mb-1">Monthly Revenue</h2>
+        <p class="text-3xl font-bold text-white">$<%= (monthlyRevenue || 0).toLocaleString() %></p>
         <p class="text-xs text-gray-500 mt-1">Current month</p>
       </div>
       
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-sm font-medium text-gray-500 mb-1">Instructor Payouts</h2>
-        <p class="text-3xl font-bold">$<%= (monthlyRevenue * 0.7).toLocaleString() %></p>
+      <!-- Instructor Payouts Card -->
+      <div class="bg-gray-800 rounded-lg shadow-md p-6">
+        <h2 class="text-sm font-medium text-gray-400 mb-1">Instructor Payouts</h2>
+        <p class="text-3xl font-bold text-white">$<%= ((monthlyRevenue || 0) * 0.7).toLocaleString() %></p>
         <p class="text-xs text-gray-500 mt-1">70% of monthly revenue</p>
       </div>
     </div>
     
+    <!-- Charts Section -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-      <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="p-4 border-b">
-          <h2 class="text-lg font-semibold">Revenue by Month</h2>
+      <!-- Revenue by Month Chart -->
+      <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden">
+        <div class="p-4 border-b border-gray-700">
+          <h2 class="text-lg font-semibold text-gray-100">Revenue by Month</h2>
         </div>
-        
         <div class="p-6">
           <div class="h-80">
             <canvas id="revenue-chart"></canvas>
@@ -38,11 +43,11 @@
         </div>
       </div>
       
-      <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <div class="p-4 border-b">
-          <h2 class="text-lg font-semibold">Revenue by Category</h2>
+      <!-- Revenue by Category Chart -->
+      <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden">
+        <div class="p-4 border-b border-gray-700">
+          <h2 class="text-lg font-semibold text-gray-100">Revenue by Category</h2>
         </div>
-        
         <div class="p-6">
           <div class="h-80">
             <canvas id="category-chart"></canvas>
@@ -51,50 +56,50 @@
       </div>
     </div>
     
-    <div class="bg-white rounded-lg shadow-md overflow-hidden">
-      <div class="p-4 border-b">
-        <h2 class="text-lg font-semibold">Recent Transactions</h2>
+    <!-- Recent Transactions Table -->
+    <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden">
+      <div class="p-4 border-b border-gray-700">
+        <h2 class="text-lg font-semibold text-gray-100">Recent Transactions</h2>
       </div>
-      
       <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
+        <table class="min-w-full divide-y divide-gray-700">
+          <thead class="bg-gray-700">
             <tr>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Order ID</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Course</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Amount</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
             </tr>
           </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
+          <tbody class="bg-gray-800 divide-y divide-gray-700">
             <% recentOrders.forEach(function(order) { %>
               <tr>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">
                   <%= order.id %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
-                    <div class="flex-shrink-0 h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                      <span class="text-gray-500 font-medium"><%= order.userName.charAt(0) %></span>
+                    <div class="flex-shrink-0 h-8 w-8 rounded-full bg-gray-700 flex items-center justify-center">
+                      <span class="text-gray-400 font-medium"><%= order.userName.charAt(0) %></span>
                     </div>
                     <div class="ml-4">
-                      <div class="text-sm font-medium text-gray-900"><%= order.userName %></div>
+                      <div class="text-sm font-medium text-gray-100"><%= order.userName %></div>
                     </div>
                   </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                   <%= order.courseTitle %>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-100">
                   $<%= order.amount.toFixed(2) %>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                   <%= new Date(order.createdAt).toLocaleDateString() %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                  <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-600 text-green-200">
                     <%= order.status.charAt(0).toUpperCase() + order.status.slice(1) %>
                   </span>
                 </td>
@@ -103,12 +108,11 @@
           </tbody>
         </table>
       </div>
-      
-      <div class="px-6 py-4 bg-gray-50 flex justify-between items-center">
-        <div class="text-sm text-gray-700">
+      <div class="px-6 py-4 bg-gray-700 flex justify-between items-center">
+        <div class="text-sm text-gray-300">
           Showing <span class="font-medium"><%= recentOrders.length %></span> transactions
         </div>
-        <a href="/admin/revenue/transactions" class="text-primary hover:text-primary-dark">
+        <a href="/admin/revenue/transactions" class="text-blue-400 hover:text-blue-300">
           View All Transactions
         </a>
       </div>
@@ -129,10 +133,10 @@
           datasets: [{
             label: 'Revenue ($)',
             data: [
-              <%= chartData.map(month => month.revenue).join(', ') %>
+              <%= chartData.map(function(month) { return month.revenue; }).join(', ') %>
             ],
-            backgroundColor: '#3498db',
-            borderColor: '#2980b9',
+            backgroundColor: '#3b82f6', // Blue-500
+            borderColor: '#2563eb', // Blue-600
             borderWidth: 1
           }]
         },
@@ -143,9 +147,28 @@
             y: {
               beginAtZero: true,
               ticks: {
+                color: '#d1d5db', // Gray-300
                 callback: function(value) {
                   return '$' + value.toLocaleString();
                 }
+              },
+              grid: {
+                color: '#374151' // Gray-700
+              }
+            },
+            x: {
+              ticks: {
+                color: '#d1d5db' // Gray-300
+              },
+              grid: {
+                color: '#374151' // Gray-700
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: {
+                color: '#d1d5db' // Gray-300
               }
             }
           }
@@ -170,16 +193,17 @@
               <% }); %>
             ],
             backgroundColor: [
-              '#3498db',
-              '#2ecc71',
-              '#e74c3c',
-              '#f39c12',
-              '#9b59b6',
-              '#1abc9c',
-              '#34495e',
-              '#95a5a6'
+              '#3b82f6', // Blue-500
+              '#10b981', // Green-500
+              '#ef4444', // Red-500
+              '#f59e0b', // Yellow-500
+              '#8b5cf6', // Purple-500
+              '#14b8a6', // Teal-500
+              '#4b5563', // Gray-600
+              '#9ca3af'  // Gray-400
             ],
-            borderWidth: 1
+            borderWidth: 1,
+            borderColor: '#1f2937' // Gray-800
           }]
         },
         options: {
@@ -188,6 +212,9 @@
           plugins: {
             legend: {
               position: 'right',
+              labels: {
+                color: '#d1d5db' // Gray-300
+              }
             }
           }
         }

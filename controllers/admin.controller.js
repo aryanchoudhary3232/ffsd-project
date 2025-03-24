@@ -92,37 +92,49 @@ const AdminController = {
   },
 
   // Get user details
-  getUserDetails: (req, res) => {
-    if (!req.session.user || req.session.user.role !== "admin") {
-      return res.redirect("/login");
-    }
+// Get user details
+getUserDetails: (req, res) => {
+  if (!req.session.user || req.session.user.role !== "admin") {
+    return res.redirect("/login");
+  }
 
-    const userId = req.params.id;
-    const user = UserModel.getUserById(userId);
+  const userId = req.params.id;
+  const user = UserModel.getUserById(userId);
 
-    if (!user) {
-      req.flash("error_msg", "User not found");
-      return res.redirect("/admin/users");
-    }
+  if (!user) {
+    req.flash("error_msg", "User not found");
+    return res.redirect("/admin/users");
+  }
 
-    // Get user's enrolled courses
-    const enrolledCourses = UserModel.getUserEnrolledCourses(userId);
+  // Get user's enrolled courses
+  const enrolledCourses = UserModel.getUserEnrolledCourses(userId);
 
-    // Get user's orders
-    const orders = OrderModel.getOrdersByUser(userId).map((order) => {
-      const course = CourseModel.getCourseById(order.courseId);
-      return {
-        ...order,
-        courseTitle: course ? course.title : "Unknown Course",
-      };
-    });
+  // Get user's orders
+  const orders = OrderModel.getOrdersByUser(userId).map((order) => {
+    const course = CourseModel.getCourseById(order.courseId);
+    return {
+      ...order,
+      courseTitle: course ? course.title : "Unknown Course",
+    };
+  });
 
-    res.render("admin/user-details", {
-      user,
-      enrolledCourses,
-      orders,
-    });
-  },
+  // Always define instructorCourses even if it's an empty array
+  let instructorCourses = [];
+  if (user.role === "instructor") {
+    // Adjust the filtering logic according to how courses are linked to instructors.
+    instructorCourses = CourseModel.getAllCourses().filter(
+      (course) => course.instructorId === userId
+    );
+  }
+
+  res.render("admin/user-details", {
+    user,
+    enrolledCourses,
+    instructorCourses, // Make sure this is included!
+    orders,
+    adminCount: 2,
+  });
+},
 
   // Update user
   updateUser: (req, res) => {
@@ -306,7 +318,6 @@ const AdminController = {
     }
   },
 
-  // Get revenue management page
   getRevenueManagement: (req, res) => {
     if (!req.session.user || req.session.user.role !== "admin") {
       return res.redirect("/login");
@@ -323,16 +334,38 @@ const AdminController = {
     // Get revenue by month
     const revenueByMonth = OrderModel.getRevenueByMonth();
 
+    // Calculate monthly revenue (revenue for the current month)
+    const currentMonth = new Date().toLocaleString("default", {
+      month: "long",
+    });
+    const monthlyRevenue =
+      revenueByMonth.find((month) => month.month === currentMonth)?.revenue ||
+      0;
+
     // Get recent orders
     const recentOrders = OrderModel.getRecentOrders(10);
 
+    // Calculate revenue by category (example logic - replace with your actual logic)
+    const categoryRevenue = [
+      { name: "Programming", revenue: 30000 },
+      { name: "Design", revenue: 15000 },
+      { name: "Business", revenue: 10000 },
+      { name: "Marketing", revenue: 5000 },
+    ];
+    // const categoryRevenue = Object.keys(revenueByCategory).map((category) => ({
+    //   name: category,
+    //   revenue: revenueByCategory[category],
+    // }));
+
+    // Render the EJS template with the data
     res.render("admin/revenue", {
       totalRevenue,
+      monthlyRevenue,
       chartData: revenueByMonth,
       recentOrders,
+      categoryRevenue,
     });
   },
 };
 
-module.exports = AdminController
-
+module.exports = AdminController;

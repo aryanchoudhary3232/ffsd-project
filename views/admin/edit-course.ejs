@@ -1,0 +1,119 @@
+<%- include('../partials/head', { title: 'Edit Course - SeekoBharat' }) %>
+<body class="bg-black text-white">
+  <%- include('../partials/navbar') %>
+
+  <div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex items-center mb-6">
+      <a href="/admin/courses/<%= course.id %>" class="text-gray-400 hover:text-gray-200 mr-4">
+        <i class="fas fa-arrow-left"></i>
+      </a>
+      <h1 class="text-2xl font-bold">Edit Course</h1>
+    </div>
+    
+    <!-- Alerts -->
+    <% if(success_msg && success_msg.length > 0) { %>
+      <div class="bg-green-800 border border-green-600 text-green-300 px-4 py-3 rounded mb-4">
+        <%= success_msg %>
+      </div>
+    <% } %>
+    <% if(error_msg && error_msg.length > 0) { %>
+      <div class="bg-red-800 border border-red-600 text-red-300 px-4 py-3 rounded mb-4">
+        <%= error_msg %>
+      </div>
+    <% } %>
+    
+    <div class="bg-gray-800 rounded-lg shadow-md p-6">
+      <form action="/admin/courses/<%= course.id %>?_method=PUT" method="POST" enctype="multipart/form-data">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Left Column -->
+          <div>
+            <div class="mb-4">
+              <label for="title" class="block text-gray-300 mb-2">Course Title</label>
+              <input type="text" id="title" name="title" value="<%= course.title %>" required
+                class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <div class="mb-4">
+              <label for="category" class="block text-gray-300 mb-2">Category</label>
+              <select id="category" name="category" required
+                class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Select a category</option>
+                <option value="Web Development" <%= course.category === 'Web Development' ? 'selected' : '' %>>Web Development</option>
+                <option value="Mobile Development" <%= course.category === 'Mobile Development' ? 'selected' : '' %>>Mobile Development</option>
+                <option value="Data Science" <%= course.category === 'Data Science' ? 'selected' : '' %>>Data Science</option>
+                <option value="Machine Learning" <%= course.category === 'Machine Learning' ? 'selected' : '' %>>Machine Learning</option>
+                <option value="Game Development" <%= course.category === 'Game Development' ? 'selected' : '' %>>Game Development</option>
+                <option value="Business" <%= course.category === 'Business' ? 'selected' : '' %>>Business</option>
+                <option value="Design" <%= course.category === 'Design' ? 'selected' : '' %>>Design</option>
+                <option value="Other" <%= course.category === 'Other' ? 'selected' : '' %>>Other</option>
+              </select>
+            </div>
+            
+            <div class="mb-4">
+              <label for="price" class="block text-gray-300 mb-2">Price ($)</label>
+              <input type="number" id="price" name="price" value="<%= course.price %>" min="0" step="0.01" required
+                class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <div class="mb-4">
+              <label for="status" class="block text-gray-300 mb-2">Status</label>
+              <select id="status" name="status" required
+                class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="draft" <%= course.status === 'draft' ? 'selected' : '' %>>Draft</option>
+                <option value="published" <%= course.status === 'published' ? 'selected' : '' %>>Published</option>
+              </select>
+            </div>
+            
+            <div class="mb-4">
+              <label class="block text-gray-300 mb-2">Featured Course</label>
+              <label class="inline-flex items-center cursor-pointer">
+                <input type="checkbox" name="featured" <%= course.featured ? 'checked' : '' %> class="sr-only peer">
+                <div class="relative w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-500 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                <span class="ml-2 text-sm font-medium text-gray-100">Feature on Homepage</span>
+              </label>
+            </div>
+          </div>
+          
+          <!-- Right Column -->
+          <div>
+            <div class="mb-4">
+              <label for="thumbnail" class="block text-gray-300 mb-2">Thumbnail Image</label>
+              <div class="mb-2">
+                <img src="<%= course.thumbnail %>" alt="Course thumbnail" class="w-full h-40 object-cover rounded-md mb-2">
+                <p class="text-sm text-gray-400">Current thumbnail</p>
+              </div>
+              <input type="file" id="thumbnail" name="thumbnail" accept="image/*"
+                class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <p class="text-sm text-gray-400 mt-1">Leave empty to keep current thumbnail</p>
+            </div>
+            
+            <div class="mb-4">
+              <label for="description" class="block text-gray-300 mb-2">Course Description</label>
+              <textarea id="description" name="description" rows="6" required
+                class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"><%= course.description %></textarea>
+            </div>
+          </div>
+        </div>
+        
+        <div class="border-t border-gray-700 mt-6 pt-6">
+          <h2 class="text-lg font-semibold mb-4">Course Content</h2>
+          <p class="text-gray-400 mb-4">To manage course modules and lessons, please save your changes and use the content editor on the course details page.</p>
+        </div>
+        
+        <div class="flex justify-end space-x-4 mt-6">
+          <a href="/admin/courses/<%= course.id %>" class="bg-gray-700 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition-colors">
+            Cancel
+          </a>
+          <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors">
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+  <%- include('../partials/scripts') %>
+</body>
+</html>

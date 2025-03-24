@@ -1,4 +1,4 @@
-<%- include('../partials/head', { title: 'Admin Dashboard - LearnHub' }) %>
+<%- include('../partials/head', { title: 'Admin Dashboard - SeekoBharat' }) %>
 <body class="bg-black text-white">
   <%- include('../partials/navbar') %>
 
@@ -172,28 +172,28 @@
                 <div>
                   <div class="flex justify-between text-sm mb-1">
                     <span>Students</span>
-                    <span><%= ((stats.totalUsers - stats.totalInstructors - 1) / stats.totalUsers * 100).toFixed(0) %>%</span>
+                    <span><%= stats.userDistribution.students.percentage %>%</span>
                   </div>
                   <div class="w-full bg-gray-700 rounded-full h-2.5">
-                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: <%= ((stats.totalUsers - stats.totalInstructors - 1) / stats.totalUsers * 100).toFixed(0) %>%"></div>
+                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: <%= stats.userDistribution.students.percentage %>%;"></div>
                   </div>
                 </div>
                 <div>
                   <div class="flex justify-between text-sm mb-1">
                     <span>Instructors</span>
-                    <span><%= (stats.totalInstructors / stats.totalUsers * 100).toFixed(0) %>%</span>
+                    <span><%= stats.userDistribution.instructors.percentage %>%</span>
                   </div>
                   <div class="w-full bg-gray-700 rounded-full h-2.5">
-                    <div class="bg-green-600 h-2.5 rounded-full" style="width: <%= (stats.totalInstructors / stats.totalUsers * 100).toFixed(0) %>%"></div>
+                    <div class="bg-green-600 h-2.5 rounded-full" style="width: <%= stats.userDistribution.instructors.percentage %>%;"></div>
                   </div>
                 </div>
                 <div>
                   <div class="flex justify-between text-sm mb-1">
                     <span>Admins</span>
-                    <span><%= (1 / stats.totalUsers * 100).toFixed(0) %>%</span>
+                    <span><%= stats.userDistribution.admins.percentage %>%</span>
                   </div>
                   <div class="w-full bg-gray-700 rounded-full h-2.5">
-                    <div class="bg-red-600 h-2.5 rounded-full" style="width: <%= (1 / stats.totalUsers * 100).toFixed(0) %>%"></div>
+                    <div class="bg-red-600 h-2.5 rounded-full" style="width: <%= stats.userDistribution.admins.percentage %>%;"></div>
                   </div>
                 </div>
               </div>

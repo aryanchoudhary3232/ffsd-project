@@ -35,6 +35,12 @@ const UserModel = {
     return data.users.find((user) => user.email === email);
   },
 
+  // Get count of admins
+  getAdminCount: () => {
+    const data = readData();
+    return data.users.filter((user) => user.role === "admin").length;
+  },
+
   // Create new user
   createUser: (userData) => {
     const data = readData();
@@ -45,7 +51,7 @@ const UserModel = {
     }
 
     // Hash password
-    const hashedPassword = userData.password;
+    const hashedPassword = bcrypt.hashSync(userData.password, 10);
 
     // Create new user
     const newUser = {
@@ -114,7 +120,6 @@ const UserModel = {
   // Authenticate user
   authenticateUser: (email, password) => {
     const data = readData();
-    console.log(data.users);
     const user = data.users.find((user) => user.email === email);
 
     if (!user || !(password === user.password)) {
@@ -206,6 +211,24 @@ const UserModel = {
       return joinDate >= thirtyDaysAgo;
     });
   },
+
+  deleteUserById: (userId) => {
+    console.log('Reached model');
+    
+    const db = require("../config/database");
+    const User = require("../models/User");
+
+    return new Promise((resolve, reject) => {
+      db.run("DELETE FROM users WHERE id = ?", [userId], function (err) {
+          if (err) {
+              reject(new Error("Error deleting user: " + err.message));
+              return;
+          }
+          resolve({ message: "User deleted successfully", changes: this.changes });
+      });
+  });
+  }
+  
 };
 
 module.exports = UserModel;

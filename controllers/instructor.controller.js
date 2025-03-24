@@ -1,16 +1,21 @@
 const CourseModel = require("../models/course.model");
 const UserModel = require("../models/user.model");
 const OrderModel = require("../models/order.model");
-const ProgressModel = require("../models/progress.model"); // Added import for ProgressModel
-const multer = require("multer");
+const ProgressModel = require("../models/progress.model");
+const fs = require("fs");
 const path = require("path");
+const multer = require("multer");
 
 // Set up multer for file uploads
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "public/uploads/");
+  destination: (_req, _file, cb) => {
+    const uploadDir = path.join(__dirname, "../public/uploads");
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
   },
-  filename: (req, file, cb) => {
+  filename: (_req, file, cb) => {
     cb(null, Date.now() + "-" + file.originalname);
   },
 });
@@ -19,7 +24,6 @@ const upload = multer({ storage: storage });
 
 // Instructor controller
 const InstructorController = {
-  // Get instructor dashboard
   getInstructorDashboard: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -28,19 +32,16 @@ const InstructorController = {
     const userId = req.session.user.id;
     const instructorCourses = CourseModel.getCoursesByInstructor(userId);
 
-    // Calculate total students and revenue
     let totalStudents = 0;
     let totalRevenue = 0;
 
     for (const course of instructorCourses) {
-      // Count enrollments
       const enrollments = UserModel.getAllUsers().filter((user) =>
         user.enrolledCourses.includes(course.id)
       ).length;
 
       totalStudents += enrollments;
 
-      // Calculate revenue
       const courseOrders = OrderModel.getOrdersByCourse(course.id).filter(
         (order) => order.status === "completed"
       );
@@ -52,7 +53,6 @@ const InstructorController = {
       totalRevenue += courseRevenue;
     }
 
-    // Get recent orders
     const recentOrders = OrderModel.getAllOrders()
       .filter((order) =>
         instructorCourses.some((course) => course.id === order.courseId)
@@ -78,14 +78,38 @@ const InstructorController = {
     });
   },
 
-  // Get instructor courses
   getInstructorCourses: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
     }
 
     const userId = req.session.user.id;
-    const instructorCourses = CourseModel.getCoursesByInstructor(userId);
+    let instructorCourses = CourseModel.getCoursesByInstructor(userId);
+
+    // Apply sorting
+    const sortFilter = req.query.sort || "newest";
+    instructorCourses.sort((a, b) => {
+      if (sortFilter === "newest") {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      } else if (sortFilter === "oldest") {
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      } else if (sortFilter === "title-asc") {
+        return a.title.localeCompare(b.title);
+      } else if (sortFilter === "title-desc") {
+        return b.title.localeCompare(a.title);
+      } else if (sortFilter === "students") {
+        return b.students - a.students;
+      } else if (sortFilter === "revenue") {
+        const revenueA = OrderModel.getOrdersByCourse(a.id)
+          .filter((order) => order.status === "completed")
+          .reduce((sum, order) => sum + order.amount, 0);
+        const revenueB = OrderModel.getOrdersByCourse(b.id)
+          .filter((order) => order.status === "completed")
+          .reduce((sum, order) => sum + order.amount, 0);
+        return revenueB - revenueA;
+      }
+      return 0;
+    });
 
     // Enhance courses with student count and revenue
     const enhancedCourses = instructorCourses.map((course) => {
@@ -109,7 +133,6 @@ const InstructorController = {
     });
   },
 
-  // Get create course form
   getCreateCourseForm: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -121,7 +144,6 @@ const InstructorController = {
     });
   },
 
-  // Create new course
   createCourse: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -158,7 +180,6 @@ const InstructorController = {
     });
   },
 
-  // Get edit course form
   getEditCourseForm: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -182,7 +203,6 @@ const InstructorController = {
     });
   },
 
-  // Update course
   updateCourse: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -209,7 +229,7 @@ const InstructorController = {
       const { title, description, category, price } = req.body;
 
       try {
-        const updatedCourse = CourseModel.updateCourse(courseId, {
+        CourseModel.updateCourse(courseId, {
           title,
           description,
           category,
@@ -228,7 +248,6 @@ const InstructorController = {
     });
   },
 
-  // Get course content management page
   getCourseContentPage: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -251,10 +270,9 @@ const InstructorController = {
     });
   },
 
-  // Add module to course
   addModule: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
+      return res.redirect("/login");
     }
 
     const courseId = req.params.id;
@@ -265,34 +283,114 @@ const InstructorController = {
       const course = CourseModel.getCourseById(courseId);
 
       if (!course || course.instructorId !== instructorId) {
-        return res.status(403).json({
-          success: false,
-          message: "Course not found or you do not have permission to edit it",
-        });
+        req.flash(
+          "error_msg",
+          "Course not found or you do not have permission to edit it"
+        );
+        return res.redirect("/instructor/courses");
       }
 
-      const newModule = CourseModel.addModuleToCourse(courseId, { title });
+      CourseModel.addModuleToCourse(courseId, { title });
 
-      res.json({ success: true, module: newModule });
+      req.flash("success_msg", "Module added successfully");
+      res.redirect(`/instructor/courses/${courseId}/content`);
     } catch (error) {
-      res.status(400).json({ success: false, message: error.message });
+      req.flash("error_msg", error.message);
+      res.redirect(`/instructor/courses/${courseId}/content`);
     }
   },
 
-  // Add lesson to module
-  addLesson: (req, res) => {
+  updateModule: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
+      return res.redirect("/login");
     }
 
-    const { courseId, moduleId } = req.params;
+    const { id: courseId, moduleId } = req.params;
+    const instructorId = req.session.user.id;
+    const { title } = req.body;
+
+    try {
+      const course = CourseModel.getCourseById(courseId);
+
+      if (!course || course.instructorId !== instructorId) {
+        req.flash(
+          "error_msg",
+          "Course not found or you do not have permission to edit it"
+        );
+        return res.redirect("/instructor/courses");
+      }
+
+      const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
+
+      if (moduleIndex === -1) {
+        req.flash("error_msg", "Module not found");
+        return res.redirect(`/instructor/courses/${courseId}/content`);
+      }
+
+      course.modules[moduleIndex].title = title;
+      course.updatedAt = new Date().toISOString();
+
+      CourseModel.updateCourse(courseId, { modules: course.modules });
+
+      req.flash("success_msg", "Module updated successfully");
+      res.redirect(`/instructor/courses/${courseId}/content`);
+    } catch (error) {
+      req.flash("error_msg", error.message);
+      res.redirect(`/instructor/courses/${courseId}/content`);
+    }
+  },
+
+  deleteModule: (req, res) => {
+    if (!req.session.user || req.session.user.role !== "instructor") {
+      return res.redirect("/login");
+    }
+
+    const { id: courseId, moduleId } = req.params;
+    const instructorId = req.session.user.id;
+
+    try {
+      const course = CourseModel.getCourseById(courseId);
+
+      if (!course || course.instructorId !== instructorId) {
+        req.flash(
+          "error_msg",
+          "Course not found or you do not have permission to edit it"
+        );
+        return res.redirect("/instructor/courses");
+      }
+
+      const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
+
+      if (moduleIndex === -1) {
+        req.flash("error_msg", "Module not found");
+        return res.redirect(`/instructor/courses/${courseId}/content`);
+      }
+
+      course.modules.splice(moduleIndex, 1);
+      course.updatedAt = new Date().toISOString();
+
+      CourseModel.updateCourse(courseId, { modules: course.modules });
+
+      req.flash("success_msg", "Module deleted successfully");
+      res.redirect(`/instructor/courses/${courseId}/content`);
+    } catch (error) {
+      req.flash("error_msg", error.message);
+      res.redirect(`/instructor/courses/${courseId}/content`);
+    }
+  },
+
+  addLesson: (req, res) => {
+    if (!req.session.user || req.session.user.role !== "instructor") {
+      return res.redirect("/login");
+    }
+
+    const { id: courseId, moduleId } = req.params;
     const instructorId = req.session.user.id;
 
     upload.single("file")(req, res, (err) => {
       if (err) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Error uploading file" });
+        req.flash("error_msg", "Error uploading file");
+        return res.redirect(`/instructor/courses/${courseId}/content`);
       }
 
       const { title, type, duration } = req.body;
@@ -301,28 +399,156 @@ const InstructorController = {
         const course = CourseModel.getCourseById(courseId);
 
         if (!course || course.instructorId !== instructorId) {
-          return res.status(403).json({
-            success: false,
-            message:
-              "Course not found or you do not have permission to edit it",
-          });
+          req.flash(
+            "error_msg",
+            "Course not found or you do not have permission to edit it"
+          );
+          return res.redirect("/instructor/courses");
         }
 
-        const newLesson = CourseModel.addLessonToModule(courseId, moduleId, {
+        const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
+
+        if (moduleIndex === -1) {
+          req.flash("error_msg", "Module not found");
+          return res.redirect(`/instructor/courses/${courseId}/content`);
+        }
+
+        const newLesson = {
+          id: Date.now().toString(),
           title,
           type,
-          duration,
+          duration: duration || "",
           file: req.file ? `/uploads/${req.file.filename}` : null,
-        });
+        };
 
-        res.json({ success: true, lesson: newLesson });
+        course.modules[moduleIndex].lessons.push(newLesson);
+        course.updatedAt = new Date().toISOString();
+
+        CourseModel.updateCourse(courseId, { modules: course.modules });
+
+        req.flash("success_msg", "Lesson added successfully");
+        res.redirect(`/instructor/courses/${courseId}/content`);
       } catch (error) {
-        res.status(400).json({ success: false, message: error.message });
+        req.flash("error_msg", error.message);
+        res.redirect(`/instructor/courses/${courseId}/content`);
       }
     });
   },
 
-  // Get instructor analytics
+  updateLesson: (req, res) => {
+    if (!req.session.user || req.session.user.role !== "instructor") {
+      return res.redirect("/login");
+    }
+
+    const { id: courseId, moduleId, lessonId } = req.params;
+    const instructorId = req.session.user.id;
+
+    upload.single("file")(req, res, (err) => {
+      if (err) {
+        req.flash("error_msg", "Error uploading file");
+        return res.redirect(`/instructor/courses/${courseId}/content`);
+      }
+
+      const { title, type, duration } = req.body;
+
+      try {
+        const course = CourseModel.getCourseById(courseId);
+
+        if (!course || course.instructorId !== instructorId) {
+          req.flash(
+            "error_msg",
+            "Course not found or you do not have permission to edit it"
+          );
+          return res.redirect("/instructor/courses");
+        }
+
+        const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
+
+        if (moduleIndex === -1) {
+          req.flash("error_msg", "Module not found");
+          return res.redirect(`/instructor/courses/${courseId}/content`);
+        }
+
+        const lessonIndex = course.modules[moduleIndex].lessons.findIndex(
+          (l) => l.id === lessonId
+        );
+
+        if (lessonIndex === -1) {
+          req.flash("error_msg", "Lesson not found");
+          return res.redirect(`/instructor/courses/${courseId}/content`);
+        }
+
+        course.modules[moduleIndex].lessons[lessonIndex] = {
+          ...course.modules[moduleIndex].lessons[lessonIndex],
+          title,
+          type,
+          duration: duration || "",
+          file: req.file
+            ? `/uploads/${req.file.filename}`
+            : course.modules[moduleIndex].lessons[lessonIndex].file,
+        };
+
+        course.updatedAt = new Date().toISOString();
+
+        CourseModel.updateCourse(courseId, { modules: course.modules });
+
+        req.flash("success_msg", "Lesson updated successfully");
+        res.redirect(`/instructor/courses/${courseId}/content`);
+      } catch (error) {
+        req.flash("error_msg", error.message);
+        res.redirect(`/instructor/courses/${courseId}/content`);
+      }
+    });
+  },
+
+  deleteLesson: (req, res) => {
+    if (!req.session.user || req.session.user.role !== "instructor") {
+      return res.redirect("/login");
+    }
+
+    const { id: courseId, moduleId, lessonId } = req.params;
+    const instructorId = req.session.user.id;
+
+    try {
+      const course = CourseModel.getCourseById(courseId);
+
+      if (!course || course.instructorId !== instructorId) {
+        req.flash(
+          "error_msg",
+          "Course not found or you do not have permission to edit it"
+        );
+        return res.redirect("/instructor/courses");
+      }
+
+      const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
+
+      if (moduleIndex === -1) {
+        req.flash("error_msg", "Module not found");
+        return res.redirect(`/instructor/courses/${courseId}/content`);
+      }
+
+      const lessonIndex = course.modules[moduleIndex].lessons.findIndex(
+        (l) => l.id === lessonId
+      );
+
+      if (lessonIndex === -1) {
+        req.flash("error_msg", "Lesson not found");
+        return res.redirect(`/instructor/courses/${courseId}/content`);
+      }
+
+      course.modules[moduleIndex].lessons.splice(lessonIndex, 1);
+      course.updatedAt = new Date().toISOString();
+
+      CourseModel.updateCourse(courseId, { modules: course.modules });
+
+      req.flash("success_msg", "Lesson deleted successfully");
+      res.redirect(`/instructor/courses/${courseId}/content`);
+    } catch (error) {
+      req.flash("error_msg", error.message);
+      res.redirect(`/instructor/courses/${courseId}/content`);
+    }
+  },
+
   getInstructorAnalytics: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -331,7 +557,6 @@ const InstructorController = {
     const userId = req.session.user.id;
     const instructorCourses = CourseModel.getCoursesByInstructor(userId);
 
-    // Calculate revenue by course
     const revenueByCourseName = {};
     let totalRevenue = 0;
 
@@ -349,7 +574,6 @@ const InstructorController = {
       totalRevenue += courseRevenue;
     }
 
-    // Calculate student engagement (completion rate)
     const courseCompletionRates = instructorCourses.map((course) => {
       const completionRate = ProgressModel.getCourseCompletionRate(course.id);
       return {
@@ -366,7 +590,6 @@ const InstructorController = {
     });
   },
 
-  // Get instructor students
   getInstructorStudents: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
@@ -374,23 +597,23 @@ const InstructorController = {
 
     const userId = req.session.user.id;
     const instructorCourses = CourseModel.getCoursesByInstructor(userId);
-    const courseIds = instructorCourses.map((course) => course.id);
+    const courseIds = instructorCourses.map((course) => String(course.id));
 
     // Get all students enrolled in instructor's courses
     const allUsers = UserModel.getAllUsers();
     const students = allUsers.filter(
       (user) =>
         user.role === "student" &&
-        user.enrolledCourses.some((courseId) => courseIds.includes(courseId))
+        user.enrolledCourses.some((courseId) => courseIds.includes(String(courseId)))
     );
 
     // Enhance students with course info
     const enhancedStudents = students.map((student) => {
       const enrolledInstructorCourses = student.enrolledCourses
-        .filter((courseId) => courseIds.includes(courseId))
+        .filter((courseId) => courseIds.includes(String(courseId)))
         .map((courseId) => {
           const course = CourseModel.getCourseById(courseId);
-          const progress = ProgressModel.getProgress(student.id, courseId);
+          const progress = ProgressModel.getProgress(student.id, courseId) || { progress: 0 };
           return {
             ...course,
             progress: progress.progress,
@@ -405,6 +628,7 @@ const InstructorController = {
 
     res.render("instructor/students", {
       students: enhancedStudents,
+      courses: instructorCourses,
     });
   },
 };

@@ -1,4 +1,4 @@
-<%- include('../partials/head', { title: 'Edit User - LearnHub' }) %>
+<%- include('../partials/head', { title: 'Edit User - SeekoBharat' }) %>
 <body class="bg-black text-white">
   <%- include('../partials/navbar') %>
 
@@ -128,11 +128,26 @@
           </div>
           
           <!-- Form Actions -->
-          <div class="flex justify-between">
-            <a href="/admin/users/<%= user.id %>" class="bg-gray-700 text-gray-300 px-4 py-2 rounded-md hover:bg-gray-600 transition-colors">
-              Cancel
-            </a>
-            <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors">
+          <div class="flex justify-between sm:flex-row flex-col gap-4">
+            <div class="flex gap-2">
+              <a href="/admin/users/<%= user.id %>" 
+                 class="bg-gray-700 text-gray-300 px-4 py-2 rounded-md hover:bg-gray-600 transition-colors"
+                 aria-label="Cancel and go back">
+                Cancel
+              </a>
+              
+              <button type="button" 
+                      class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+                      aria-label="Delete user"
+                      onclick="fetch('/admin/users/<%= user.id %>?_method=DELETE', { method: 'POST' })">
+                Delete Account
+              </button>
+            
+            </div>
+          
+            <button type="submit" 
+                    class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors"
+                    aria-label="Save your changes">
               Save Changes
             </button>
           </div>

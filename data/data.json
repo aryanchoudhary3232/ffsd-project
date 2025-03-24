@@ -8,7 +8,9 @@
       "role": "admin",
       "joinDate": "2023-01-01",
       "enrolledCourses": [
-        "2"
+        "2",
+        "1742757772637",
+        "1742757216231"
       ],
       "completedCourses": []
     },
@@ -34,8 +36,7 @@
       "enrolledCourses": [
         "1",
         "2",
-        "4",
-        "3"
+        "4"
       ],
       "completedCourses": []
     },
@@ -57,7 +58,8 @@
       "role": "student",
       "joinDate": "2023-03-01",
       "enrolledCourses": [
-        "1"
+        "1",
+        "4"
       ],
       "completedCourses": []
     },
@@ -76,16 +78,6 @@
       "name": "Shreyaan",
       "email": "123@gmail.com",
       "password": "$2b$10$A8C.GqdslDxT3n69bbvPHOyRp.hRGOWrer6JhUet5CmeG7TMnl096",
-      "role": "instructor",
-      "joinDate": "2025-03-15",
-      "enrolledCourses": [],
-      "completedCourses": []
-    },
-    {
-      "id": "1742017900372",
-      "name": "instruc1",
-      "email": "ins@gmail.com",
-      "password": "instructor",
       "role": "instructor",
       "joinDate": "2025-03-15",
       "enrolledCourses": [],
@@ -117,21 +109,21 @@
               "title": "Course Overview",
               "type": "video",
               "duration": "10:15",
-              "file": "/videos/course-overview.mp4"
+              "file": "/video/video1.mp4"
             },
             {
               "id": "l2",
               "title": "Setting Up Your Development Environment",
               "type": "video",
               "duration": "15:30",
-              "file": "/videos/dev-setup.mp4"
+              "file": "/video/video2.mp4"
             },
             {
               "id": "l3",
               "title": "Web Development Basics",
               "type": "video",
               "duration": "12:45",
-              "file": "/videos/web-basics.mp4"
+              "file": "/video/video3.mp4"
             },
             {
               "id": "l4",
@@ -151,21 +143,21 @@
               "title": "HTML Document Structure",
               "type": "video",
               "duration": "14:20",
-              "file": "/videos/html-structure.mp4"
+              "file": "/video/video4.mp4"
             },
             {
               "id": "l6",
               "title": "HTML Elements and Attributes",
               "type": "video",
               "duration": "18:45",
-              "file": "/videos/html-elements.mp4"
+              "file": "/video/video.mp4"
             },
             {
               "id": "l7",
               "title": "HTML Forms",
               "type": "video",
               "duration": "20:10",
-              "file": "/videos/html-forms.mp4"
+              "file": "/video/video1.mp4"
             },
             {
               "id": "l8",
@@ -185,28 +177,28 @@
               "title": "CSS Selectors",
               "type": "video",
               "duration": "16:30",
-              "file": "/videos/css-selectors.mp4"
+              "file": "/video/video3.mp4"
             },
             {
               "id": "l10",
               "title": "CSS Box Model",
               "type": "video",
               "duration": "15:15",
-              "file": "/videos/css-box-model.mp4"
+              "file": "/video/video4.mp4"
             },
             {
               "id": "l11",
               "title": "CSS Flexbox",
               "type": "video",
               "duration": "22:40",
-              "file": "/videos/css-flexbox.mp4"
+              "file": "/video/video.mp4"
             },
             {
               "id": "l12",
               "title": "CSS Grid",
               "type": "video",
               "duration": "25:10",
-              "file": "/videos/css-grid.mp4"
+              "file": "/video/video1.mp4"
             },
             {
               "id": "l13",
@@ -226,28 +218,28 @@
               "title": "JavaScript Introduction",
               "type": "video",
               "duration": "18:20",
-              "file": "/videos/js-intro.mp4"
+              "file": "/video/video3.mp4"
             },
             {
               "id": "l15",
               "title": "Variables and Data Types",
               "type": "video",
               "duration": "20:45",
-              "file": "/videos/js-variables.mp4"
+              "file": "/video/video4.mp4"
             },
             {
               "id": "l16",
               "title": "Functions and Scope",
               "type": "video",
               "duration": "24:30",
-              "file": "/videos/js-functions.mp4"
+              "file": "/video/video.mp4"
             },
             {
               "id": "l17",
               "title": "DOM Manipulation",
               "type": "video",
               "duration": "28:15",
-              "file": "/videos/js-dom.mp4"
+              "file": "/video/video1.mp4"
             },
             {
               "id": "l18",
@@ -272,7 +264,7 @@
       "rating": 4.9,
       "students": 987,
       "createdAt": "2023-02-20",
-      "updatedAt": "2023-11-20",
+      "updatedAt": "2025-03-24T20:31:12.275Z",
       "featured": true,
       "modules": [
         {
@@ -284,21 +276,21 @@
               "title": "Execution Context and Call Stack",
               "type": "video",
               "duration": "22:15",
-              "file": "/videos/js-execution.mp4"
+              "file": "/video/video3.mp4"
             },
             {
               "id": "l2",
               "title": "Scope and Closures",
               "type": "video",
               "duration": "25:30",
-              "file": "/videos/js-closures.mp4"
+              "file": "/video/video4.mp4"
             },
             {
               "id": "l3",
               "title": "this Keyword and Binding",
               "type": "video",
               "duration": "20:45",
-              "file": "/videos/js-this.mp4"
+              "file": "/video/video.mp4"
             }
           ]
         },
@@ -311,21 +303,21 @@
               "title": "Prototypes and Inheritance",
               "type": "video",
               "duration": "28:20",
-              "file": "/videos/js-prototypes.mp4"
+              "file": "/video/video1.mp4"
             },
             {
               "id": "l5",
               "title": "ES6 Classes",
               "type": "video",
               "duration": "24:45",
-              "file": "/videos/js-classes.mp4"
+              "file": "/video/video2.mp4"
             },
             {
               "id": "l6",
               "title": "Design Patterns",
               "type": "video",
               "duration": "32:10",
-              "file": "/videos/js-patterns.mp4"
+              "file": "/video/video3.mp4"
             }
           ]
         },
@@ -338,23 +330,33 @@
               "title": "Callbacks and Promises",
               "type": "video",
               "duration": "26:30",
-              "file": "/videos/js-promises.mp4"
+              "file": "/video/video4.mp4"
             },
             {
               "id": "l8",
               "title": "Async/Await",
               "type": "video",
               "duration": "22:15",
-              "file": "/videos/js-async-await.mp4"
+              "file": "/video/video.mp4"
             },
             {
               "id": "l9",
               "title": "Event Loop",
               "type": "video",
               "duration": "18:40",
-              "file": "/videos/js-event-loop.mp4"
+              "file": "/video/video1.mp4"
             }
           ]
+        },
+        {
+          "id": "1742848269547",
+          "title": "Non constant",
+          "lessons": []
+        },
+        {
+          "id": "1742848272275",
+          "title": "Non constant",
+          "lessons": []
         }
       ]
     },
@@ -382,21 +384,21 @@
               "title": "Introduction to React",
               "type": "video",
               "duration": "15:20",
-              "file": "/videos/react-intro.mp4"
+              "file": "/video/video2.mp4"
             },
             {
               "id": "l2",
               "title": "Setting Up React Environment",
               "type": "video",
               "duration": "18:45",
-              "file": "/videos/react-setup.mp4"
+              "file": "/video/video3.mp4"
             },
             {
               "id": "l3",
               "title": "JSX Syntax",
               "type": "video",
               "duration": "14:30",
-              "file": "/videos/react-jsx.mp4"
+              "file": "/video/video3.mp4"
             }
           ]
         },
@@ -409,21 +411,21 @@
               "title": "Functional Components",
               "type": "video",
               "duration": "22:15",
-              "file": "/videos/react-functional.mp4"
+              "file": "/video/video4.mp4"
             },
             {
               "id": "l5",
               "title": "Class Components",
               "type": "video",
               "duration": "20:30",
-              "file": "/videos/react-class.mp4"
+              "file": "/video/video.mp4"
             },
             {
               "id": "l6",
               "title": "Props and State",
               "type": "video",
               "duration": "25:45",
-              "file": "/videos/react-props-state.mp4"
+              "file": "/video/video1.mp4"
             }
           ]
         },
@@ -436,21 +438,21 @@
               "title": "useState Hook",
               "type": "video",
               "duration": "18:20",
-              "file": "/videos/react-usestate.mp4"
+              "file": "/video/video2.mp4"
             },
             {
               "id": "l8",
               "title": "useEffect Hook",
               "type": "video",
               "duration": "24:15",
-              "file": "/videos/react-useeffect.mp4"
+              "file": "/video/video3.mp4"
             },
             {
               "id": "l9",
               "title": "Custom Hooks",
               "type": "video",
               "duration": "22:40",
-              "file": "/videos/react-custom-hooks.mp4"
+              "file": "/video/video4.mp4"
             }
           ]
         }
@@ -480,21 +482,21 @@
               "title": "Introduction to Node.js",
               "type": "video",
               "duration": "16:30",
-              "file": "/videos/node-intro.mp4"
+              "file": "/video/video.mp4"
             },
             {
               "id": "l2",
               "title": "Node.js Modules",
               "type": "video",
               "duration": "20:15",
-              "file": "/videos/node-modules.mp4"
+              "file": "/video/video1.mp4"
             },
             {
               "id": "l3",
               "title": "File System Operations",
               "type": "video",
               "duration": "18:45",
-              "file": "/videos/node-fs.mp4"
+              "file": "/video/video3.mp4"
             }
           ]
         },
@@ -507,21 +509,21 @@
               "title": "Setting Up Express",
               "type": "video",
               "duration": "15:20",
-              "file": "/videos/express-setup.mp4"
+              "file": "/video/video3.mp4"
             },
             {
               "id": "l5",
               "title": "Routing in Express",
               "type": "video",
               "duration": "22:30",
-              "file": "/videos/express-routing.mp4"
+              "file": "/video/video4.mp4"
             },
             {
               "id": "l6",
               "title": "Middleware",
               "type": "video",
               "duration": "24:15",
-              "file": "/videos/express-middleware.mp4"
+              "file": "/video/video.mp4"
             }
           ]
         },
@@ -534,32 +536,54 @@
               "title": "MongoDB Basics",
               "type": "video",
               "duration": "26:40",
-              "file": "/videos/mongodb-basics.mp4"
+              "file": "/video/video1.mp4"
             },
             {
               "id": "l8",
               "title": "Mongoose ODM",
               "type": "video",
               "duration": "28:15",
-              "file": "/videos/mongoose.mp4"
+              "file": "/video/video3.mp4"
             },
             {
               "id": "l9",
               "title": "CRUD Operations",
               "type": "video",
               "duration": "32:20",
-              "file": "/videos/mongodb-crud.mp4"
+              "file": "/video/video4.mp4"
             }
           ]
         }
       ]
+    },
+    {
+      "id": "1742791944339",
+      "title": "hello",
+      "description": "this is a course",
+      "category": "Web Development",
+      "price": 400,
+      "instructorId": "4",
+      "instructor": "Michael Wilson",
+      "thumbnail": "/uploads/1742791944282-Screenshot 2025-03-04 at 22-50-34 Checkout - GameSir Official Store.png",
+      "rating": 0,
+      "students": 0,
+      "createdAt": "2025-03-24T04:52:24.339Z",
+      "updatedAt": "2025-03-24T05:13:38.561Z",
+      "modules": [
+        {
+          "id": "1742793218561",
+          "title": "sadasd",
+          "lessons": []
+        }
+      ],
+      "featured": false
     }
   ],
   "progress": [
     {
       "userId": "3",
       "courseId": "1",
-      "progress": 65,
+      "progress": 72,
       "completedLessons": [
         "l1",
         "l2",
@@ -570,7 +594,10 @@
         "l7",
         "l8",
         "l9",
-        "l10"
+        "l10",
+        "l14",
+        "l15",
+        "l13"
       ]
     },
     {
@@ -586,12 +613,13 @@
     {
       "userId": "5",
       "courseId": "1",
-      "progress": 25,
+      "progress": 28,
       "completedLessons": [
         "l1",
         "l2",
         "l3",
-        "l4"
+        "l4",
+        "l5"
       ]
     },
     {
@@ -614,6 +642,18 @@
     },
     {
       "userId": "2",
+      "courseId": "4",
+      "progress": 0,
+      "completedLessons": []
+    },
+    {
+      "userId": "5",
+      "courseId": "4",
+      "progress": 0,
+      "completedLessons": []
+    },
+    {
+      "userId": "3",
       "courseId": "4",
       "progress": 0,
       "completedLessons": []
