@@ -264,7 +264,7 @@
       "rating": 4.9,
       "students": 987,
       "createdAt": "2023-02-20",
-      "updatedAt": "2023-11-20",
+      "updatedAt": "2025-03-24T20:31:12.275Z",
       "featured": true,
       "modules": [
         {
@@ -347,6 +347,16 @@
               "file": "/video/video1.mp4"
             }
           ]
+        },
+        {
+          "id": "1742848269547",
+          "title": "Non constant",
+          "lessons": []
+        },
+        {
+          "id": "1742848272275",
+          "title": "Non constant",
+          "lessons": []
         }
       ]
     },

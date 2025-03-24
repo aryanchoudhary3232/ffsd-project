@@ -1,14 +1,14 @@
-<%- include('../partials/head', { title: course.title + ' - Course Details - SeekoBharat' }) %>
+<%- include('../partials/head', { title: 'Edit Course - LearnHub' }) %>
 <body class="bg-black text-white">
   <%- include('../partials/navbar') %>
 
   <div class="container mx-auto px-4 py-8">
     <!-- Header -->
     <div class="flex items-center mb-6">
-      <a href="/admin/courses" class="text-gray-400 hover:text-gray-200 mr-4">
+      <a href="/admin/courses/<%= course.id %>" class="text-gray-400 hover:text-gray-200 mr-4">
         <i class="fas fa-arrow-left"></i>
       </a>
-      <h1 class="text-2xl font-bold">Course Details</h1>
+      <h1 class="text-2xl font-bold">Edit Course</h1>
     </div>
     
     <!-- Alerts -->
@@ -23,222 +23,114 @@
       </div>
     <% } %>
     
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <!-- Left Column: Course & Instructor Info -->
-      <div class="md:col-span-1">
-        <!-- Course Card -->
-        <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden">
-          <img src="<%= course.thumbnail %>" alt="<%= course.title %>" class="w-full h-48 object-cover">
-          <div class="p-6">
-            <h2 class="text-xl font-bold mb-2 text-gray-100"><%= course.title %></h2>
-            <div class="flex items-center mb-2">
-              <span class="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-xs mr-2"><%= course.category %></span>
-              <span class="<%= course.status === 'published' ? 'bg-green-800 text-green-300' : 'bg-yellow-800 text-yellow-300' %> px-2 py-1 rounded-full text-xs">
-                <%= course.status ? (course.status.charAt(0).toUpperCase() + course.status.slice(1)) : 'Not specified' %>
-              </span>
-            </div>
-            <p class="text-gray-400 mb-4"><%= course.instructor %></p>
-            
-            <div class="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <p class="text-xs text-gray-500">Price</p>
-                <p class="font-medium text-gray-100">$<%= course.price.toFixed(2) %></p>
-              </div>
-              <div>
-                <p class="text-xs text-gray-500">Students</p>
-                <p class="font-medium text-gray-100"><%= course.students %></p>
-              </div>
-              <div>
-                <p class="text-xs text-gray-500">Rating</p>
-                <p class="font-medium text-gray-100"><%= course.rating %> ★</p>
-              </div>
-              <div>
-                <p class="text-xs text-gray-500">Created</p>
-                <p class="font-medium text-gray-100"><%= new Date(course.createdAt).toLocaleDateString() %></p>
-              </div>
-            </div>
-            
-            <div class="flex flex-col gap-2">
-              <a href="/admin/courses/<%= course.id %>/edit-course" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors text-center">
-                Edit Course
-              </a>
-              <a href="/courses/<%= course.id %>" target="_blank" class="bg-gray-700 text-gray-300 px-4 py-2 rounded-md hover:bg-gray-600 transition-colors text-center">
-                View Course Page
-              </a>
-              <form action="/admin/courses/<%= course.id %>?_method=DELETE" method="POST" onsubmit="return confirm('Are you sure you want to delete this course? This action cannot be undone.')">
-                <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors w-full">
-                  Delete Course
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Instructor Information -->
-        <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden mt-6">
-          <div class="p-4 border-b border-gray-700">
-            <h2 class="text-lg font-semibold">Instructor Information</h2>
-          </div>
-          
-          <div class="p-6">
-            <div class="flex items-center mb-4">
-              <div class="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center mr-4">
-                <span class="text-gray-400 font-medium"><%= instructor.name.charAt(0) %></span>
-              </div>
-              <div>
-                <h3 class="font-medium text-gray-100"><%= instructor.name %></h3>
-                <p class="text-sm text-gray-400"><%= instructor.email %></p>
-              </div>
-            </div>
-            
-            <a href="/admin/users/<%= instructor.id %>" class="text-blue-500 hover:text-blue-400 text-sm">
-              View Instructor Profile
-            </a>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Right Column: Course Description, Featured Status, Content & Students -->
-      <div class="md:col-span-2">
-        <!-- Course Description -->
-        <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden mb-6">
-          <div class="p-4 border-b border-gray-700">
-            <h2 class="text-lg font-semibold">Course Description</h2>
-          </div>
-          
-          <div class="p-6">
-            <p class="text-gray-400 mb-4"><%= course.description %></p>
-            
-            <div class="mt-4">
-              <h3 class="font-medium mb-2 text-gray-100">Featured Status</h3>
-              <form action="/admin/courses/<%= course.id %>/featured?_method=PUT" method="POST" class="flex items-center">
-                <label class="inline-flex items-center cursor-pointer mr-4">
-                  <input type="checkbox" name="featured" <%= course.featured ? 'checked' : '' %> class="sr-only peer">
-                  <div class="relative w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-500 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
-                  <span class="ml-2 text-sm font-medium text-gray-100">Featured on Homepage</span>
-                </label>
-                <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition-colors text-sm">
-                  Save
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Course Content -->
-        <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden mb-6">
-          <div class="p-4 border-b border-gray-700">
-            <h2 class="text-lg font-semibold">Course Content</h2>
-          </div>
-          
-          <div class="p-6">
+    <div class="bg-gray-800 rounded-lg shadow-md p-6">
+      <form action="/admin/courses/<%= course.id %>" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="_method" value="PUT">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Left Column -->
+          <div>
             <div class="mb-4">
-              <p class="text-sm text-gray-400">
-                <%= course.modules.length %> modules • 
-                <%= course.modules.reduce((total, module) => total + module.lessons.length, 0) %> lessons
-              </p>
+              <label for="title" class="block text-gray-300 mb-2">Course Title</label>
+              <input type="text" id="title" name="title" value="<%= course.title %>" required
+                class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             
-            <div class="space-y-4">
-              <% course.modules.forEach(function(module, moduleIndex) { %>
-                <div class="border border-gray-700 rounded-md overflow-hidden">
-                  <div class="bg-gray-700 p-3 flex justify-between items-center cursor-pointer" onclick="toggleModule(<%= moduleIndex %>)">
-                    <h3 class="font-medium text-gray-100"><%= module.title %></h3>
-                    <div class="flex items-center">
-                      <span class="text-xs text-gray-400 mr-2"><%= module.lessons.length %> lessons</span>
-                      <i class="fas fa-chevron-down text-gray-400 module-icon-<%= moduleIndex %>"></i>
-                    </div>
-                  </div>
-                  
-                  <div class="p-3 hidden module-content-<%= moduleIndex %>">
-                    <div class="space-y-2">
-                      <% module.lessons.forEach(function(lesson) { %>
-                        <div class="flex items-center justify-between text-sm">
-                          <div class="flex items-center">
-                            <% if (lesson.type === 'video') { %>
-                              <i class="fas fa-play-circle text-blue-500 mr-2"></i>
-                            <% } else if (lesson.type === 'pdf') { %>
-                              <i class="fas fa-file-pdf text-red-500 mr-2"></i>
-                            <% } else if (lesson.type === 'quiz') { %>
-                              <i class="fas fa-question-circle text-blue-500 mr-2"></i>
-                            <% } else { %>
-                              <i class="fas fa-file-alt text-gray-400 mr-2"></i>
-                            <% } %>
-                            <span class="text-gray-100"><%= lesson.title %></span>
-                          </div>
-                          <% if (lesson.duration) { %>
-                            <span class="text-xs text-gray-400"><%= lesson.duration %></span>
-                          <% } %>
-                        </div>
-                      <% }); %>
-                    </div>
-                  </div>
+            <div class="mb-4">
+              <label for="category" class="block text-gray-300 mb-2">Category</label>
+              <!-- Custom styled select -->
+              <div class="relative">
+                <select id="category" name="category" required
+                  class="block appearance-none w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">Select a category</option>
+                  <option value="Web Development" <%= course.category === 'Web Development' ? 'selected' : '' %>>Web Development</option>
+                  <option value="Mobile Development" <%= course.category === 'Mobile Development' ? 'selected' : '' %>>Mobile Development</option>
+                  <option value="Data Science" <%= course.category === 'Data Science' ? 'selected' : '' %>>Data Science</option>
+                  <option value="Machine Learning" <%= course.category === 'Machine Learning' ? 'selected' : '' %>>Machine Learning</option>
+                  <option value="Game Development" <%= course.category === 'Game Development' ? 'selected' : '' %>>Game Development</option>
+                  <option value="Business" <%= course.category === 'Business' ? 'selected' : '' %>>Business</option>
+                  <option value="Design" <%= course.category === 'Design' ? 'selected' : '' %>>Design</option>
+                  <option value="Other" <%= course.category === 'Other' ? 'selected' : '' %>>Other</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                  <svg class="fill-current h-4 w-4" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5.516 7.548l4.484 4.484 4.484-4.484L16 8.516l-6 6-6-6z"/>
+                  </svg>
                 </div>
-              <% }); %>
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <label for="price" class="block text-gray-300 mb-2">Price ($)</label>
+              <input type="number" id="price" name="price" value="<%= course.price %>" min="0" step="0.01" required
+                class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            
+            <div class="mb-4">
+              <label for="status" class="block text-gray-300 mb-2">Status</label>
+              <!-- Custom styled select -->
+              <div class="relative">
+                <select id="status" name="status" required
+                  class="block appearance-none w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="draft" <%= course.status === 'draft' ? 'selected' : '' %>>Draft</option>
+                  <option value="published" <%= course.status === 'published' ? 'selected' : '' %>>Published</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                  <svg class="fill-current h-4 w-4" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5.516 7.548l4.484 4.484 4.484-4.484L16 8.516l-6 6-6-6z"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <label class="block text-gray-300 mb-2">Featured Course</label>
+              <label class="inline-flex items-center cursor-pointer">
+                <input type="checkbox" name="featured" <%= course.featured ? 'checked' : '' %> class="sr-only peer">
+                <div class="relative w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-500 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                <span class="ml-2 text-sm font-medium text-gray-100">Feature on Homepage</span>
+              </label>
+            </div>
+          </div>
+          
+          <!-- Right Column -->
+          <div>
+            <div class="mb-4">
+              <label for="thumbnail" class="block text-gray-300 mb-2">Thumbnail Image</label>
+              <div class="mb-2">
+                <img src="<%= course.thumbnail %>" alt="Course thumbnail" class="w-full h-40 object-cover rounded-md mb-2">
+                <p class="text-sm text-gray-400">Current thumbnail</p>
+              </div>
+              <input type="file" id="thumbnail" name="thumbnail" accept="image/*"
+                class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <p class="text-sm text-gray-400 mt-1">Leave empty to keep current thumbnail</p>
+            </div>
+            
+            <div class="mb-4">
+              <label for="description" class="block text-gray-300 mb-2">Course Description</label>
+              <textarea id="description" name="description" rows="6" required
+                class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"><%= course.description %></textarea>
             </div>
           </div>
         </div>
         
-        <!-- Enrolled Students -->
-        <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden">
-          <div class="p-4 border-b border-gray-700">
-            <h2 class="text-lg font-semibold">Enrolled Students (<%= enrolledStudents.length %>)</h2>
-          </div>
-          
-          <% if (enrolledStudents.length > 0) { %>
-            <div class="divide-y divide-gray-700">
-              <% enrolledStudents.slice(0, 5).forEach(function(student) { %>
-                <div class="p-4 flex items-center justify-between">
-                  <div class="flex items-center">
-                    <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center mr-3">
-                      <span class="text-gray-400 font-medium"><%= student.name.charAt(0) %></span>
-                    </div>
-                    <div>
-                      <h3 class="font-medium text-gray-100"><%= student.name %></h3>
-                      <p class="text-sm text-gray-400"><%= student.email %></p>
-                    </div>
-                  </div>
-                  <a href="/admin/users/<%= student.id %>" class="text-blue-500 hover:text-blue-400 text-sm">
-                    View Profile
-                  </a>
-                </div>
-              <% }); %>
-            </div>
-            
-            <% if (enrolledStudents.length > 5) { %>
-              <div class="p-4 text-center">
-                <a href="/admin/courses/<%= course.id %>/students" class="text-blue-500 hover:text-blue-400">
-                  View All <%= enrolledStudents.length %> Students
-                </a>
-              </div>
-            <% } %>
-          <% } else { %>
-            <div class="p-6 text-center">
-              <p class="text-gray-400">No students enrolled in this course yet.</p>
-            </div>
-          <% } %>
+        <div class="border-t border-gray-700 mt-6 pt-6">
+          <h2 class="text-lg font-semibold mb-4">Course Content</h2>
+          <p class="text-gray-400 mb-4">To manage course modules and lessons, please save your changes and use the content editor on the course details page.</p>
         </div>
-      </div>
+        
+        <div class="flex justify-end space-x-4 mt-6">
+          <a href="/admin/courses/<%= course.id %>" class="bg-gray-700 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition-colors">
+            Cancel
+          </a>
+          <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors">
+            Save Changes
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
   <%- include('../partials/footer') %>
   <%- include('../partials/scripts') %>
-  <script>
-    function toggleModule(moduleIndex) {
-      const content = document.querySelector(`.module-content-${moduleIndex}`);
-      const icon = document.querySelector(`.module-icon-${moduleIndex}`);
-      
-      content.classList.toggle('hidden');
-      
-      if (content.classList.contains('hidden')) {
-        icon.classList.remove('fa-chevron-up');
-        icon.classList.add('fa-chevron-down');
-      } else {
-        icon.classList.remove('fa-chevron-down');
-        icon.classList.add('fa-chevron-up');
-      }
-    }
-  </script>
 </body>
 </html>
