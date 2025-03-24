@@ -1,0 +1,146 @@
+<%- include('../partials/head', { title: 'Courses - LearnHub' }) %>
+<style>
+  body {
+    background-color: #000;
+    color: #fff;
+  }
+  .bg-white {
+    background-color: #111;
+  }
+  .text-gray-600, .text-gray-500, .text-gray-700 {
+    color: #ccc;
+  }
+  .bg-primary {
+    background-color: #fff;
+    color: #000;
+  }
+  .text-primary {
+    color: #fff;
+  }
+  .hover\:bg-primary-dark:hover {
+    background-color: #ccc;
+  }
+  .border-gray-300 {
+    border-color: #555;
+  }
+  .bg-gray-200 {
+    background-color: #222;
+  }
+  .text-gray-700 {
+    color: #eee;
+  }
+  .text-white {
+    color: #000;
+  }
+  input, select {
+    background-color: #222;
+    color: #fff;
+    border: 1px solid #555;
+  }
+</style>
+<body>
+  <%- include('../partials/navbar') %>
+
+  <div class="container mx-auto px-4 py-8">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+      <h1 class="text-2xl font-bold mb-4 md:mb-0">Browse Courses</h1>
+      <div class="flex flex-col md:flex-row gap-4">
+        <form action="/courses/search" method="GET" class="flex">
+          <input 
+            type="text" 
+            name="query" 
+            placeholder="Search courses..." 
+            value="<%= search %>"
+            class="px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-primary focus:border-primary"
+          >
+          <button type="submit" class="bg-primary px-4 py-2 rounded-r-md hover:bg-primary-dark">
+            <i class="fas fa-search"></i>
+          </button>
+        </form>
+        <div class="flex gap-2">
+          <select 
+            id="category-filter" 
+            class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+          >
+            <option value="all" <%= category === 'all' ? 'selected' : '' %>>All Categories</option>
+            <% categories.forEach(function(cat) { %>
+              <option value="<%= cat %>" <%= category === cat ? 'selected' : '' %>><%= cat %></option>
+            <% }); %>
+          </select>
+          <select 
+            id="sort-filter" 
+            class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+          >
+            <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Newest</option>
+            <option value="price-low" <%= sort === 'price-low' ? 'selected' : '' %>>Price: Low to High</option>
+            <option value="price-high" <%= sort === 'price-high' ? 'selected' : '' %>>Price: High to Low</option>
+            <option value="rating" <%= sort === 'rating' ? 'selected' : '' %>>Highest Rated</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <% if (search && search.length > 0) { %>
+      <div class="mb-6">
+        <p class="text-gray-600">
+          Showing results for "<%= search %>" - <%= courses.length %> courses found
+        </p>
+      </div>
+    <% } %>
+
+    <% if (courses.length > 0) { %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% courses.forEach(function(course) { %>
+          <div class="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:transform hover:scale-105 border border-gray-300">
+            <img src="<%= course.thumbnail %>" alt="<%= course.title %>" class="w-full h-48 object-cover">
+            <div class="p-6">
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="text-xl font-bold"><%= course.title %></h3>
+                <span class="bg-primary px-2 py-1 rounded-full text-sm font-semibold">$<%= course.price.toFixed(2) %></span>
+              </div>
+              <p class="text-gray-600 mb-4"><%= course.instructor %></p>
+              <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center">
+                  <span class="text-white mr-1">★</span>
+                  <span><%= course.rating %></span>
+                  <span class="text-gray-500 ml-1">(<%= course.students %>)</span>
+                </div>
+                <span class="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-xs"><%= course.category %></span>
+              </div>
+              <p class="text-gray-700 mb-4 line-clamp-2"><%= course.description %></p>
+              <a href="/courses/<%= course.id %>" class="block w-full text-center bg-primary py-2 px-4 rounded-md hover:bg-primary-dark transition-colors">View Course</a>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <div class="bg-white rounded-lg shadow-md p-8 text-center border border-gray-300">
+        <h2 class="text-xl font-bold mb-2">No courses found</h2>
+        <p class="text-gray-600 mb-4">Try adjusting your search or filter criteria.</p>
+        <a href="/courses" class="text-primary hover:underline">View all courses</a>
+      </div>
+    <% } %>
+  </div>
+
+  <%- include('../partials/footer') %>
+  <%- include('../partials/scripts') %>
+  <script>
+    // Filter and sort functionality
+    document.getElementById('category-filter').addEventListener('change', applyFilters);
+    document.getElementById('sort-filter').addEventListener('change', applyFilters);
+
+    function applyFilters() {
+      const category = document.getElementById('category-filter').value;
+      const sort = document.getElementById('sort-filter').value;
+      const search = '<%= search %>';
+      
+      let url = '/courses?';
+      if (category && category !== 'all') url += `category=${category}&`;
+      if (sort) url += `sort=${sort}&`;
+      if (search) url += `search=${search}`;
+      
+      window.location.href = url;
+    }
+  </script>
+</body>
+</html>
