@@ -51,7 +51,7 @@ const UserModel = {
     }
 
     // Hash password
-    const hashedPassword = bcrypt.hashSync(userData.password, 10);
+    const hashedPassword = userData.password;
 
     // Create new user
     const newUser = {

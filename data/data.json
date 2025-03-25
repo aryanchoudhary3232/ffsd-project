@@ -22,7 +22,8 @@
       "role": "instructor",
       "joinDate": "2023-01-15",
       "enrolledCourses": [
-        "4"
+        "4",
+        "1"
       ],
       "completedCourses": []
     },
@@ -36,7 +37,9 @@
       "enrolledCourses": [
         "1",
         "2",
-        "4"
+        "4",
+        "1742791944339",
+        "3"
       ],
       "completedCourses": []
     },
@@ -81,6 +84,20 @@
       "role": "instructor",
       "joinDate": "2025-03-15",
       "enrolledCourses": [],
+      "completedCourses": []
+    },
+    {
+      "id": "1742892188159",
+      "name": "tester",
+      "email": "test@email.com",
+      "password": "123456",
+      "role": "student",
+      "joinDate": "2025-03-25",
+      "enrolledCourses": [
+        "3",
+        "1",
+        "2"
+      ],
       "completedCourses": []
     }
   ],
@@ -603,11 +620,12 @@
     {
       "userId": "3",
       "courseId": "2",
-      "progress": 30,
+      "progress": 44,
       "completedLessons": [
         "l1",
         "l2",
-        "l3"
+        "l3",
+        "l4"
       ]
     },
     {
@@ -625,8 +643,11 @@
     {
       "userId": "3",
       "courseId": "4",
-      "progress": 0,
-      "completedLessons": []
+      "progress": 22,
+      "completedLessons": [
+        "l1",
+        "l2"
+      ]
     },
     {
       "userId": "1",
@@ -657,9 +678,55 @@
       "courseId": "4",
       "progress": 0,
       "completedLessons": []
+    },
+    {
+      "userId": "2",
+      "courseId": "1",
+      "progress": 0,
+      "completedLessons": []
+    },
+    {
+      "userId": "3",
+      "courseId": "1742791944339",
+      "progress": 0,
+      "completedLessons": []
+    },
+    {
+      "userId": "3",
+      "courseId": "3",
+      "progress": 0,
+      "completedLessons": []
+    },
+    {
+      "userId": "1742892188159",
+      "courseId": "3",
+      "progress": 0,
+      "completedLessons": []
+    },
+    {
+      "userId": "1742892188159",
+      "courseId": "1",
+      "progress": 0,
+      "completedLessons": []
+    },
+    {
+      "userId": "1742892188159",
+      "courseId": "2",
+      "progress": 0,
+      "completedLessons": []
     }
   ],
-  "carts": [],
+  "carts": [
+    {
+      "userId": "5",
+      "items": [
+        {
+          "courseId": "3",
+          "addedAt": "2025-03-25T08:28:15.690Z"
+        }
+      ]
+    }
+  ],
   "orders": [
     {
       "id": "1",
@@ -705,6 +772,33 @@
       "paymentMethod": "credit_card",
       "status": "completed",
       "createdAt": "2025-03-13T18:36:09.990Z"
+    },
+    {
+      "id": "1742890331439",
+      "userId": "3",
+      "courseId": "1742791944339",
+      "amount": 400,
+      "paymentMethod": "credit_card",
+      "status": "completed",
+      "createdAt": "2025-03-25T08:12:11.439Z"
+    },
+    {
+      "id": "1742892540798",
+      "userId": "1742892188159",
+      "courseId": "1",
+      "amount": 89.99,
+      "paymentMethod": "credit_card",
+      "status": "completed",
+      "createdAt": "2025-03-25T08:49:00.798Z"
+    },
+    {
+      "id": "1742892603365",
+      "userId": "1742892188159",
+      "courseId": "2",
+      "amount": 69.99,
+      "paymentMethod": "credit_card",
+      "status": "completed",
+      "createdAt": "2025-03-25T08:50:03.365Z"
     }
   ]
 }

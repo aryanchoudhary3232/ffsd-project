@@ -31,9 +31,9 @@ const UserController = {
 
  // Get user profile
 getUserProfile: (req, res) => {
-  if (!req.session.user) {
-    return res.redirect("/login");;
-  }
+  // if (!req.session.user) {
+  //   return res.redirect("/login");;
+  // }
 
   const userId = req.session.user.id;;
   const user = UserModel.getUserById(userId);;
