@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const bcrypt = require("bcryptjs");
+const db = require("../config/database");
 
 const dataPath = path.join(__dirname, "../data/data.json");
 
@@ -42,7 +43,7 @@ const UserModel = {
   },
 
   // Create new user
-  createUser: (userData) => {
+  createUser: async (userData) => {
     const data = readData();
 
     // Check if email already exists
@@ -53,9 +54,8 @@ const UserModel = {
     // Hash password
     const hashedPassword = userData.password;
 
-    // Create new user
-    const newUser = {
-      id: Date.now().toString(),
+    // Prepare user data
+    const userToSave = {
       name: userData.name,
       email: userData.email,
       password: hashedPassword,
@@ -65,13 +65,17 @@ const UserModel = {
       completedCourses: [],
     };
 
-    // Add user to data
-    data.users.push(newUser);
-    writeData(data);
-
-    // Return user without password
-    const { password, ...userWithoutPassword } = newUser;
-    return userWithoutPassword;
+    try {
+      // Use the database.js saveUser function to save to both SQLite and JSON
+      const result = await db.saveUser(userToSave);
+      
+      // Return user without password
+      const { password, ...userWithoutPassword } = result.user || userToSave;
+      return userWithoutPassword;
+    } catch (error) {
+      console.error("Error saving user:", error);
+      throw new Error("Failed to create user: " + error.message);
+    }
   },
 
   // Update user
@@ -215,7 +219,6 @@ const UserModel = {
   deleteUserById: (userId) => {
     console.log('Reached model');
     
-    const db = require("../config/database");
     const User = require("../models/User");
 
     return new Promise((resolve, reject) => {

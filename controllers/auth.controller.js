@@ -50,7 +50,7 @@ const AuthController = {
   },
 
   // Handle registration
-  register: (req, res) => {
+  register: async (req, res) => {
     const { name, email, password, confirmPassword, role } = req.body;
 
     // Validation
@@ -75,7 +75,7 @@ const AuthController = {
     }
 
     try {
-      const user = UserModel.createUser({
+      const user = await UserModel.createUser({
         name,
         email,
         password,
