@@ -405,6 +405,11 @@ const AdminController = {
         instructor:
           UserModel.getUserById(course.instructorId)?.name ||
           "Unknown Instructor",
+          // Sorting: Sorts courses by createdAt (descending, newest first), converting to Date objects for accurate comparison.
+// Slicing: Takes the top 5 entries.
+// Mapping: Adds the instructor’s name by looking up instructorId in UserModel; defaults to "Unknown Instructor" if not found.
+// Highlights the 5 most recently created courses, including who created them.
+// Enhances usability by linking courses to instructors.
       }));
 
     const totalStudents = users.filter(
@@ -422,11 +427,17 @@ const AdminController = {
           ? ((totalInstructors / totalUsers) * 100).toFixed(1)
           : 0,
       },
+      // Percentages: Computes the percentage of each role
+      //  relative to totalUsers, with a ternary operator to 
+      // handle division by zero (returns 0 if totalUsers is 0
+      // ). .toFixed(1) rounds to one decimal place.
       admins: {
         percentage: totalUsers
           ? ((totalAdmins / totalUsers) * 100).toFixed(1)
           : 0,
       },
+      // Provides a breakdown of user roles as percentages, useful for understanding the platform’s user composition (e.g., for pie charts in the UI).
+// 7. Stats Object
     };
 
     const stats = {
