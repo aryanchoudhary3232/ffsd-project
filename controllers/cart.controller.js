@@ -6,10 +6,10 @@ const OrderModel = require("../models/order.model");
 const CartController = {
   // Get cart page
   getCart: (req, res) => {
-    if (!req.session.user) {
-      req.flash("error_msg", "Please login to view your cart");
-      return res.redirect("/login");
-    }
+    // if (!req.session.user) {
+    //   req.flash("error_msg", "Please login to view your cart");
+    //   return res.redirect("/login");
+    // }
 
     const userId = req.session.user.id;
     const { items, total } = CartModel.getCartWithCourses(userId);
@@ -22,9 +22,9 @@ const CartController = {
 
   // Add to cart
   addToCart: (req, res) => {
-    if (!req.session.user) {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
-    }
+    // if (!req.session.user) {
+    //   return res.status(401).json({ success: false, message: "Unauthorized" });
+    // }
 
     const { courseId } = req.body;
     const userId = req.session.user.id;
@@ -39,9 +39,9 @@ const CartController = {
 
   // Remove from cart
   removeFromCart: (req, res) => {
-    if (!req.session.user) {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
-    }
+    // if (!req.session.user) {
+    //   return res.status(401).json({ success: false, message: "Unauthorized" });
+    // }
 
     const { courseId } = req.body;
     const userId = req.session.user.id;
@@ -56,10 +56,10 @@ const CartController = {
 
   // Get checkout page
   getCheckout: (req, res) => {
-    if (!req.session.user) {
-      req.flash("error_msg", "Please login to checkout");
-      return res.redirect("/login");
-    }
+    // if (!req.session.user) {
+    //   req.flash("error_msg", "Please login to checkout");
+    //   return res.redirect("/login");
+    // }
 
     const userId = req.session.user.id;
     const { items, total } = CartModel.getCartWithCourses(userId);
@@ -77,10 +77,10 @@ const CartController = {
 
   // Process payment
   processPayment: (req, res) => {
-    if (!req.session.user) {
-      req.flash("error_msg", "Please login to checkout");
-      return res.redirect("/login");
-    }
+    // if (!req.session.user) {
+    //   req.flash("error_msg", "Please login to checkout");
+    //   return res.redirect("/login");
+    // }
 
     const userId = req.session.user.id;
     const { paymentMethod } = req.body;

@@ -94,7 +94,7 @@ const CourseController = {
     try {
       const enrolled = UserModel.enrollUserInCourse(userId, courseId)
 
-      if (!enrolled) {
+      if (enrolled) {
         req.flash("info_msg", "You are already enrolled in this course")
       } else {
         req.flash("success_msg", "Successfully enrolled in the course")

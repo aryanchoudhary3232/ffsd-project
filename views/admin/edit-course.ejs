@@ -1,14 +1,14 @@
-<%- include('../partials/head', { title: 'Edit Course - SeekoBharat' }) %>
+<%- include('../partials/head', { title: course ? 'Edit Course - LearnHub' : 'Add New Course - LearnHub' }) %>
 <body class="bg-black text-white">
   <%- include('../partials/navbar') %>
 
   <div class="container mx-auto px-4 py-8">
     <!-- Header -->
     <div class="flex items-center mb-6">
-      <a href="/admin/courses/<%= course.id %>" class="text-gray-400 hover:text-gray-200 mr-4">
+      <a href="/admin/courses<%= course ? '/' + course.id : '' %>" class="text-gray-400 hover:text-gray-200 mr-4">
         <i class="fas fa-arrow-left"></i>
       </a>
-      <h1 class="text-2xl font-bold">Edit Course</h1>
+      <h1 class="text-2xl font-bold"><%= course ? 'Edit Course' : 'Add New Course' %></h1>
     </div>
     
     <!-- Alerts -->
@@ -24,13 +24,13 @@
     <% } %>
     
     <div class="bg-gray-800 rounded-lg shadow-md p-6">
-      <form action="/admin/courses/<%= course.id %>?_method=PUT" method="POST" enctype="multipart/form-data">
+      <form action="<%= course ? '/admin/courses/' + course.id + '?_method=PUT' : '/admin/courses' %>" method="POST" enctype="multipart/form-data">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Left Column -->
           <div>
             <div class="mb-4">
               <label for="title" class="block text-gray-300 mb-2">Course Title</label>
-              <input type="text" id="title" name="title" value="<%= course.title %>" required
+              <input type="text" id="title" name="title" value="<%= course ? course.title : '' %>" required
                 class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             
@@ -39,20 +39,20 @@
               <select id="category" name="category" required
                 class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">Select a category</option>
-                <option value="Web Development" <%= course.category === 'Web Development' ? 'selected' : '' %>>Web Development</option>
-                <option value="Mobile Development" <%= course.category === 'Mobile Development' ? 'selected' : '' %>>Mobile Development</option>
-                <option value="Data Science" <%= course.category === 'Data Science' ? 'selected' : '' %>>Data Science</option>
-                <option value="Machine Learning" <%= course.category === 'Machine Learning' ? 'selected' : '' %>>Machine Learning</option>
-                <option value="Game Development" <%= course.category === 'Game Development' ? 'selected' : '' %>>Game Development</option>
-                <option value="Business" <%= course.category === 'Business' ? 'selected' : '' %>>Business</option>
-                <option value="Design" <%= course.category === 'Design' ? 'selected' : '' %>>Design</option>
-                <option value="Other" <%= course.category === 'Other' ? 'selected' : '' %>>Other</option>
+                <option value="Web Development" <%= course && course.category === 'Web Development' ? 'selected' : '' %>>Web Development</option>
+                <option value="Mobile Development" <%= course && course.category === 'Mobile Development' ? 'selected' : '' %>>Mobile Development</option>
+                <option value="Data Science" <%= course && course.category === 'Data Science' ? 'selected' : '' %>>Data Science</option>
+                <option value="Machine Learning" <%= course && course.category === 'Machine Learning' ? 'selected' : '' %>>Machine Learning</option>
+                <option value="Game Development" <%= course && course.category === 'Game Development' ? 'selected' : '' %>>Game Development</option>
+                <option value="Business" <%= course && course.category === 'Business' ? 'selected' : '' %>>Business</option>
+                <option value="Design" <%= course && course.category === 'Design' ? 'selected' : '' %>>Design</option>
+                <option value="Other" <%= course && course.category === 'Other' ? 'selected' : '' %>>Other</option>
               </select>
             </div>
             
             <div class="mb-4">
               <label for="price" class="block text-gray-300 mb-2">Price ($)</label>
-              <input type="number" id="price" name="price" value="<%= course.price %>" min="0" step="0.01" required
+              <input type="number" id="price" name="price" value="<%= course ? course.price : '0' %>" min="0" step="0.01" required
                 class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             
@@ -60,15 +60,15 @@
               <label for="status" class="block text-gray-300 mb-2">Status</label>
               <select id="status" name="status" required
                 class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="draft" <%= course.status === 'draft' ? 'selected' : '' %>>Draft</option>
-                <option value="published" <%= course.status === 'published' ? 'selected' : '' %>>Published</option>
+                <option value="draft" <%= course && course.status === 'draft' ? 'selected' : '' %>>Draft</option>
+                <option value="published" <%= course && course.status === 'published' ? 'selected' : '' %>>Published</option>
               </select>
             </div>
             
             <div class="mb-4">
               <label class="block text-gray-300 mb-2">Featured Course</label>
               <label class="inline-flex items-center cursor-pointer">
-                <input type="checkbox" name="featured" <%= course.featured ? 'checked' : '' %> class="sr-only peer">
+                <input type="checkbox" name="featured" <%= course && course.featured ? 'checked' : '' %> class="sr-only peer">
                 <div class="relative w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-500 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
                 <span class="ml-2 text-sm font-medium text-gray-100">Feature on Homepage</span>
               </label>
@@ -79,19 +79,21 @@
           <div>
             <div class="mb-4">
               <label for="thumbnail" class="block text-gray-300 mb-2">Thumbnail Image</label>
-              <div class="mb-2">
-                <img src="<%= course.thumbnail %>" alt="Course thumbnail" class="w-full h-40 object-cover rounded-md mb-2">
-                <p class="text-sm text-gray-400">Current thumbnail</p>
-              </div>
+              <% if (course && course.thumbnail) { %>
+                <div class="mb-2">
+                  <img src="<%= course.thumbnail %>" alt="Course thumbnail" class="w-full h-40 object-cover rounded-md mb-2">
+                  <p class="text-sm text-gray-400">Current thumbnail</p>
+                </div>
+              <% } %>
               <input type="file" id="thumbnail" name="thumbnail" accept="image/*"
                 class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <p class="text-sm text-gray-400 mt-1">Leave empty to keep current thumbnail</p>
+              <p class="text-sm text-gray-400 mt-1"><%= course ? 'Leave empty to keep current thumbnail' : 'Upload a thumbnail for the course' %></p>
             </div>
             
             <div class="mb-4">
               <label for="description" class="block text-gray-300 mb-2">Course Description</label>
               <textarea id="description" name="description" rows="6" required
-                class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"><%= course.description %></textarea>
+                class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"><%= course ? course.description : '' %></textarea>
             </div>
           </div>
         </div>
@@ -102,11 +104,11 @@
         </div>
         
         <div class="flex justify-end space-x-4 mt-6">
-          <a href="/admin/courses/<%= course.id %>" class="bg-gray-700 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition-colors">
+          <a href="/admin/courses<%= course ? '/' + course.id : '' %>" class="bg-gray-700 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition-colors">
             Cancel
           </a>
           <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors">
-            Save Changes
+            <%= course ? 'Save Changes' : 'Create Course' %>
           </button>
         </div>
       </form>

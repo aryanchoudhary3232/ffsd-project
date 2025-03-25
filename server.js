@@ -31,7 +31,7 @@ app.use(bodyParser.json());
 app.use(methodOverride("_method"));
 app.use(
   session({
-    secret: "learnhub-secret-key",
+    secret: "seekobharat-secret-key",
     resave: false,
     saveUninitialized: true,
     cookie: { maxAge: 24 * 60 * 60 * 1000 }, // 24 hours
@@ -153,10 +153,6 @@ app.post("/contact-us/submit", (req, res) => {
     // Example with a theoretical contactModel:
     // const contactModel = require('./models/contact.model');
     // contactModel.saveContactMessage({ name, email, subject, message });
-    
-    // If using nodemailer for email notifications:
-    // const mailer = require('./utils/mailer');
-    // mailer.sendContactNotification({ name, email, subject, message });
     
     // Flash two separate messages for submission and email confirmation
     req.flash("success_msg", "Thank you for your message. We'll be in touch soon!");
