@@ -263,30 +263,25 @@ const path = require("path");
 const dataFilePath = path.join(__dirname, "../data.json");
 
 const CourseModel = {
-  // Helper function to read data from data.json
   readData() {
     const rawData = fs.readFileSync(dataFilePath);
     return JSON.parse(rawData);
   },
 
-  // Helper function to write data to data.json
   writeData(data) {
     fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
   },
 
-  // Get all courses
   getAllCourses() {
     const data = this.readData();
     return data.courses || [];
   },
 
-  // Get a course by ID
   getCourseById(courseId) {
     const courses = this.getAllCourses();
     return courses.find((course) => course.id === courseId);
   },
 
-  // Add a new course
   addCourse(newCourse) {
     const data = this.readData();
     if (!data.courses) {
@@ -296,7 +291,6 @@ const CourseModel = {
     this.writeData(data);
   },
 
-  // Update an existing course
   updateCourse(courseId, updatedCourse) {
     const data = this.readData();
     const courses = data.courses || [];
@@ -308,7 +302,6 @@ const CourseModel = {
     }
   },
 
-  // Delete a course
   deleteCourse(courseId) {
     const data = this.readData();
     const courses = data.courses || [];
@@ -316,10 +309,14 @@ const CourseModel = {
     this.writeData(data);
   },
 
-  // Get featured courses
   getFeaturedCourses() {
     const courses = this.getAllCourses();
     return courses.filter((course) => course.featured);
+  },
+
+  getAllCategories() {
+    const courses = this.getAllCourses();
+    return [...new Set(courses.map((course) => course.category))];
   },
 };
 
