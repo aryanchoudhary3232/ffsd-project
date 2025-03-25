@@ -83,6 +83,56 @@
       "joinDate": "2025-03-15",
       "enrolledCourses": [],
       "completedCourses": []
+    },
+    {
+      "id": "1742896508686",
+      "name": "sarah here",
+      "email": "sarah1@example.com",
+      "password": "$2b$10$QqJHK19YQ9sydscDQMvC8eJV3zv1n00AqYKwc/m9w5RSTAzD4jzCe",
+      "role": "student",
+      "joinDate": "2025-03-25",
+      "enrolledCourses": [],
+      "completedCourses": []
+    },
+    {
+      "id": "1742896718754",
+      "name": "sarah2",
+      "email": "sarah2@example.com",
+      "password": "$2b$10$pwVJUWqGK3s.EBoh6WBMQ.5JgX.ZY7xLlvA9PvRxGecJTjP3qBy/W",
+      "role": "student",
+      "joinDate": "2025-03-25",
+      "enrolledCourses": [],
+      "completedCourses": []
+    },
+    {
+      "id": "1742896865238",
+      "name": "sarah3",
+      "email": "sarah3@example.com",
+      "password": "$2b$10$bcuf2u3qvUt3RvWXMidSpuKM7YSVrLcRp9.Fwvf1FEPnwyXFw0uqi",
+      "role": "student",
+      "joinDate": "2025-03-25",
+      "enrolledCourses": [],
+      "completedCourses": []
+    },
+    {
+      "id": "1742897396192",
+      "name": "sarah5",
+      "email": "sarah5@example.com",
+      "password": "$2b$10$aRutmPPd0iAf5JoZHo1jTOF2jfC5fl3qHJqCm5GslsB0PbZo8jzym",
+      "role": "student",
+      "joinDate": "2025-03-25",
+      "enrolledCourses": [],
+      "completedCourses": []
+    },
+    {
+      "id": "1742897412920",
+      "name": "sarah6",
+      "email": "sarah6@example.com",
+      "password": "$2b$10$mIhx1oVIopqgX3yYrThS2uML8AZgpX4/sY9EQHsFsUTgf2UVADpX6",
+      "role": "student",
+      "joinDate": "2025-03-25",
+      "enrolledCourses": [],
+      "completedCourses": []
     }
   ],
   "courses": [
