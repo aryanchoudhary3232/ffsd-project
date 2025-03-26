@@ -16,7 +16,10 @@
       </div>
     <% } %>
 
-    <form action="<%= isEdit ? `/admin/courses/${course.id}/edit` : '/admin/courses/new' %>" method="POST" enctype="multipart/form-data" class="bg-gray-800 p-6 rounded-lg">
+    <form action="<%= isEdit ? `/instructor/courses/${course.id}` : '/instructor/courses/new' %>" method="POST" enctype="multipart/form-data" class="bg-gray-800 p-6 rounded-lg">
+      <% if (isEdit) { %>
+        <input type="hidden" name="_method" value="PUT">
+      <% } %>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Title -->
         <div>
@@ -28,7 +31,7 @@
         <!-- Category -->
         <div>
           <label for="category" class="block text-sm font-medium text-gray-300">Category</label>
-          <input type="text" id="category" name="category" required
+          <input type="text" id="category" name="category" value="<%= isEdit ? course.category : '' %>" required
             class="bg-gray-800 text-white rounded-md px-3 py-2 w-full border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             list="category-list">
           <datalist id="category-list">
@@ -69,7 +72,7 @@
         <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
           <%= isEdit ? 'Update Course' : 'Create Course' %>
         </button>
-        <a href="/admin/courses" class="bg-gray-700 text-gray-300 px-4 py-2 rounded-md hover:bg-gray-600 transition-colors">Cancel</a>
+        <a href="/instructor/courses" class="bg-gray-700 text-gray-300 px-4 py-2 rounded-md hover:bg-gray-600 transition-colors">Cancel</a>
       </div>
     </form>
   </div>

@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const authRoutes = require('./routes/auth');
+const instructorRoutes = require('./routes/instructor.routes');
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use(session({
 
 // Routes
 app.use('/auth', authRoutes);
+app.use('/instructor', instructorRoutes);
 
 // Other routes and middleware
 // ...existing code...

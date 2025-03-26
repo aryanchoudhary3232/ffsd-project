@@ -19,13 +19,16 @@ router.put("/courses/:id", isAuthenticated, isInstructor, InstructorController.u
 
 // Course content management
 router.get("/courses/:id/content", isAuthenticated, isInstructor, InstructorController.getCourseContentPage)
+
+// Module management
 router.post("/courses/:id/modules", isAuthenticated, isInstructor, InstructorController.addModule)
-router.post(
-  "/courses/:courseId/modules/:moduleId/lessons",
-  isAuthenticated,
-  isInstructor,
-  InstructorController.addLesson,
-)
+router.put("/courses/:id/modules/:moduleId", isAuthenticated, isInstructor, InstructorController.updateModule)
+router.delete("/courses/:id/modules/:moduleId", isAuthenticated, isInstructor, InstructorController.deleteModule)
+
+// Lesson management
+router.post("/courses/:courseId/modules/:moduleId/lessons", isAuthenticated, isInstructor, InstructorController.addLesson)
+router.put("/courses/:id/modules/:moduleId/lessons/:lessonId", isAuthenticated, isInstructor, InstructorController.updateLesson)
+router.delete("/courses/:id/modules/:moduleId/lessons/:lessonId", isAuthenticated, isInstructor, InstructorController.deleteLesson)
 
 // Instructor analytics
 router.get("/analytics", isAuthenticated, isInstructor, InstructorController.getInstructorAnalytics)

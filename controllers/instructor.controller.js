@@ -272,7 +272,10 @@ const InstructorController = {
 
   addModule: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
-      return res.redirect("/login");
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized"
+      });
     }
 
     const courseId = req.params.id;
@@ -283,18 +286,33 @@ const InstructorController = {
       const course = CourseModel.getCourseById(courseId);
 
       if (!course || course.instructorId !== instructorId) {
-        req.flash(
-          "error_msg",
-          "Course not found or you do not have permission to edit it"
-        );
-        return res.redirect("/instructor/courses");
+        return res.status(403).json({
+          success: false, 
+          message: "Course not found or you do not have permission to edit it"
+        });
       }
 
-      CourseModel.addModuleToCourse(courseId, { title });
+      const newModule = CourseModel.addModuleToCourse(courseId, { title });
 
+      // Return JSON response for Ajax requests
+      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        return res.json({
+          success: true,
+          message: "Module added successfully",
+          module: newModule
+        });
+      }
+
+      // Otherwise use regular redirect with flash message
       req.flash("success_msg", "Module added successfully");
       res.redirect(`/instructor/courses/${courseId}/content`);
     } catch (error) {
+      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        return res.status(500).json({
+          success: false,
+          message: error.message
+        });
+      }
       req.flash("error_msg", error.message);
       res.redirect(`/instructor/courses/${courseId}/content`);
     }
@@ -302,7 +320,10 @@ const InstructorController = {
 
   updateModule: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
-      return res.redirect("/login");
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized"
+      });
     }
 
     const { id: courseId, moduleId } = req.params;
@@ -313,18 +334,19 @@ const InstructorController = {
       const course = CourseModel.getCourseById(courseId);
 
       if (!course || course.instructorId !== instructorId) {
-        req.flash(
-          "error_msg",
-          "Course not found or you do not have permission to edit it"
-        );
-        return res.redirect("/instructor/courses");
+        return res.status(403).json({
+          success: false,
+          message: "Course not found or you do not have permission to edit it"
+        });
       }
 
       const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
 
       if (moduleIndex === -1) {
-        req.flash("error_msg", "Module not found");
-        return res.redirect(`/instructor/courses/${courseId}/content`);
+        return res.status(404).json({
+          success: false,
+          message: "Module not found"
+        });
       }
 
       course.modules[moduleIndex].title = title;
@@ -332,9 +354,25 @@ const InstructorController = {
 
       CourseModel.updateCourse(courseId, { modules: course.modules });
 
+      // Return JSON response for Ajax requests
+      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        return res.json({
+          success: true,
+          message: "Module updated successfully",
+          module: course.modules[moduleIndex]
+        });
+      }
+
+      // Otherwise use regular redirect with flash message
       req.flash("success_msg", "Module updated successfully");
       res.redirect(`/instructor/courses/${courseId}/content`);
     } catch (error) {
+      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        return res.status(500).json({
+          success: false,
+          message: error.message
+        });
+      }
       req.flash("error_msg", error.message);
       res.redirect(`/instructor/courses/${courseId}/content`);
     }
@@ -342,7 +380,10 @@ const InstructorController = {
 
   deleteModule: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
-      return res.redirect("/login");
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized"
+      });
     }
 
     const { id: courseId, moduleId } = req.params;
@@ -352,28 +393,49 @@ const InstructorController = {
       const course = CourseModel.getCourseById(courseId);
 
       if (!course || course.instructorId !== instructorId) {
-        req.flash(
-          "error_msg",
-          "Course not found or you do not have permission to edit it"
-        );
-        return res.redirect("/instructor/courses");
+        return res.status(403).json({
+          success: false,
+          message: "Course not found or you do not have permission to edit it"
+        });
       }
 
       const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
 
       if (moduleIndex === -1) {
-        req.flash("error_msg", "Module not found");
-        return res.redirect(`/instructor/courses/${courseId}/content`);
+        return res.status(404).json({
+          success: false,
+          message: "Module not found"
+        });
       }
 
+      // Store the module before removing it
+      const deletedModule = course.modules[moduleIndex];
+      
+      // Remove the module
       course.modules.splice(moduleIndex, 1);
       course.updatedAt = new Date().toISOString();
 
       CourseModel.updateCourse(courseId, { modules: course.modules });
 
+      // Return JSON response for Ajax requests
+      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        return res.json({
+          success: true,
+          message: "Module deleted successfully",
+          moduleId: deletedModule.id
+        });
+      }
+
+      // Otherwise use regular redirect with flash message
       req.flash("success_msg", "Module deleted successfully");
       res.redirect(`/instructor/courses/${courseId}/content`);
     } catch (error) {
+      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        return res.status(500).json({
+          success: false,
+          message: error.message
+        });
+      }
       req.flash("error_msg", error.message);
       res.redirect(`/instructor/courses/${courseId}/content`);
     }
@@ -381,14 +443,23 @@ const InstructorController = {
 
   addLesson: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
-      return res.redirect("/login");
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized"
+      });
     }
 
-    const { id: courseId, moduleId } = req.params;
+    const { courseId, moduleId } = req.params;
     const instructorId = req.session.user.id;
 
     upload.single("file")(req, res, (err) => {
       if (err) {
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+          return res.status(400).json({
+            success: false,
+            message: "Error uploading file"
+          });
+        }
         req.flash("error_msg", "Error uploading file");
         return res.redirect(`/instructor/courses/${courseId}/content`);
       }
@@ -399,16 +470,25 @@ const InstructorController = {
         const course = CourseModel.getCourseById(courseId);
 
         if (!course || course.instructorId !== instructorId) {
-          req.flash(
-            "error_msg",
-            "Course not found or you do not have permission to edit it"
-          );
+          if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.status(403).json({
+              success: false,
+              message: "Course not found or you do not have permission to edit it"
+            });
+          }
+          req.flash("error_msg", "Course not found or you do not have permission to edit it");
           return res.redirect("/instructor/courses");
         }
 
         const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
 
         if (moduleIndex === -1) {
+          if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.status(404).json({
+              success: false,
+              message: "Module not found"
+            });
+          }
           req.flash("error_msg", "Module not found");
           return res.redirect(`/instructor/courses/${courseId}/content`);
         }
@@ -426,9 +506,25 @@ const InstructorController = {
 
         CourseModel.updateCourse(courseId, { modules: course.modules });
 
+        // Return JSON response for Ajax requests
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+          return res.json({
+            success: true,
+            message: "Lesson added successfully",
+            lesson: newLesson
+          });
+        }
+
+        // Otherwise use regular redirect with flash message
         req.flash("success_msg", "Lesson added successfully");
         res.redirect(`/instructor/courses/${courseId}/content`);
       } catch (error) {
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+          return res.status(500).json({
+            success: false,
+            message: error.message
+          });
+        }
         req.flash("error_msg", error.message);
         res.redirect(`/instructor/courses/${courseId}/content`);
       }
@@ -437,7 +533,10 @@ const InstructorController = {
 
   updateLesson: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
-      return res.redirect("/login");
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized"
+      });
     }
 
     const { id: courseId, moduleId, lessonId } = req.params;
@@ -445,6 +544,12 @@ const InstructorController = {
 
     upload.single("file")(req, res, (err) => {
       if (err) {
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+          return res.status(400).json({
+            success: false,
+            message: "Error uploading file"
+          });
+        }
         req.flash("error_msg", "Error uploading file");
         return res.redirect(`/instructor/courses/${courseId}/content`);
       }
@@ -455,16 +560,25 @@ const InstructorController = {
         const course = CourseModel.getCourseById(courseId);
 
         if (!course || course.instructorId !== instructorId) {
-          req.flash(
-            "error_msg",
-            "Course not found or you do not have permission to edit it"
-          );
+          if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.status(403).json({
+              success: false,
+              message: "Course not found or you do not have permission to edit it"
+            });
+          }
+          req.flash("error_msg", "Course not found or you do not have permission to edit it");
           return res.redirect("/instructor/courses");
         }
 
         const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
 
         if (moduleIndex === -1) {
+          if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.status(404).json({
+              success: false,
+              message: "Module not found"
+            });
+          }
           req.flash("error_msg", "Module not found");
           return res.redirect(`/instructor/courses/${courseId}/content`);
         }
@@ -474,11 +588,17 @@ const InstructorController = {
         );
 
         if (lessonIndex === -1) {
+          if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.status(404).json({
+              success: false,
+              message: "Lesson not found"
+            });
+          }
           req.flash("error_msg", "Lesson not found");
           return res.redirect(`/instructor/courses/${courseId}/content`);
         }
 
-        course.modules[moduleIndex].lessons[lessonIndex] = {
+        const updatedLesson = {
           ...course.modules[moduleIndex].lessons[lessonIndex],
           title,
           type,
@@ -488,13 +608,30 @@ const InstructorController = {
             : course.modules[moduleIndex].lessons[lessonIndex].file,
         };
 
+        course.modules[moduleIndex].lessons[lessonIndex] = updatedLesson;
         course.updatedAt = new Date().toISOString();
 
         CourseModel.updateCourse(courseId, { modules: course.modules });
 
+        // Return JSON response for Ajax requests
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+          return res.json({
+            success: true,
+            message: "Lesson updated successfully",
+            lesson: updatedLesson
+          });
+        }
+
+        // Otherwise use regular redirect with flash message
         req.flash("success_msg", "Lesson updated successfully");
         res.redirect(`/instructor/courses/${courseId}/content`);
       } catch (error) {
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+          return res.status(500).json({
+            success: false,
+            message: error.message
+          });
+        }
         req.flash("error_msg", error.message);
         res.redirect(`/instructor/courses/${courseId}/content`);
       }
@@ -503,7 +640,10 @@ const InstructorController = {
 
   deleteLesson: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
-      return res.redirect("/login");
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized"
+      });
     }
 
     const { id: courseId, moduleId, lessonId } = req.params;
@@ -513,16 +653,25 @@ const InstructorController = {
       const course = CourseModel.getCourseById(courseId);
 
       if (!course || course.instructorId !== instructorId) {
-        req.flash(
-          "error_msg",
-          "Course not found or you do not have permission to edit it"
-        );
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+          return res.status(403).json({
+            success: false,
+            message: "Course not found or you do not have permission to edit it"
+          });
+        }
+        req.flash("error_msg", "Course not found or you do not have permission to edit it");
         return res.redirect("/instructor/courses");
       }
 
       const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
 
       if (moduleIndex === -1) {
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+          return res.status(404).json({
+            success: false,
+            message: "Module not found"
+          });
+        }
         req.flash("error_msg", "Module not found");
         return res.redirect(`/instructor/courses/${courseId}/content`);
       }
@@ -532,18 +681,44 @@ const InstructorController = {
       );
 
       if (lessonIndex === -1) {
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+          return res.status(404).json({
+            success: false,
+            message: "Lesson not found"
+          });
+        }
         req.flash("error_msg", "Lesson not found");
         return res.redirect(`/instructor/courses/${courseId}/content`);
       }
 
+      // Store the lesson before removing it
+      const deletedLesson = course.modules[moduleIndex].lessons[lessonIndex];
+
+      // Remove the lesson
       course.modules[moduleIndex].lessons.splice(lessonIndex, 1);
       course.updatedAt = new Date().toISOString();
 
       CourseModel.updateCourse(courseId, { modules: course.modules });
 
+      // Return JSON response for Ajax requests
+      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        return res.json({
+          success: true,
+          message: "Lesson deleted successfully",
+          lessonId: deletedLesson.id
+        });
+      }
+
+      // Otherwise use regular redirect with flash message
       req.flash("success_msg", "Lesson deleted successfully");
       res.redirect(`/instructor/courses/${courseId}/content`);
     } catch (error) {
+      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        return res.status(500).json({
+          success: false,
+          message: error.message
+        });
+      }
       req.flash("error_msg", error.message);
       res.redirect(`/instructor/courses/${courseId}/content`);
     }
