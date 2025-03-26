@@ -187,6 +187,62 @@
         "4"
       ],
       "completedCourses": []
+    },
+    {
+      "id": "1742922014299",
+      "name": "snickerdoodle",
+      "email": "student@gmail.com",
+      "password": "123456",
+      "role": "student",
+      "joinDate": "2025-03-25",
+      "enrolledCourses": [
+        "3",
+        "4",
+        "2"
+      ],
+      "completedCourses": []
+    },
+    {
+      "id": "1743008553287",
+      "name": "student1",
+      "email": "rr@g.com",
+      "password": "123456",
+      "role": "student",
+      "joinDate": "2025-03-26",
+      "enrolledCourses": [
+        "4"
+      ],
+      "completedCourses": []
+    },
+    {
+      "id": "1743009397679",
+      "name": "snickerdoodlewtrd",
+      "email": "snickerdoodle@gmail",
+      "password": "123456",
+      "role": "student",
+      "joinDate": "2025-03-26",
+      "enrolledCourses": [],
+      "completedCourses": []
+    },
+    {
+      "id": "1743009444381",
+      "name": "trial",
+      "email": "trial@gmail",
+      "password": "123456",
+      "role": "student",
+      "joinDate": "2025-03-26",
+      "enrolledCourses": [],
+      "completedCourses": []
+    },
+    {
+      "id": "1743011974691",
+      "name": "Sudhan P",
+      "email": "sudhanp2004@gmail.com",
+      "password": "123456",
+      "role": "student",
+      "joinDate": "2025-03-26",
+      "enrolledCourses": [],
+      "completedCourses": []
     }
   ],
   "courses": [
@@ -871,6 +927,49 @@
       "courseId": "1743013827800",
       "progress": 0,
       "completedLessons": []
+    },
+    {
+      "userId": "1742922014299",
+      "courseId": "3",
+      "progress": 100,
+      "completedLessons": [
+        "l3",
+        "l4",
+        "l1",
+        "l5",
+        "l6",
+        "l7",
+        "l9",
+        "l2",
+        "l8"
+      ]
+    },
+    {
+      "userId": "1742922014299",
+      "courseId": "4",
+      "progress": 22,
+      "completedLessons": [
+        "l1",
+        "l2"
+      ]
+    },
+    {
+      "userId": "1742922014299",
+      "courseId": "2",
+      "progress": 22,
+      "completedLessons": [
+        "l1",
+        "l2"
+      ]
+    },
+    {
+      "userId": "1743008553287",
+      "courseId": "4",
+      "progress": 22,
+      "completedLessons": [
+        "l1",
+        "l2"
+      ]
     }
   ],
   "carts": [
@@ -974,6 +1073,15 @@
       "paymentMethod": "credit_card",
       "status": "completed",
       "createdAt": "2025-03-26T18:18:29.464Z"
+    },
+    {
+      "id": "1743005510522",
+      "userId": "1742922014299",
+      "courseId": "4",
+      "amount": 74.99,
+      "paymentMethod": "paypal",
+      "status": "completed",
+      "createdAt": "2025-03-26T16:11:50.522Z"
     }
   ]
 }

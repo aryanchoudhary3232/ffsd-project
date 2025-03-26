@@ -1,20 +1,20 @@
-<nav class="bg-gray-900 shadow-md">
+<nav class="bg-gray-900 shadow-md text-white">
   <div class="container mx-auto px-4">
     <div class="flex justify-between items-center py-4">
       <a href="/" class="text-2xl font-bold text-primary">SeekoBharat</a>
-      <div class="hidden md:flex space-x-4">
+      <div class="hidden md:flex space-x-4  text-white">
         <a href="/courses" class="nav-link">Courses</a>
         <% if (user) { %>
-        <a href="/dashboard" class="nav-link">Dashboard</a>
-        <a href="/user/profile" class="nav-link">Profile</a>
+        <a href="/dashboard" class="nav-link text-white">Dashboard</a>
+        <a href="/user/profile" class="nav-link text-white">Profile</a>
         <% if (user.role === 'student'){ %>
-        <a href="/cart" class="nav-link">Cart</a>
+        <a href="/cart" class="nav-link text-white">Cart</a>
         <% } else { %> <% } %>
-        <a href="/logout" class="nav-link">Logout</a>
+        <a href="/logout" class="nav-link text-white">Logout</a>
 
         <% } else { %>
-        <a href="/login" class="nav-link">Login</a>
-        <a href="/register" class="nav-link">Register</a>
+        <a href="/login" class="nav-link text-white">Login</a>
+        <a href="/register" class="nav-link text-white">Register</a>
         <% } %>
       </div>
       <div class="md:hidden">
@@ -28,25 +28,25 @@
     </div>
   </div>
   <div id="mobile-menu" class="hidden md:hidden">
-    <a href="/courses" class="block py-2 px-4 text-sm hover:bg-gray-600"
+    <a href="/courses" class="block py-2 px-4 text-sm hover:bg-gray-600 text-white"
       >Courses</a
     >
     <% if (user) { %>
-    <a href="/dashboard" class="block py-2 px-4 text-sm hover:bg-gray-600"
+    <a href="/dashboard" class="block py-2 px-4 text-sm hover:bg-gray-600 text-white"
       >Dashboard</a
     >
-    <a href="/user/profile" class="block py-2 px-4 text-sm hover:bg-gray-600"
+    <a href="/user/profile" class="block py-2 px-4 text-sm hover:bg-gray-600 text-white"
       >Profile</a
     >
     <% if (user.role === 'student'){ %>
-    <a href="/cart" class="block py-2 px-4 text-sm hover:bg-gray-600">Cart</a>
+    <a href="/cart" class="block py-2 px-4 text-sm hover:bg-gray-600 text-white">Cart</a>
     <% } else { %> <% } %>
-    <a href="/logout" class="block py-2 px-4 text-sm hover:bg-gray-600"
+    <a href="/logout" class="block py-2 px-4 text-sm hover:bg-gray-600 text-white"
       >Logout</a
     >
     <% } else { %>
-    <a href="/login" class="block py-2 px-4 text-sm hover:bg-gray-100">Login</a>
-    <a href="/register" class="block py-2 px-4 text-sm hover:bg-gray-100"
+    <a href="/login" class="block py-2 px-4 text-sm hover:bg-gray-100 text-white">Login</a>
+    <a href="/register" class="block py-2 px-4 text-sm hover:bg-gray-100 text-white"
       >Register</a
     >
     <% } %>
