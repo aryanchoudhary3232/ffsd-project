@@ -313,6 +313,7 @@ const InstructorController = {
           message: error.message
         });
       }
+      
       req.flash("error_msg", error.message);
       res.redirect(`/instructor/courses/${courseId}/content`);
     }
@@ -436,6 +437,8 @@ const InstructorController = {
           message: error.message
         });
       }
+      
+      // Make sure to set the error flash message for non-Ajax requests
       req.flash("error_msg", error.message);
       res.redirect(`/instructor/courses/${courseId}/content`);
     }

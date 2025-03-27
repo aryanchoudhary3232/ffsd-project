@@ -52,7 +52,9 @@
       "password": "123456",
       "role": "instructor",
       "joinDate": "2023-02-15",
-      "enrolledCourses": [],
+      "enrolledCourses": [
+        "1742791944339"
+      ],
       "completedCourses": []
     },
     {
@@ -241,6 +243,26 @@
       "password": "123456",
       "role": "student",
       "joinDate": "2025-03-26",
+      "enrolledCourses": [],
+      "completedCourses": []
+    },
+    {
+      "id": "1743023262257",
+      "name": "asdhqeqwe",
+      "email": "asdasdas@asjdasda.asdad",
+      "password": "123456",
+      "role": "student",
+      "joinDate": "2025-03-26",
+      "enrolledCourses": [],
+      "completedCourses": []
+    },
+    {
+      "id": "1743050583735",
+      "name": "saraheigh",
+      "email": "sarah8@example.com",
+      "password": "123456",
+      "role": "student",
+      "joinDate": "2025-03-27",
       "enrolledCourses": [],
       "completedCourses": []
     }
@@ -727,14 +749,29 @@
       "instructor": "Michael Wilson",
       "thumbnail": "/uploads/1742791944282-Screenshot 2025-03-04 at 22-50-34 Checkout - GameSir Official Store.png",
       "rating": 0,
-      "students": 0,
+      "students": 3,
       "createdAt": "2025-03-24T04:52:24.339Z",
-      "updatedAt": "2025-03-24T05:13:38.561Z",
+      "updatedAt": "2025-03-27T06:11:44.561Z",
       "modules": [
         {
-          "id": "1742793218561",
-          "title": "sadasd",
-          "lessons": []
+          "id": "1743055487619",
+          "title": "now fixed",
+          "lessons": [
+            {
+              "id": "1743055507288",
+              "title": "here is a lesson",
+              "type": "video",
+              "duration": "2:20",
+              "file": "/uploads/1743055507212-video3.mp4"
+            },
+            {
+              "id": "1743055904561",
+              "title": "fixed lesson",
+              "type": "video",
+              "duration": "4:30",
+              "file": "/uploads/1743055904485-video.mp4"
+            }
+          ]
         }
       ],
       "featured": false
@@ -969,6 +1006,16 @@
       "completedLessons": [
         "l1",
         "l2"
+      ]
+    },
+    {
+      "userId": "4",
+      "courseId": "1742791944339",
+      "progress": 150,
+      "completedLessons": [
+        "1743055320322",
+        "1743055507288",
+        "1743055904561"
       ]
     }
   ],
