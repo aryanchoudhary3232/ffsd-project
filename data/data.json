@@ -267,6 +267,26 @@
       "joinDate": "2025-03-27",
       "enrolledCourses": [],
       "completedCourses": []
+    },
+    {
+      "id": "1743065261157",
+      "name": "testboy",
+      "email": "test@gmail.com",
+      "password": "123456",
+      "role": "student",
+      "joinDate": "2025-03-27",
+      "enrolledCourses": [],
+      "completedCourses": []
+    },
+    {
+      "id": "1743065376410",
+      "name": "testboy",
+      "email": "test1@gmail.com",
+      "password": "123456",
+      "role": "student",
+      "joinDate": "2025-03-27",
+      "enrolledCourses": [],
+      "completedCourses": []
     }
   ],
   "courses": [

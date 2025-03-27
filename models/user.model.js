@@ -95,7 +95,7 @@ const UserModel = {
 
     // If password is provided, hash it
     if (userData.password) {
-      data.users[userIndex].password = bcrypt.hashSync(userData.password, 10);
+      data.users[userIndex].password = userData.password;
     }
 
     writeData(data);

@@ -13,7 +13,7 @@ const dataJsonPath = path.join(__dirname, '../data/data.json');
 
 // Create a database connection
 const dbPath = path.join(__dirname, '../data/users.db');
-const db = new sqlite3.Database("dbPath", (err) => {
+const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('Error connecting to database:', err.message);
     } else {
