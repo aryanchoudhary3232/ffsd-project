@@ -15,7 +15,7 @@ router.post("/courses/new", isAuthenticated, isInstructor, InstructorController.
 
 // Edit course
 router.get("/courses/:id/edit", isAuthenticated, isInstructor, InstructorController.getEditCourseForm)
-router.put("/courses/:id", isAuthenticated, isInstructor, InstructorController.updateCourse)
+router.post("/courses/:id", isAuthenticated, isInstructor, InstructorController.updateCourse)
 
 // Course content management
 router.get("/courses/:id/content", isAuthenticated, isInstructor, InstructorController.getCourseContentPage)

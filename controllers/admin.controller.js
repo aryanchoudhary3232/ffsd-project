@@ -197,7 +197,7 @@ const AdminController = {
         courses.sort((a, b) => a.price - b.price);
         break;
       case "price-high":
-        courses.sort((a, b) => b.price - b.price);
+        courses.sort((a, b) => b.price - a.price);
         break;
       default:
         courses.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -316,7 +316,7 @@ const AdminController = {
       modules: [],
     };
 
-    CourseModel.addCourse(newCourse);
+    CourseModel.createCourse(newCourse);
     req.flash("success_msg", "Course created successfully");
     res.redirect("/admin/courses");
   },

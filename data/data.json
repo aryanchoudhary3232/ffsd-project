@@ -295,14 +295,14 @@
       "title": "Complete Web Development Bootcamp",
       "description": "Learn web development from scratch with this comprehensive bootcamp covering HTML, CSS, JavaScript, React, Node.js, and more.",
       "category": "Web Development",
-      "price": 89.99,
+      "price": 59.99,
       "instructorId": "2",
       "instructor": "Jane Smith",
       "thumbnail": "/img/courses/web-dev.jpg",
       "rating": 4.8,
-      "students": 1245,
+      "students": 4,
       "createdAt": "2023-01-20",
-      "updatedAt": "2023-10-15",
+      "updatedAt": "2025-03-27T09:35:24.134Z",
       "featured": true,
       "modules": [
         {
