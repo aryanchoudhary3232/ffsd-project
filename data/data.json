@@ -25,7 +25,8 @@
       "enrolledCourses": [
         "4",
         "1",
-        "1743013827800"
+        "1743013827800",
+        "1742791944339"
       ],
       "completedCourses": []
     },
@@ -40,8 +41,8 @@
         "1",
         "2",
         "4",
-        "1742791944339",
-        "3"
+        "3",
+        "1742791944339"
       ],
       "completedCourses": []
     },
@@ -302,20 +303,13 @@
       "rating": 4.8,
       "students": 4,
       "createdAt": "2023-01-20",
-      "updatedAt": "2025-03-27T09:35:24.134Z",
+      "updatedAt": "2025-03-27T17:49:58.478Z",
       "featured": true,
       "modules": [
         {
           "id": "m1",
           "title": "Introduction to Web Development",
           "lessons": [
-            {
-              "id": "l1",
-              "title": "Course Overview",
-              "type": "video",
-              "duration": "10:15",
-              "file": "/video/video1.mp4"
-            },
             {
               "id": "l2",
               "title": "Setting Up Your Development Environment",
@@ -798,6 +792,22 @@
       ],
       "featured": false,
       "status": "draft"
+    },
+    {
+      "id": "1743159420560",
+      "title": "abcd423434@",
+      "description": "fgfdsfgdszd",
+      "category": "fdff",
+      "price": 132,
+      "instructorId": "2",
+      "instructor": "Jane",
+      "thumbnail": "/uploads/1743159420531-IMG_20250324_235113.jpg",
+      "rating": 0,
+      "students": 0,
+      "createdAt": "2025-03-28T10:57:00.560Z",
+      "updatedAt": "2025-03-28T10:57:00.560Z",
+      "modules": [],
+      "featured": false
     }
   ],
   "progress": [
@@ -898,8 +908,11 @@
     {
       "userId": "3",
       "courseId": "1742791944339",
-      "progress": 0,
-      "completedLessons": []
+      "progress": 100,
+      "completedLessons": [
+        "1743055507288",
+        "1743055904561"
+      ]
     },
     {
       "userId": "3",
@@ -1022,6 +1035,18 @@
         "1743055507288",
         "1743055904561"
       ]
+    },
+    {
+      "userId": "3",
+      "courseId": "1742791944339",
+      "progress": 0,
+      "completedLessons": []
+    },
+    {
+      "userId": "2",
+      "courseId": "1742791944339",
+      "progress": 0,
+      "completedLessons": []
     }
   ],
   "carts": [
@@ -1143,6 +1168,24 @@
       "paymentMethod": "credit_card",
       "status": "completed",
       "createdAt": "2025-03-27T08:36:45.199Z"
+    },
+    {
+      "id": "1743073259354",
+      "userId": "3",
+      "courseId": "1742791944339",
+      "amount": 40,
+      "paymentMethod": "credit_card",
+      "status": "completed",
+      "createdAt": "2025-03-27T11:00:59.354Z"
+    },
+    {
+      "id": "1743159472031",
+      "userId": "2",
+      "courseId": "1742791944339",
+      "amount": 40,
+      "paymentMethod": "credit_card",
+      "status": "completed",
+      "createdAt": "2025-03-28T10:57:52.031Z"
     }
   ]
 }

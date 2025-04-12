@@ -1,209 +1,257 @@
-const CourseModel = require("../models/course.model")
-const UserModel = require("../models/user.model")
-const ProgressModel = require("../models/progress.model")
+const CourseModel = require("../models/course.model"); // Using updated MongoDB-based CourseModel
+const User = require("../models/User"); // Mongoose User model
+const ProgressModel = require("../models/progress.model"); // Using updated Progress model
 
 // Course controller
 const CourseController = {
   // Get all courses
-  getAllCourses: (req, res) => {
-    const { search, category, sort } = req.query
-    let courses = CourseModel.getAllCourses()
-    const categories = CourseModel.getAllCategories()
+  getAllCourses: async (req, res) => {
+    const { search, category, sort } = req.query;
 
-    // Apply search filter
-    if (search) {
-      courses = CourseModel.searchCourses(search)
+    try {
+        let courses;
+        
+        // Handle search query
+        if (search) {
+            courses = await CourseModel.searchCourses(search);
+        } else if (category && category !== "all") {
+            courses = await CourseModel.getCoursesByCategory(category);
+        } else {
+            courses = await CourseModel.getAllCourses();
+        }
+        
+        // Apply sorting
+        if (sort) {
+            switch (sort) {
+                case "price-low":
+                    courses = courses.sort((a, b) => a.price - b.price);
+                    break;
+                case "price-high":
+                    courses = courses.sort((a, b) => b.price - a.price);
+                    break;
+                case "rating":
+                    courses = courses.sort((a, b) => b.rating - a.rating);
+                    break;
+                case "newest":
+                    courses = courses.sort((a, b) => 
+                        new Date(b.createdAt) - new Date(a.createdAt)
+                    );
+                    break;
+            }
+        } else {
+            // Default sort by newest
+            courses = courses.sort((a, b) => 
+                new Date(b.createdAt) - new Date(a.createdAt)
+            );
+        }
+
+        const categories = await CourseModel.getAllCategories();
+
+        res.render("courses/index", {
+            courses,
+            categories,
+            search: search || "",
+            category: category || "all",
+            sort: sort || "newest",
+        });
+    } catch (error) {
+        console.error("Get All Courses error:", error);
+        req.flash("error_msg", "Could not load courses.");
+        res.redirect('/');
     }
-
-    // Apply category filter
-    if (category && category !== "all") {
-      courses = courses.filter((course) => course.category === category)
-    }
-
-    // Apply sorting
-    if (sort) {
-      switch (sort) {
-        case "price-low":
-          courses.sort((a, b) => a.price - b.price)
-          break
-        case "price-high":
-          courses.sort((a, b) => b.price - a.price)
-          break
-        case "rating":
-          courses.sort((a, b) => b.rating - a.rating)
-          break
-        case "newest":
-          courses.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-          break
-      }
-    } else {
-      // Default sort by newest
-      courses.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    }
-
-    res.render("courses/index", {
-      courses,
-      categories,
-      search: search || "",
-      category: category || "all",
-      sort: sort || "newest",
-    })
   },
 
   // Get course details
-  getCourseDetails: (req, res) => {
-    const courseId = req.params.id
-    const course = CourseModel.getCourseById(courseId)
+  getCourseDetails: async (req, res) => {
+    const courseId = req.params.id;
 
-    if (!course) {
-      req.flash("error_msg", "Course not found")
-      return res.redirect("/courses")
+    try {
+        const course = await CourseModel.getCourseById(courseId);
+
+        if (!course) {
+            req.flash("error_msg", "Course not found");
+            return res.redirect("/courses");
+        }
+
+        // Get instructor info if needed
+        let instructorName = course.instructor || 'Unknown Instructor';
+
+        // Check if user is enrolled
+        let isEnrolled = false;
+        let progress = 0;
+
+        if (req.session.user) {
+            const user = await User.findById(req.session.user.id);
+            // Check if user exists and has enrolledCourses array
+            if (user && user.enrolledCourses && user.enrolledCourses.includes(courseId)) {
+                isEnrolled = true;
+                // Find progress record
+                const userProgress = await ProgressModel.getProgress(user._id, courseId);
+                progress = userProgress ? userProgress.progress : 0;
+            }
+        }
+
+        res.render("courses/details", {
+            course,
+            instructorName,
+            isEnrolled,
+            progress,
+        });
+    } catch (error) {
+        console.error("Get Course Details error:", error);
+        req.flash("error_msg", "Could not load course details.");
+        res.redirect('/courses');
     }
-
-    // Check if user is enrolled
-    let isEnrolled = false
-    let progress = 0
-
-    if (req.session.user) {
-      const user = UserModel.getUserById(req.session.user.id)
-      isEnrolled = user.enrolledCourses.includes(courseId)
-
-      if (isEnrolled) {
-        const userProgress = ProgressModel.getProgress(user.id, courseId)
-        progress = userProgress.progress
-      }
-    }
-
-    res.render("courses/details", {
-      course,
-      isEnrolled,
-      progress,
-    })
   },
 
   // Enroll in course
-  enrollInCourse: (req, res) => {
+  enrollInCourse: async (req, res) => {
     if (!req.session.user) {
-      req.flash("error_msg", "Please login to enroll in courses")
-      return res.redirect("/login")
+        req.flash("error_msg", "Please login to enroll in courses");
+        return res.redirect("/login");
     }
 
-    const courseId = req.params.id
-    const userId = req.session.user.id
+    const courseId = req.params.id;
+    const userId = req.session.user.id;
 
     try {
-      const enrolled = UserModel.enrollUserInCourse(userId, courseId)
+        // Check if course exists
+        const course = await CourseModel.getCourseById(courseId);
+        if (!course) {
+            req.flash("error_msg", "Course not found");
+            return res.redirect(`/courses`);
+        }
 
-      if (enrolled) {
-        req.flash("info_msg", "You are already enrolled in this course")
-      } else {
-        req.flash("success_msg", "Successfully enrolled in the course")
-      }
+        // Add course to user's enrolledCourses array if not already present
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { $addToSet: { enrolledCourses: courseId } },
+            { new: true }
+        );
 
-      res.redirect(`/courses/${courseId}/learn`)
+        if (!updatedUser) {
+            req.flash("error_msg", "User not found");
+            return res.redirect("/login");
+        }
+
+        // Initialize progress for this course
+        await ProgressModel.getProgress(userId, courseId);
+
+        req.flash("success_msg", "Successfully enrolled in the course");
+        res.redirect(`/courses/${courseId}/learn`);
     } catch (error) {
-      req.flash("error_msg", error.message)
-      res.redirect(`/courses/${courseId}`)
+        console.error("Enrollment error:", error);
+        req.flash("error_msg", error.message || "Error enrolling in course");
+        res.redirect(`/courses/${courseId}`);
     }
   },
 
   // Course learning page
-  getCourseLearningPage: (req, res) => {
+  getCourseLearningPage: async (req, res) => {
     if (!req.session.user) {
-      req.flash("error_msg", "Please login to access course content")
-      return res.redirect("/login")
+        req.flash("error_msg", "Please login to access course content");
+        return res.redirect("/login");
     }
 
-    const courseId = req.params.id
-    const userId = req.session.user.id
-    const course = CourseModel.getCourseById(courseId)
-    const user = UserModel.getUserById(userId)
+    const courseId = req.params.id;
+    const userId = req.session.user.id;
 
-    if (!course || !user) {
-      req.flash("error_msg", "Course or user not found")
-      return res.redirect("/courses")
+    try {
+        const course = await CourseModel.getCourseById(courseId);
+        const user = await User.findById(userId);
+
+        if (!course || !user) {
+            req.flash("error_msg", "Course or user not found");
+            return res.redirect("/courses");
+        }
+
+        // Check if enrolled
+        if (!user.enrolledCourses.includes(courseId)) {
+            req.flash("error_msg", "You are not enrolled in this course");
+            return res.redirect(`/courses/${courseId}`);
+        }
+
+        // Get progress
+        const userProgress = await ProgressModel.getProgress(userId, courseId);
+
+        // Determine current lesson
+        let currentLesson = null;
+        let currentModule = null;
+        const lessonId = req.query.lesson;
+
+        if (lessonId && course.modules) {
+            for (const module of course.modules) {
+                // Ensure lessons array exists and find the lesson
+                const lesson = module.lessons?.find(l => l._id.toString() === lessonId);
+                if (lesson) {
+                    currentLesson = lesson;
+                    currentModule = module;
+                    break;
+                }
+            }
+        }
+
+        // Default to first lesson if not found or no lessonId provided
+        if (!currentLesson && course.modules && course.modules.length > 0 && 
+            course.modules[0].lessons && course.modules[0].lessons.length > 0) {
+            currentModule = course.modules[0];
+            currentLesson = currentModule.lessons[0];
+        } else if (!currentLesson) {
+            // Handle case where course has no modules or lessons
+            req.flash("error_msg", "Course content not available yet.");
+            return res.redirect(`/courses/${courseId}`);
+        }
+
+        const completedLessons = userProgress.completedLessons || [];
+
+        res.render("courses/learn", {
+            course,
+            currentModule,
+            currentLesson,
+            progress: userProgress.progress,
+            completedLessons: completedLessons.map(id => id.toString()),
+        });
+    } catch (error) {
+        console.error("Course Learning Page error:", error);
+        req.flash("error_msg", "Could not load course content.");
+        res.redirect(`/courses/${courseId}`);
     }
-
-    // Check if enrolled
-    if (!user.enrolledCourses.includes(courseId)) {
-      req.flash("error_msg", "You are not enrolled in this course")
-      return res.redirect(`/courses/${courseId}`)
-    }
-
-    // Get progress
-    const userProgress = ProgressModel.getProgress(userId, courseId)
-
-    // Get current lesson (from query or first lesson)
-    const lessonId = req.query.lesson || course.modules[0].lessons[0].id
-
-    // Find current lesson
-    let currentLesson = null
-    let currentModule = null
-
-    for (const module of course.modules) {
-      const lesson = module.lessons.find((l) => l.id === lessonId)
-      if (lesson) {
-        currentLesson = lesson
-        currentModule = module
-        break
-      }
-    }
-
-    if (!currentLesson) {
-      currentModule = course.modules[0]
-      currentLesson = currentModule.lessons[0]
-    }
-
-    res.render("courses/learn", {
-      course,
-      currentModule,
-      currentLesson,
-      progress: userProgress.progress,
-      completedLessons: userProgress.completedLessons,
-    })
   },
 
   // Mark lesson as complete
-  markLessonAsComplete: (req, res) => {
+  markLessonAsComplete: async (req, res) => {
     if (!req.session.user) {
-      return res.status(401).json({ success: false, message: "Unauthorized" })
+        return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
-    const { courseId, lessonId } = req.params
-    const userId = req.session.user.id
+    const { courseId, lessonId } = req.params;
+    const userId = req.session.user.id;
 
     try {
-      const updatedProgress = ProgressModel.markLessonAsComplete(userId, courseId, lessonId)
+        // Use the ProgressModel's markLessonAsComplete method
+        const updatedProgress = await ProgressModel.markLessonAsComplete(userId, courseId, lessonId);
+        
+        if (!updatedProgress) {
+            return res.status(500).json({ 
+                success: false, 
+                message: "Could not update progress" 
+            });
+        }
 
-      res.json({
-        success: true,
-        progress: updatedProgress.progress,
-      })
+        res.json({
+            success: true,
+            progress: updatedProgress.progress,
+            completedLessonId: lessonId
+        });
     } catch (error) {
-      res.status(400).json({ success: false, message: error.message })
+        console.error("Mark Lesson Complete error:", error);
+        res.status(500).json({ 
+            success: false, 
+            message: error.message || "Error marking lesson complete" 
+        });
     }
   },
+};
 
-  // Search courses
-  searchCourses: (req, res) => {
-    const { query } = req.query
-
-    if (!query) {
-      return res.redirect("/courses")
-    }
-
-    const courses = CourseModel.searchCourses(query)
-    const categories = CourseModel.getAllCategories()
-
-    res.render("courses/index", {
-      courses,
-      categories,
-      search: query,
-      category: "all",
-      sort: "newest",
-    })
-  },
-}
-
-module.exports = CourseController
+module.exports = CourseController;
 

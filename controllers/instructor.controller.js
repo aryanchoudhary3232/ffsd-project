@@ -1,8 +1,7 @@
-const CourseModel = require("../models/course.model");
-const UserModel = require("../models/user.model");
-const OrderModel = require("../models/order.model");
-const ProgressModel = require("../models/progress.model");
-const fs = require("fs");
+const Course = require("../models/course.model"); // Assuming Mongoose Course model
+const User = require("../models/User"); // Assuming Mongoose User model
+const Order = require("../models/order.model"); // Assuming Mongoose Order model
+const Progress = require("../models/progress.model"); // Assuming Mongoose Progress model
 const path = require("path");
 const multer = require("multer");
 
@@ -24,113 +23,92 @@ const upload = multer({ storage: storage });
 
 // Instructor controller
 const InstructorController = {
-  getInstructorDashboard: (req, res) => {
+  getInstructorDashboard: async (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
     }
 
-    const userId = req.session.user.id;
-    const instructorCourses = CourseModel.getCoursesByInstructor(userId);
+    try {
+      const userId = req.session.user.id;
+      const instructorCourses = await Course.find({ instructorId: userId });
+      const courseIds = instructorCourses.map(course => course._id);
 
-    let totalStudents = 0;
-    let totalRevenue = 0;
+      const totalStudents = await User.countDocuments({ enrolledCourses: { $in: courseIds } });
 
-    for (const course of instructorCourses) {
-      const enrollments = UserModel.getAllUsers().filter((user) =>
-        user.enrolledCourses.includes(course.id)
-      ).length;
+      const completedOrders = await Order.find({ courseId: { $in: courseIds }, status: "completed" });
+      const totalRevenue = completedOrders.reduce((sum, order) => sum + order.amount, 0);
 
-      totalStudents += enrollments;
+      const recentOrdersData = await Order.find({ courseId: { $in: courseIds } })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .populate('userId', 'name')
+        .populate('courseId', 'title');
 
-      const courseOrders = OrderModel.getOrdersByCourse(course.id).filter(
-        (order) => order.status === "completed"
-      );
+      const recentOrders = recentOrdersData.map(order => ({
+        ...order.toObject(),
+        userName: order.userId ? order.userId.name : "Unknown User",
+        courseTitle: order.courseId ? order.courseId.title : "Unknown Course",
+      }));
 
-      const courseRevenue = courseOrders.reduce(
-        (sum, order) => sum + order.amount,
-        0
-      );
-      totalRevenue += courseRevenue;
+      res.render("instructor/dashboard", {
+        courses: instructorCourses,
+        totalStudents,
+        totalRevenue,
+        recentOrders,
+      });
+    } catch (error) {
+      console.error("Instructor Dashboard error:", error);
+      req.flash("error_msg", "Could not load dashboard.");
+      res.redirect('/');
+    }
+  },
+
+  getInstructorCourses: async (req, res) => {
+    if (!req.session.user || req.session.user.role !== "instructor") {
+      return res.redirect("/login");
     }
 
-    const recentOrders = OrderModel.getAllOrders()
-      .filter((order) =>
-        instructorCourses.some((course) => course.id === order.courseId)
-      )
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(0, 5)
-      .map((order) => {
-        const user = UserModel.getUserById(order.userId);
-        const course = CourseModel.getCourseById(order.courseId);
+    try {
+      const userId = req.session.user.id;
+      const sortFilter = req.query.sort || "newest";
+      let sortOption = { createdAt: -1 };
 
+      switch (sortFilter) {
+        case "oldest": sortOption = { createdAt: 1 }; break;
+        case "title-asc": sortOption = { title: 1 }; break;
+        case "title-desc": sortOption = { title: -1 }; break;
+      }
+
+      let instructorCourses = await Course.find({ instructorId: userId }).sort(sortOption);
+
+      const enhancedCoursesPromises = instructorCourses.map(async (course) => {
+        const studentCount = await User.countDocuments({ enrolledCourses: course._id });
+        const courseOrders = await Order.find({ courseId: course._id, status: "completed" });
+        const revenue = courseOrders.reduce((sum, order) => sum + order.amount, 0);
         return {
-          ...order,
-          userName: user ? user.name : "Unknown User",
-          courseTitle: course ? course.title : "Unknown Course",
+          ...course.toObject(),
+          studentCount,
+          revenue,
         };
       });
 
-    res.render("instructor/dashboard", {
-      courses: instructorCourses,
-      totalStudents,
-      totalRevenue,
-      recentOrders,
-    });
-  },
+      let enhancedCourses = await Promise.all(enhancedCoursesPromises);
 
-  getInstructorCourses: (req, res) => {
-    if (!req.session.user || req.session.user.role !== "instructor") {
-      return res.redirect("/login");
-    }
-
-    const userId = req.session.user.id;
-    let instructorCourses = CourseModel.getCoursesByInstructor(userId);
-
-    // Apply sorting
-    const sortFilter = req.query.sort || "newest";
-    instructorCourses.sort((a, b) => {
-      if (sortFilter === "newest") {
-        return new Date(b.createdAt) - new Date(a.createdAt);
-      } else if (sortFilter === "oldest") {
-        return new Date(a.createdAt) - new Date(b.createdAt);
-      } else if (sortFilter === "title-asc") {
-        return a.title.localeCompare(b.title);
-      } else if (sortFilter === "title-desc") {
-        return b.title.localeCompare(a.title);
-      } else if (sortFilter === "students") {
-        return b.students - a.students;
+      if (sortFilter === "students") {
+        enhancedCourses.sort((a, b) => b.studentCount - a.studentCount);
       } else if (sortFilter === "revenue") {
-        const revenueA = OrderModel.getOrdersByCourse(a.id)
-          .filter((order) => order.status === "completed")
-          .reduce((sum, order) => sum + order.amount, 0);
-        const revenueB = OrderModel.getOrdersByCourse(b.id)
-          .filter((order) => order.status === "completed")
-          .reduce((sum, order) => sum + order.amount, 0);
-        return revenueB - revenueA;
+        enhancedCourses.sort((a, b) => b.revenue - a.revenue);
       }
-      return 0;
-    });
 
-    // Enhance courses with student count and revenue
-    const enhancedCourses = instructorCourses.map((course) => {
-      const studentCount = UserModel.getAllUsers().filter((user) =>
-        user.enrolledCourses.includes(course.id)
-      ).length;
-
-      const revenue = OrderModel.getOrdersByCourse(course.id)
-        .filter((order) => order.status === "completed")
-        .reduce((sum, order) => sum + order.amount, 0);
-
-      return {
-        ...course,
-        studentCount,
-        revenue,
-      };
-    });
-
-    res.render("instructor/courses", {
-      courses: enhancedCourses,
-    });
+      res.render("instructor/courses", {
+        courses: enhancedCourses,
+        sort: sortFilter
+      });
+    } catch (error) {
+      console.error("Get Instructor Courses error:", error);
+      req.flash("error_msg", "Could not load courses.");
+      res.redirect('/instructor/dashboard');
+    }
   },
 
   getCreateCourseForm: (req, res) => {
@@ -149,9 +127,9 @@ const InstructorController = {
       return res.redirect("/login");
     }
 
-    upload.single("thumbnail")(req, res, (err) => {
+    upload.single("thumbnail")(req, res, async (err) => {
       if (err) {
-        req.flash("error_msg", "Error uploading file");
+        req.flash("error_msg", "Error uploading file: " + err.message);
         return res.redirect("/instructor/courses/new");
       }
 
@@ -159,48 +137,60 @@ const InstructorController = {
       const instructorId = req.session.user.id;
 
       try {
-        const newCourse = CourseModel.createCourse({
+        const newCourseData = {
           title,
           description,
           category,
-          price,
+          price: Number.parseFloat(price) || 0,
           instructorId,
-          instructor: req.session.user.name,
           thumbnail: req.file
             ? `/uploads/${req.file.filename}`
             : "/img/course-placeholder.jpg",
-        });
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          modules: [],
+          status: 'draft'
+        };
 
-        req.flash("success_msg", "Course created successfully");
-        res.redirect(`/instructor/courses/${newCourse.id}/edit`);
+        const newCourse = await Course.create(newCourseData);
+
+        req.flash("success_msg", "Course created successfully. Add content now.");
+        res.redirect(`/instructor/courses/${newCourse._id}/content`);
       } catch (error) {
-        req.flash("error_msg", error.message);
+        console.error("Create Course error:", error);
+        req.flash("error_msg", error.message || "Error creating course");
         res.redirect("/instructor/courses/new");
       }
     });
   },
 
-  getEditCourseForm: (req, res) => {
+  getEditCourseForm: async (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
     }
 
-    const courseId = req.params.id;
-    const instructorId = req.session.user.id;
-    const course = CourseModel.getCourseById(courseId);
+    try {
+      const courseId = req.params.id;
+      const instructorId = req.session.user.id;
+      const course = await Course.findById(courseId);
 
-    if (!course || course.instructorId !== instructorId) {
-      req.flash(
-        "error_msg",
-        "Course not found or you do not have permission to edit it"
-      );
-      return res.redirect("/instructor/courses");
+      if (!course || !course.instructorId.equals(instructorId)) {
+        req.flash(
+          "error_msg",
+          "Course not found or you do not have permission to edit it"
+        );
+        return res.redirect("/instructor/courses");
+      }
+
+      res.render("instructor/course-form", {
+        course,
+        isEdit: true,
+      });
+    } catch (error) {
+      console.error("Get Edit Course Form error:", error);
+      req.flash("error_msg", "Could not load course editor.");
+      res.redirect("/instructor/courses");
     }
-
-    res.render("instructor/course-form", {
-      course,
-      isEdit: true,
-    });
   },
 
   updateCourse: (req, res) => {
@@ -210,72 +200,82 @@ const InstructorController = {
 
     const courseId = req.params.id;
     const instructorId = req.session.user.id;
-    const course = CourseModel.getCourseById(courseId);
 
-    if (!course || course.instructorId !== instructorId) {
-      req.flash(
-        "error_msg",
-        "Course not found or you do not have permission to edit it"
-      );
-      return res.redirect("/instructor/courses");
-    }
-
-    upload.single("thumbnail")(req, res, (err) => {
+    upload.single("thumbnail")(req, res, async (err) => {
       if (err) {
-        req.flash("error_msg", "Error uploading file");
+        req.flash("error_msg", "Error uploading file: " + err.message);
         return res.redirect(`/instructor/courses/${courseId}/edit`);
       }
 
-      const { title, description, category, price } = req.body;
+      const { title, description, category, price, status } = req.body;
 
       try {
-        CourseModel.updateCourse(courseId, {
+        const course = await Course.findById(courseId);
+
+        if (!course || !course.instructorId.equals(instructorId)) {
+          req.flash(
+            "error_msg",
+            "Course not found or you do not have permission to edit it"
+          );
+          return res.redirect("/instructor/courses");
+        }
+
+        const updates = {
           title,
           description,
           category,
-          price: Number.parseFloat(price),
-          thumbnail: req.file
-            ? `/uploads/${req.file.filename}`
-            : course.thumbnail,
-        });
+          price: Number.parseFloat(price) || 0,
+          status: status || course.status,
+          updatedAt: new Date()
+        };
+
+        if (req.file) {
+          updates.thumbnail = `/uploads/${req.file.filename}`;
+        }
+
+        await Course.findByIdAndUpdate(courseId, updates);
 
         req.flash("success_msg", "Course updated successfully");
         res.redirect("/instructor/courses");
       } catch (error) {
-        req.flash("error_msg", error.message);
+        console.error("Update Course error:", error);
+        req.flash("error_msg", error.message || "Error updating course");
         res.redirect(`/instructor/courses/${courseId}/edit`);
       }
     });
   },
 
-  getCourseContentPage: (req, res) => {
+  getCourseContentPage: async (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
     }
 
-    const courseId = req.params.id;
-    const instructorId = req.session.user.id;
-    const course = CourseModel.getCourseById(courseId);
+    try {
+      const courseId = req.params.id;
+      const instructorId = req.session.user.id;
+      const course = await Course.findById(courseId);
 
-    if (!course || course.instructorId !== instructorId) {
-      req.flash(
-        "error_msg",
-        "Course not found or you do not have permission to edit it"
-      );
-      return res.redirect("/instructor/courses");
+      if (!course || !course.instructorId.equals(instructorId)) {
+        req.flash(
+          "error_msg",
+          "Course not found or you do not have permission to manage its content"
+        );
+        return res.redirect("/instructor/courses");
+      }
+
+      res.render("instructor/course-content", {
+        course,
+      });
+    } catch (error) {
+      console.error("Get Course Content Page error:", error);
+      req.flash("error_msg", "Could not load course content editor.");
+      res.redirect("/instructor/courses");
     }
-
-    res.render("instructor/course-content", {
-      course,
-    });
   },
 
-  addModule: (req, res) => {
+  addModule: async (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized"
-      });
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
     const courseId = req.params.id;
@@ -283,48 +283,38 @@ const InstructorController = {
     const { title } = req.body;
 
     try {
-      const course = CourseModel.getCourseById(courseId);
+      const course = await Course.findById(courseId);
 
-      if (!course || course.instructorId !== instructorId) {
-        return res.status(403).json({
-          success: false, 
-          message: "Course not found or you do not have permission to edit it"
-        });
+      if (!course || !course.instructorId.equals(instructorId)) {
+        return res.status(403).json({ success: false, message: "Course not found or permission denied" });
       }
 
-      const newModule = CourseModel.addModuleToCourse(courseId, { title });
+      const newModule = { title: title, lessons: [] };
+      course.modules.push(newModule);
+      course.updatedAt = new Date();
+      await course.save();
 
-      // Return JSON response for Ajax requests
-      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-        return res.json({
-          success: true,
-          message: "Module added successfully",
-          module: newModule
-        });
+      const addedModule = course.modules[course.modules.length - 1];
+
+      if (req.xhr || req.headers.accept.includes('json')) {
+        return res.json({ success: true, message: "Module added", module: addedModule });
       }
-
-      // Otherwise use regular redirect with flash message
       req.flash("success_msg", "Module added successfully");
       res.redirect(`/instructor/courses/${courseId}/content`);
     } catch (error) {
-      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-        return res.status(500).json({
-          success: false,
-          message: error.message
-        });
+      console.error("Add Module error:", error);
+      const errorMsg = error.message || "Error adding module";
+      if (req.xhr || req.headers.accept.includes('json')) {
+        return res.status(500).json({ success: false, message: errorMsg });
       }
-      
-      req.flash("error_msg", error.message);
+      req.flash("error_msg", errorMsg);
       res.redirect(`/instructor/courses/${courseId}/content`);
     }
   },
 
-  updateModule: (req, res) => {
+  updateModule: async (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized"
-      });
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
     const { id: courseId, moduleId } = req.params;
@@ -332,203 +322,142 @@ const InstructorController = {
     const { title } = req.body;
 
     try {
-      const course = CourseModel.getCourseById(courseId);
+      const course = await Course.findById(courseId);
 
-      if (!course || course.instructorId !== instructorId) {
-        return res.status(403).json({
-          success: false,
-          message: "Course not found or you do not have permission to edit it"
-        });
+      if (!course || !course.instructorId.equals(instructorId)) {
+        return res.status(403).json({ success: false, message: "Course not found or permission denied" });
       }
 
-      const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
-
-      if (moduleIndex === -1) {
-        return res.status(404).json({
-          success: false,
-          message: "Module not found"
-        });
+      const module = course.modules.id(moduleId);
+      if (!module) {
+        return res.status(404).json({ success: false, message: "Module not found" });
       }
 
-      course.modules[moduleIndex].title = title;
-      course.updatedAt = new Date().toISOString();
+      module.title = title;
+      course.updatedAt = new Date();
+      await course.save();
 
-      CourseModel.updateCourse(courseId, { modules: course.modules });
-
-      // Return JSON response for Ajax requests
-      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-        return res.json({
-          success: true,
-          message: "Module updated successfully",
-          module: course.modules[moduleIndex]
-        });
+      if (req.xhr || req.headers.accept.includes('json')) {
+        return res.json({ success: true, message: "Module updated", module: module });
       }
-
-      // Otherwise use regular redirect with flash message
       req.flash("success_msg", "Module updated successfully");
       res.redirect(`/instructor/courses/${courseId}/content`);
     } catch (error) {
-      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-        return res.status(500).json({
-          success: false,
-          message: error.message
-        });
+      console.error("Update Module error:", error);
+      const errorMsg = error.message || "Error updating module";
+      if (req.xhr || req.headers.accept.includes('json')) {
+        return res.status(500).json({ success: false, message: errorMsg });
       }
-      req.flash("error_msg", error.message);
+      req.flash("error_msg", errorMsg);
       res.redirect(`/instructor/courses/${courseId}/content`);
     }
   },
 
-  deleteModule: (req, res) => {
+  deleteModule: async (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized"
-      });
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
     const { id: courseId, moduleId } = req.params;
     const instructorId = req.session.user.id;
 
     try {
-      const course = CourseModel.getCourseById(courseId);
+      const course = await Course.findById(courseId);
 
-      if (!course || course.instructorId !== instructorId) {
-        return res.status(403).json({
-          success: false,
-          message: "Course not found or you do not have permission to edit it"
-        });
+      if (!course || !course.instructorId.equals(instructorId)) {
+        return res.status(403).json({ success: false, message: "Course not found or permission denied" });
       }
 
-      const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
-
-      if (moduleIndex === -1) {
-        return res.status(404).json({
-          success: false,
-          message: "Module not found"
-        });
+      const module = course.modules.id(moduleId);
+      if (!module) {
+        return res.status(404).json({ success: false, message: "Module not found" });
       }
+      module.remove();
+      course.updatedAt = new Date();
+      await course.save();
 
-      // Store the module before removing it
-      const deletedModule = course.modules[moduleIndex];
-      
-      // Remove the module
-      course.modules.splice(moduleIndex, 1);
-      course.updatedAt = new Date().toISOString();
-
-      CourseModel.updateCourse(courseId, { modules: course.modules });
-
-      // Return JSON response for Ajax requests
-      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-        return res.json({
-          success: true,
-          message: "Module deleted successfully",
-          moduleId: deletedModule.id
-        });
+      if (req.xhr || req.headers.accept.includes('json')) {
+        return res.json({ success: true, message: "Module deleted", moduleId: moduleId });
       }
-
-      // Otherwise use regular redirect with flash message
       req.flash("success_msg", "Module deleted successfully");
       res.redirect(`/instructor/courses/${courseId}/content`);
     } catch (error) {
-      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-        return res.status(500).json({
-          success: false,
-          message: error.message
-        });
+      console.error("Delete Module error:", error);
+      const errorMsg = error.message || "Error deleting module";
+      if (req.xhr || req.headers.accept.includes('json')) {
+        return res.status(500).json({ success: false, message: errorMsg });
       }
-      
-      // Make sure to set the error flash message for non-Ajax requests
-      req.flash("error_msg", error.message);
+      req.flash("error_msg", errorMsg);
       res.redirect(`/instructor/courses/${courseId}/content`);
     }
   },
 
   addLesson: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized"
-      });
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
     const { courseId, moduleId } = req.params;
     const instructorId = req.session.user.id;
 
-    upload.single("file")(req, res, (err) => {
+    upload.single("file")(req, res, async (err) => {
       if (err) {
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-          return res.status(400).json({
-            success: false,
-            message: "Error uploading file"
-          });
+        const errorMsg = "Error uploading file: " + err.message;
+        if (req.xhr || req.headers.accept.includes('json')) {
+          return res.status(400).json({ success: false, message: errorMsg });
         }
-        req.flash("error_msg", "Error uploading file");
+        req.flash("error_msg", errorMsg);
         return res.redirect(`/instructor/courses/${courseId}/content`);
       }
 
       const { title, type, duration } = req.body;
 
       try {
-        const course = CourseModel.getCourseById(courseId);
+        const course = await Course.findById(courseId);
 
-        if (!course || course.instructorId !== instructorId) {
-          if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-            return res.status(403).json({
-              success: false,
-              message: "Course not found or you do not have permission to edit it"
-            });
+        if (!course || !course.instructorId.equals(instructorId)) {
+          const errorMsg = "Course not found or permission denied";
+          if (req.xhr || req.headers.accept.includes('json')) {
+            return res.status(403).json({ success: false, message: errorMsg });
           }
-          req.flash("error_msg", "Course not found or you do not have permission to edit it");
+          req.flash("error_msg", errorMsg);
           return res.redirect("/instructor/courses");
         }
 
-        const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
-
-        if (moduleIndex === -1) {
-          if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-            return res.status(404).json({
-              success: false,
-              message: "Module not found"
-            });
+        const module = course.modules.id(moduleId);
+        if (!module) {
+          const errorMsg = "Module not found";
+          if (req.xhr || req.headers.accept.includes('json')) {
+            return res.status(404).json({ success: false, message: errorMsg });
           }
-          req.flash("error_msg", "Module not found");
+          req.flash("error_msg", errorMsg);
           return res.redirect(`/instructor/courses/${courseId}/content`);
         }
 
         const newLesson = {
-          id: Date.now().toString(),
           title,
           type,
           duration: duration || "",
           file: req.file ? `/uploads/${req.file.filename}` : null,
         };
+        module.lessons.push(newLesson);
+        course.updatedAt = new Date();
+        await course.save();
 
-        course.modules[moduleIndex].lessons.push(newLesson);
-        course.updatedAt = new Date().toISOString();
+        const addedLesson = module.lessons[module.lessons.length - 1];
 
-        CourseModel.updateCourse(courseId, { modules: course.modules });
-
-        // Return JSON response for Ajax requests
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-          return res.json({
-            success: true,
-            message: "Lesson added successfully",
-            lesson: newLesson
-          });
+        if (req.xhr || req.headers.accept.includes('json')) {
+          return res.json({ success: true, message: "Lesson added", lesson: addedLesson });
         }
-
-        // Otherwise use regular redirect with flash message
         req.flash("success_msg", "Lesson added successfully");
         res.redirect(`/instructor/courses/${courseId}/content`);
       } catch (error) {
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-          return res.status(500).json({
-            success: false,
-            message: error.message
-          });
+        console.error("Add Lesson error:", error);
+        const errorMsg = error.message || "Error adding lesson";
+        if (req.xhr || req.headers.accept.includes('json')) {
+          return res.status(500).json({ success: false, message: errorMsg });
         }
-        req.flash("error_msg", error.message);
+        req.flash("error_msg", errorMsg);
         res.redirect(`/instructor/courses/${courseId}/content`);
       }
     });
@@ -536,278 +465,234 @@ const InstructorController = {
 
   updateLesson: (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized"
-      });
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
     const { id: courseId, moduleId, lessonId } = req.params;
     const instructorId = req.session.user.id;
 
-    upload.single("file")(req, res, (err) => {
+    upload.single("file")(req, res, async (err) => {
       if (err) {
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-          return res.status(400).json({
-            success: false,
-            message: "Error uploading file"
-          });
+        const errorMsg = "Error uploading file: " + err.message;
+        if (req.xhr || req.headers.accept.includes('json')) {
+          return res.status(400).json({ success: false, message: errorMsg });
         }
-        req.flash("error_msg", "Error uploading file");
+        req.flash("error_msg", errorMsg);
         return res.redirect(`/instructor/courses/${courseId}/content`);
       }
 
       const { title, type, duration } = req.body;
 
       try {
-        const course = CourseModel.getCourseById(courseId);
+        const course = await Course.findById(courseId);
 
-        if (!course || course.instructorId !== instructorId) {
-          if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-            return res.status(403).json({
-              success: false,
-              message: "Course not found or you do not have permission to edit it"
-            });
+        if (!course || !course.instructorId.equals(instructorId)) {
+          const errorMsg = "Course not found or permission denied";
+          if (req.xhr || req.headers.accept.includes('json')) {
+            return res.status(403).json({ success: false, message: errorMsg });
           }
-          req.flash("error_msg", "Course not found or you do not have permission to edit it");
+          req.flash("error_msg", errorMsg);
           return res.redirect("/instructor/courses");
         }
 
-        const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
-
-        if (moduleIndex === -1) {
-          if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-            return res.status(404).json({
-              success: false,
-              message: "Module not found"
-            });
+        const module = course.modules.id(moduleId);
+        if (!module) {
+          const errorMsg = "Module not found";
+          if (req.xhr || req.headers.accept.includes('json')) {
+            return res.status(404).json({ success: false, message: errorMsg });
           }
-          req.flash("error_msg", "Module not found");
+          req.flash("error_msg", errorMsg);
+          return res.redirect(`/instructor/courses/${courseId}/content`);
+        }
+        const lesson = module.lessons.id(lessonId);
+        if (!lesson) {
+          const errorMsg = "Lesson not found";
+          if (req.xhr || req.headers.accept.includes('json')) {
+            return res.status(404).json({ success: false, message: errorMsg });
+          }
+          req.flash("error_msg", errorMsg);
           return res.redirect(`/instructor/courses/${courseId}/content`);
         }
 
-        const lessonIndex = course.modules[moduleIndex].lessons.findIndex(
-          (l) => l.id === lessonId
-        );
-
-        if (lessonIndex === -1) {
-          if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-            return res.status(404).json({
-              success: false,
-              message: "Lesson not found"
-            });
-          }
-          req.flash("error_msg", "Lesson not found");
-          return res.redirect(`/instructor/courses/${courseId}/content`);
+        lesson.title = title;
+        lesson.type = type;
+        lesson.duration = duration || "";
+        if (req.file) {
+          lesson.file = `/uploads/${req.file.filename}`;
         }
+        course.updatedAt = new Date();
+        await course.save();
 
-        const updatedLesson = {
-          ...course.modules[moduleIndex].lessons[lessonIndex],
-          title,
-          type,
-          duration: duration || "",
-          file: req.file
-            ? `/uploads/${req.file.filename}`
-            : course.modules[moduleIndex].lessons[lessonIndex].file,
-        };
-
-        course.modules[moduleIndex].lessons[lessonIndex] = updatedLesson;
-        course.updatedAt = new Date().toISOString();
-
-        CourseModel.updateCourse(courseId, { modules: course.modules });
-
-        // Return JSON response for Ajax requests
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-          return res.json({
-            success: true,
-            message: "Lesson updated successfully",
-            lesson: updatedLesson
-          });
+        if (req.xhr || req.headers.accept.includes('json')) {
+          return res.json({ success: true, message: "Lesson updated", lesson: lesson });
         }
-
-        // Otherwise use regular redirect with flash message
         req.flash("success_msg", "Lesson updated successfully");
         res.redirect(`/instructor/courses/${courseId}/content`);
       } catch (error) {
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-          return res.status(500).json({
-            success: false,
-            message: error.message
-          });
+        console.error("Update Lesson error:", error);
+        const errorMsg = error.message || "Error updating lesson";
+        if (req.xhr || req.headers.accept.includes('json')) {
+          return res.status(500).json({ success: false, message: errorMsg });
         }
-        req.flash("error_msg", error.message);
+        req.flash("error_msg", errorMsg);
         res.redirect(`/instructor/courses/${courseId}/content`);
       }
     });
   },
 
-  deleteLesson: (req, res) => {
+  deleteLesson: async (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized"
-      });
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
     const { id: courseId, moduleId, lessonId } = req.params;
     const instructorId = req.session.user.id;
 
     try {
-      const course = CourseModel.getCourseById(courseId);
+      const course = await Course.findById(courseId);
 
-      if (!course || course.instructorId !== instructorId) {
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-          return res.status(403).json({
-            success: false,
-            message: "Course not found or you do not have permission to edit it"
-          });
+      if (!course || !course.instructorId.equals(instructorId)) {
+        const errorMsg = "Course not found or permission denied";
+        if (req.xhr || req.headers.accept.includes('json')) {
+          return res.status(403).json({ success: false, message: errorMsg });
         }
-        req.flash("error_msg", "Course not found or you do not have permission to edit it");
+        req.flash("error_msg", errorMsg);
         return res.redirect("/instructor/courses");
       }
 
-      const moduleIndex = course.modules.findIndex((m) => m.id === moduleId);
-
-      if (moduleIndex === -1) {
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-          return res.status(404).json({
-            success: false,
-            message: "Module not found"
-          });
+      const module = course.modules.id(moduleId);
+      if (!module) {
+        const errorMsg = "Module not found";
+        if (req.xhr || req.headers.accept.includes('json')) {
+          return res.status(404).json({ success: false, message: errorMsg });
         }
-        req.flash("error_msg", "Module not found");
+        req.flash("error_msg", errorMsg);
+        return res.redirect(`/instructor/courses/${courseId}/content`);
+      }
+      const lesson = module.lessons.id(lessonId);
+      if (!lesson) {
+        const errorMsg = "Lesson not found";
+        if (req.xhr || req.headers.accept.includes('json')) {
+          return res.status(404).json({ success: false, message: errorMsg });
+        }
+        req.flash("error_msg", errorMsg);
         return res.redirect(`/instructor/courses/${courseId}/content`);
       }
 
-      const lessonIndex = course.modules[moduleIndex].lessons.findIndex(
-        (l) => l.id === lessonId
-      );
+      lesson.remove();
+      course.updatedAt = new Date();
+      await course.save();
 
-      if (lessonIndex === -1) {
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-          return res.status(404).json({
-            success: false,
-            message: "Lesson not found"
-          });
-        }
-        req.flash("error_msg", "Lesson not found");
-        return res.redirect(`/instructor/courses/${courseId}/content`);
+      if (req.xhr || req.headers.accept.includes('json')) {
+        return res.json({ success: true, message: "Lesson deleted", lessonId: lessonId });
       }
-
-      // Store the lesson before removing it
-      const deletedLesson = course.modules[moduleIndex].lessons[lessonIndex];
-
-      // Remove the lesson
-      course.modules[moduleIndex].lessons.splice(lessonIndex, 1);
-      course.updatedAt = new Date().toISOString();
-
-      CourseModel.updateCourse(courseId, { modules: course.modules });
-
-      // Return JSON response for Ajax requests
-      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-        return res.json({
-          success: true,
-          message: "Lesson deleted successfully",
-          lessonId: deletedLesson.id
-        });
-      }
-
-      // Otherwise use regular redirect with flash message
       req.flash("success_msg", "Lesson deleted successfully");
       res.redirect(`/instructor/courses/${courseId}/content`);
     } catch (error) {
-      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-        return res.status(500).json({
-          success: false,
-          message: error.message
-        });
+      console.error("Delete Lesson error:", error);
+      const errorMsg = error.message || "Error deleting lesson";
+      if (req.xhr || req.headers.accept.includes('json')) {
+        return res.status(500).json({ success: false, message: errorMsg });
       }
-      req.flash("error_msg", error.message);
+      req.flash("error_msg", errorMsg);
       res.redirect(`/instructor/courses/${courseId}/content`);
     }
   },
 
-  getInstructorAnalytics: (req, res) => {
+  getInstructorAnalytics: async (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
     }
 
-    const userId = req.session.user.id;
-    const instructorCourses = CourseModel.getCoursesByInstructor(userId);
+    try {
+      const userId = req.session.user.id;
+      const instructorCourses = await Course.find({ instructorId: userId });
+      const courseIds = instructorCourses.map(c => c._id);
 
-    const revenueByCourseName = {};
-    let totalRevenue = 0;
+      const orders = await Order.find({ courseId: { $in: courseIds }, status: 'completed' });
+      const revenueByCourseName = {};
+      let totalRevenue = 0;
 
-    for (const course of instructorCourses) {
-      const courseOrders = OrderModel.getOrdersByCourse(course.id).filter(
-        (order) => order.status === "completed"
-      );
+      instructorCourses.forEach(course => {
+        const courseOrders = orders.filter(order => order.courseId.equals(course._id));
+        const courseRevenue = courseOrders.reduce((sum, order) => sum + order.amount, 0);
+        revenueByCourseName[course.title] = courseRevenue;
+        totalRevenue += courseRevenue;
+      });
 
-      const courseRevenue = courseOrders.reduce(
-        (sum, order) => sum + order.amount,
-        0
-      );
+      const progressRecords = await Progress.find({ courseId: { $in: courseIds } });
+      const courseCompletionRates = instructorCourses.map(course => {
+        const courseProgress = progressRecords.filter(p => p.courseId.equals(course._id));
+        const completedCount = courseProgress.filter(p => p.progress === 100).length;
+        const totalEnrolled = courseProgress.length;
+        const completionRate = totalEnrolled > 0 ? Math.round((completedCount / totalEnrolled) * 100) : 0;
+        return {
+          course: course.title,
+          completionRate,
+        };
+      });
 
-      revenueByCourseName[course.title] = courseRevenue;
-      totalRevenue += courseRevenue;
+      res.render("instructor/analytics", {
+        courses: instructorCourses,
+        revenueByCourseName,
+        totalRevenue,
+        courseCompletionRates,
+      });
+    } catch (error) {
+      console.error("Instructor Analytics error:", error);
+      req.flash("error_msg", "Could not load analytics.");
+      res.redirect('/instructor/dashboard');
     }
-
-    const courseCompletionRates = instructorCourses.map((course) => {
-      const completionRate = ProgressModel.getCourseCompletionRate(course.id);
-      return {
-        course: course.title,
-        completionRate,
-      };
-    });
-
-    res.render("instructor/analytics", {
-      courses: instructorCourses,
-      revenueByCourseName,
-      totalRevenue,
-      courseCompletionRates,
-    });
   },
 
-  getInstructorStudents: (req, res) => {
+  getInstructorStudents: async (req, res) => {
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.redirect("/login");
     }
 
-    const userId = req.session.user.id;
-    const instructorCourses = CourseModel.getCoursesByInstructor(userId);
-    const courseIds = instructorCourses.map((course) => String(course.id));
+    try {
+      const userId = req.session.user.id;
+      const instructorCourses = await Course.find({ instructorId: userId });
+      const courseIds = instructorCourses.map((course) => course._id);
 
-    // Get all students enrolled in instructor's courses
-    const allUsers = UserModel.getAllUsers();
-    const students = allUsers.filter(
-      (user) =>
-        user.role === "student" &&
-        user.enrolledCourses.some((courseId) => courseIds.includes(String(courseId)))
-    );
+      const students = await User.find({
+        role: "student",
+        enrolledCourses: { $in: courseIds }
+      }).populate('enrolledCourses');
 
-    // Enhance students with course info
-    const enhancedStudents = students.map((student) => {
-      const enrolledInstructorCourses = student.enrolledCourses
-        .filter((courseId) => courseIds.includes(String(courseId)))
-        .map((courseId) => {
-          const course = CourseModel.getCourseById(courseId);
-          const progress = ProgressModel.getProgress(student.id, courseId) || { progress: 0 };
-          return {
-            ...course,
-            progress: progress.progress,
-          };
-        });
+      const progressRecords = await Progress.find({
+        userId: { $in: students.map(s => s._id) },
+        courseId: { $in: courseIds }
+      });
 
-      return {
-        ...student,
-        courses: enrolledInstructorCourses,
-      };
-    });
+      const enhancedStudents = students.map((student) => {
+        const enrolledInstructorCourses = student.enrolledCourses
+          .filter((course) => courseIds.some(id => id.equals(course._id)))
+          .map((course) => {
+            const progress = progressRecords.find(
+              p => p.userId.equals(student._id) && p.courseId.equals(course._id)
+            );
+            return {
+              ...course.toObject(),
+              progress: progress ? progress.progress : 0,
+            };
+          });
 
-    res.render("instructor/students", {
-      students: enhancedStudents,
-      courses: instructorCourses,
-    });
+        return {
+          ...student.toObject(),
+          courses: enrolledInstructorCourses,
+        };
+      });
+
+      res.render("instructor/students", {
+        students: enhancedStudents,
+        courses: instructorCourses,
+      });
+    } catch (error) {
+      console.error("Instructor Students error:", error);
+      req.flash("error_msg", "Could not load student list.");
+      res.redirect('/instructor/dashboard');
+    }
   },
 };
 

@@ -1,58 +1,69 @@
-const fs = require("fs");
-const path = require("path");
+const { ObjectId } = require("mongodb");
+const { getDb } = require("../config/database");
 
-// Adjust the path to point to the data folder
-const dataPath = path.join(__dirname, "../data/data.json");
-
-// Cache for data to avoid repeated file reads
-let cachedData = null;
-let lastReadTime = 0;
-const CACHE_DURATION = 5000; // Cache for 5 seconds
-
-// Helper function to read data.json with caching
-function readData() {
-  const now = Date.now();
-  if (!cachedData || now - lastReadTime > CACHE_DURATION) {
-    const rawData = fs.readFileSync(dataPath);
-    cachedData = JSON.parse(rawData);
-    lastReadTime = now;
-  }
-  return cachedData;
-}
-
-// Helper function to write to data.json and update cache
-function writeData(data) {
-  fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
-  cachedData = data; // Update cache
-  lastReadTime = Date.now();
-}
+// Helper function to get collections
+const getCollections = () => {
+  const db = getDb();
+  return {
+    courses: db.collection("courses"),
+    users: db.collection("users"),
+  };
+};
 
 // Course model
 const CourseModel = {
   // Get all courses
-  getAllCourses: () => {
-    return readData().courses;
+  getAllCourses: async () => {
+    const { courses } = getCollections();
+    return await courses.find({}).toArray();
   },
 
   // Get course by ID
-  getCourseById: (id) => {
-    const data = readData();
-    return data.courses.find((course) => String(course.id) === String(id));
+  getCourseById: async (id) => {
+    try {
+      if (!id) {
+        console.error('getCourseById called with null or undefined id');
+        return null;
+      }
+      
+      // Log the ID we're looking for to help with debugging
+      console.log(`Looking for course with ID: ${id}`);
+      
+      const { courses } = getCollections();
+      let courseId;
+      
+      try {
+        courseId = new ObjectId(id);
+      } catch (error) {
+        console.error(`Invalid ObjectId format: ${id}`);
+        return null;
+      }
+      
+      const course = await courses.findOne({ _id: courseId });
+      
+      if (!course) {
+        console.log(`No course found with ID: ${id}`);
+      }
+      
+      return course;
+    } catch (error) {
+      console.error(`Error in getCourseById(${id}):`, error);
+      return null;
+    }
   },
 
   // Get featured courses
-  getFeaturedCourses: () => {
-    const data = readData();
-    return data.courses.filter((course) => course.featured).slice(0, 6);
+  getFeaturedCourses: async () => {
+    const { courses } = getCollections();
+    return await courses.find({ featured: true }).limit(6).toArray();
   },
 
   // Create new course
-  createCourse: (courseData) => {
-    const data = readData();
+  createCourse: async (courseData) => {
+    const { courses } = getCollections();
 
     // Create new course
     const newCourse = {
-      id: Date.now().toString(),
       title: courseData.title,
       description: courseData.description,
       category: courseData.category,
@@ -62,105 +73,94 @@ const CourseModel = {
       thumbnail: courseData.thumbnail || "/img/course-placeholder.jpg",
       rating: 0,
       students: 0, // Will be updated dynamically
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
       modules: [],
       featured: false,
     };
 
-    // Add course to data
-    data.courses.push(newCourse);
-    writeData(data);
-
-    return newCourse;
+    // Add course to collection
+    const result = await courses.insertOne(newCourse);
+    return { _id: result.insertedId, ...newCourse };
   },
 
   // Update course
-  updateCourse: (id, courseData) => {
-    const data = readData();
-    const courseIndex = data.courses.findIndex((course) => String(course.id) === String(id));
+  updateCourse: async (id, courseData) => {
+    const { courses, users } = getCollections();
+    const courseId = new ObjectId(id);
 
-    if (courseIndex === -1) {
+    // Get current course
+    const course = await courses.findOne({ _id: courseId });
+    if (!course) {
       throw new Error("Course not found");
     }
 
+    // Calculate student count
+    const enrolledStudents = await users.countDocuments({ 
+      enrolledCourses: id.toString() 
+    });
+
     // Update course data
-    data.courses[courseIndex] = {
-      ...data.courses[courseIndex],
+    const updatedCourse = {
+      ...course,
       ...courseData,
-      updatedAt: new Date().toISOString(),
+      students: enrolledStudents,
+      updatedAt: new Date(),
     };
 
-    // Recalculate student count
-    const enrolledStudents = data.users.filter((user) =>
-      user.enrolledCourses.includes(String(id))
-    ).length;
-    data.courses[courseIndex].students = enrolledStudents;
+    // Remove _id from the update data
+    delete updatedCourse._id;
 
-    writeData(data);
-    return data.courses[courseIndex];
+    // Update in database
+    await courses.updateOne({ _id: courseId }, { $set: updatedCourse });
+    
+    // Return the updated course
+    return { _id: courseId, ...updatedCourse };
   },
 
   // Delete course
-  deleteCourse: (id) => {
-    const data = readData();
-    const courseIndex = data.courses.findIndex((course) => String(course.id) === String(id));
+  deleteCourse: async (id) => {
+    const { courses } = getCollections();
+    const courseId = new ObjectId(id);
 
-    if (courseIndex === -1) {
-      throw new Error("Course not found");
-    }
-
-    // Remove course
-    data.courses.splice(courseIndex, 1);
-    writeData(data);
-
-    return true;
+    // Find and delete the course
+    const result = await courses.deleteOne({ _id: courseId });
+    return result.deletedCount === 1;
   },
 
   // Add module to course
-  addModuleToCourse: (courseId, moduleData) => {
-    const data = readData();
-    const courseIndex = data.courses.findIndex((course) => String(course.id) === String(courseId));
-
-    if (courseIndex === -1) {
-      throw new Error("Course not found");
-    }
+  addModuleToCourse: async (courseId, moduleData) => {
+    const { courses } = getCollections();
+    const courseObjId = new ObjectId(courseId);
 
     // Create new module
     const newModule = {
-      id: Date.now().toString(),
+      _id: new ObjectId(),
       title: moduleData.title,
       lessons: [],
     };
 
     // Add module to course
-    data.courses[courseIndex].modules.push(newModule);
-    data.courses[courseIndex].updatedAt = new Date().toISOString();
+    await courses.updateOne(
+      { _id: courseObjId },
+      { 
+        $push: { modules: newModule },
+        $set: { updatedAt: new Date() }
+      }
+    );
 
-    writeData(data);
     return newModule;
   },
 
   // Add lesson to module
-  addLessonToModule: (courseId, moduleId, lessonData) => {
-    const data = readData();
-    const courseIndex = data.courses.findIndex((course) => String(course.id) === String(courseId));
-
-    if (courseIndex === -1) {
-      throw new Error("Course not found");
-    }
-
-    const moduleIndex = data.courses[courseIndex].modules.findIndex(
-      (module) => String(module.id) === String(moduleId)
-    );
-
-    if (moduleIndex === -1) {
-      throw new Error("Module not found");
-    }
+  addLessonToModule: async (courseId, moduleId, lessonData) => {
+    const { courses } = getCollections();
+    const courseObjId = new ObjectId(courseId);
+    const moduleObjId = new ObjectId(moduleId);
 
     // Create new lesson
     const newLesson = {
-      id: Date.now().toString(),
+      _id: new ObjectId(),
       title: lessonData.title,
       type: lessonData.type,
       duration: lessonData.duration || "",
@@ -168,91 +168,98 @@ const CourseModel = {
     };
 
     // Add lesson to module
-    data.courses[courseIndex].modules[moduleIndex].lessons.push(newLesson);
-    data.courses[courseIndex].updatedAt = new Date().toISOString();
+    await courses.updateOne(
+      { _id: courseObjId, "modules._id": moduleObjId },
+      { 
+        $push: { "modules.$.lessons": newLesson },
+        $set: { updatedAt: new Date() }
+      }
+    );
 
-    writeData(data);
     return newLesson;
   },
 
   // Get courses by instructor
-  getCoursesByInstructor: (instructorId) => {
-    const data = readData();
-    const courses = data.courses.filter(
-      (course) => String(course.instructorId) === String(instructorId)
-    );
+  getCoursesByInstructor: async (instructorId) => {
+    const { courses, users } = getCollections();
+    
+    const instructorCourses = await courses.find({ 
+      instructorId: instructorId.toString() 
+    }).toArray();
 
-    // Update student counts for each course
-    return courses.map((course) => {
-      const enrolledStudents = data.users.filter((user) =>
-        user.enrolledCourses.includes(String(course.id))
-      ).length;
-      return {
+    // Update student count for each course
+    const updatedCourses = [];
+    
+    for (const course of instructorCourses) {
+      const enrolledStudents = await users.countDocuments({ 
+        enrolledCourses: course._id.toString() 
+      });
+      
+      updatedCourses.push({
         ...course,
-        students: enrolledStudents,
-      };
-    });
+        students: enrolledStudents
+      });
+    }
+
+    return updatedCourses;
   },
 
   // Get courses by category
-  getCoursesByCategory: (category) => {
-    const data = readData();
-    return data.courses.filter((course) => course.category === category);
+  getCoursesByCategory: async (category) => {
+    const { courses } = getCollections();
+    return await courses.find({ category }).toArray();
   },
 
   // Search courses
-  searchCourses: (query) => {
-    const data = readData();
+  searchCourses: async (query) => {
+    const { courses } = getCollections();
     const searchLower = query.toLowerCase();
 
-    return data.courses.filter(
-      (course) =>
-        course.title.toLowerCase().includes(searchLower) ||
-        course.instructor.toLowerCase().includes(searchLower) ||
-        course.category.toLowerCase().includes(searchLower) ||
-        course.description.toLowerCase().includes(searchLower)
-    );
+    return await courses.find({ 
+      $or: [
+        { title: { $regex: searchLower, $options: 'i' } },
+        { instructor: { $regex: searchLower, $options: 'i' } },
+        { category: { $regex: searchLower, $options: 'i' } },
+        { description: { $regex: searchLower, $options: 'i' } }
+      ]
+    }).toArray();
   },
 
   // Get all categories
-  getAllCategories: () => {
-    const data = readData();
-    return [...new Set(data.courses.map((course) => course.category))];
+  getAllCategories: async () => {
+    const { courses } = getCollections();
+    const result = await courses.distinct("category");
+    return result;
   },
 
   // Get course count
-  getCourseCount: () => {
-    const data = readData();
-    return data.courses.length;
+  getCourseCount: async () => {
+    const { courses } = getCollections();
+    return await courses.countDocuments();
   },
 
   // Get new courses (created in the last 30 days)
-  getNewCourses: () => {
-    const data = readData();
+  getNewCourses: async () => {
+    const { courses } = getCollections();
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    return data.courses.filter((course) => {
-      const createdAt = new Date(course.createdAt);
-      return createdAt >= thirtyDaysAgo;
-    });
+    return await courses.find({ 
+      createdAt: { $gte: thirtyDaysAgo } 
+    }).toArray();
   },
 
   // Mark course as featured
-  markAsFeatured: (courseId, featured = true) => {
-    const data = readData();
-    const courseIndex = data.courses.findIndex(
-      (course) => String(course.id) === String(courseId)
+  markAsFeatured: async (courseId, featured = true) => {
+    const { courses } = getCollections();
+    const courseObjId = new ObjectId(courseId);
+
+    await courses.updateOne(
+      { _id: courseObjId },
+      { $set: { featured } }
     );
 
-    if (courseIndex === -1) {
-      throw new Error("Course not found");
-    }
-
-    data.courses[courseIndex].featured = featured;
-    writeData(data);
-
-    return data.courses[courseIndex];
+    return await courses.findOne({ _id: courseObjId });
   },
 };
 

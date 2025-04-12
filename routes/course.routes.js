@@ -6,9 +6,6 @@ const { isAuthenticated } = require("../middleware/auth.middleware")
 // Get all courses
 router.get("/", CourseController.getAllCourses)
 
-// Search courses
-router.get("/search", CourseController.searchCourses)
-
 // Get course details
 router.get("/:id", CourseController.getCourseDetails)
 
