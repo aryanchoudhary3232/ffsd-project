@@ -1,17 +1,14 @@
-const User = require("../models/User"); // Assuming Mongoose User model
-const Course = require("../models/course.model"); // Fixed path to Course model
-const Order = require("../models/order.model"); // Fixed path to Order model
-// Remove ProgressModel if not directly used here
-// const ProgressModel = require("../models/Progress");
+const User = require("../models/User");
+const Course = require("../models/course.model");
+const Order = require("../models/order.model");
 
 const AdminController = {
-  getAdminDashboard: async (req, res) => { // Add async
+  getAdminDashboard: async (req, res) => {
     if (!req.session.user || req.session.user.role !== "admin") {
       return res.redirect("/login");
     }
 
-    try { // Add try-catch
-        // Use Promise.all for concurrent fetching
+    try {
         const [
             totalUsers,
             totalInstructors,
@@ -28,8 +25,8 @@ const AdminController = {
             User.countDocuments({ role: "admin" }),
             Course.countDocuments(),
             Order.find({ status: "completed" }),
-            User.find().sort({ joinDate: -1 }).limit(5), // Sort by joinDate or createdAt if joinDate isn't reliable
-            Course.find().sort({ createdAt: -1 }).limit(5).populate('instructorId', 'name') // Populate instructor name
+            User.find().sort({ joinDate: -1 }).limit(5),
+            Course.find().sort({ createdAt: -1 }).limit(5).populate('instructorId', 'name')
         ]);
 
         const totalRevenue = completedOrders.reduce((sum, order) => sum + order.amount, 0);
@@ -37,7 +34,6 @@ const AdminController = {
         // Process recent users/courses if needed (e.g., formatting dates)
         const recentUsers = recentUsersData.map(user => ({
             ...user.toObject(),
-            // joinDate: user.joinDate ? new Date(user.joinDate).toLocaleDateString() : 'N/A', // Example formatting
         }));
         const recentCourses = recentCoursesData.map(course => ({
             ...course.toObject(),
@@ -45,7 +41,6 @@ const AdminController = {
         }));
 
 
-        // Calculate user distribution percentages
         const userDistribution = {
           students: { percentage: totalUsers ? ((totalStudents / totalUsers) * 100).toFixed(1) : 0 },
           instructors: { percentage: totalUsers ? ((totalInstructors / totalUsers) * 100).toFixed(1) : 0 },

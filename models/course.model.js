@@ -24,27 +24,14 @@ const CourseModel = {
       if (!id) {
         console.error('getCourseById called with null or undefined id');
         return null;
-      }
-      
-      // Log the ID we're looking for to help with debugging
-      console.log(`Looking for course with ID: ${id}`);
-      
+      }     
       const { courses } = getCollections();
-      let courseId;
-      
-      try {
-        courseId = new ObjectId(id);
-      } catch (error) {
-        console.error(`Invalid ObjectId format: ${id}`);
-        return null;
-      }
-      
-      const course = await courses.findOne({ _id: courseId });
-      
+      const course = await courses.findOne({ id: id });
+     
       if (!course) {
         console.log(`No course found with ID: ${id}`);
       }
-      
+     
       return course;
     } catch (error) {
       console.error(`Error in getCourseById(${id}):`, error);
@@ -87,7 +74,7 @@ const CourseModel = {
   // Update course
   updateCourse: async (id, courseData) => {
     const { courses, users } = getCollections();
-    const courseId = new ObjectId(id);
+    const courseId = ObjectId.createFromTime(id);
 
     // Get current course
     const course = await courses.findOne({ _id: courseId });
@@ -121,7 +108,7 @@ const CourseModel = {
   // Delete course
   deleteCourse: async (id) => {
     const { courses } = getCollections();
-    const courseId = new ObjectId(id);
+    const courseId = ObjectId.createFromTime(id);
 
     // Find and delete the course
     const result = await courses.deleteOne({ _id: courseId });
@@ -131,7 +118,7 @@ const CourseModel = {
   // Add module to course
   addModuleToCourse: async (courseId, moduleData) => {
     const { courses } = getCollections();
-    const courseObjId = new ObjectId(courseId);
+    const courseObjId =  ObjectId.createFromTime(courseId);
 
     // Create new module
     const newModule = {
@@ -155,8 +142,8 @@ const CourseModel = {
   // Add lesson to module
   addLessonToModule: async (courseId, moduleId, lessonData) => {
     const { courses } = getCollections();
-    const courseObjId = new ObjectId(courseId);
-    const moduleObjId = new ObjectId(moduleId);
+    const courseObjId = ObjectId.createFromTime(courseId);
+    const moduleObjId = ObjectId.createFromTime(moduleId);
 
     // Create new lesson
     const newLesson = {
@@ -252,7 +239,7 @@ const CourseModel = {
   // Mark course as featured
   markAsFeatured: async (courseId, featured = true) => {
     const { courses } = getCollections();
-    const courseObjId = new ObjectId(courseId);
+    const courseObjId = ObjectId.createFromTime(courseId);
 
     await courses.updateOne(
       { _id: courseObjId },

@@ -1,6 +1,6 @@
-const CourseModel = require("../models/course.model"); // Using updated MongoDB-based CourseModel
-const User = require("../models/User"); // Mongoose User model
-const ProgressModel = require("../models/progress.model"); // Using updated Progress model
+const CourseModel = require("../models/course.model");
+const User = require("../models/User");
+const ProgressModel = require("../models/progress.model");
 
 // Course controller
 const CourseController = {
