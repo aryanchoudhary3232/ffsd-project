@@ -21,8 +21,7 @@ const AuthController = {
         return res.redirect("/login");
       }
 
-      // Compare password
-      const isMatch = await bcrypt.compare(password, user.password);compare
+      const isMatch = await bcrypt.compare(password, user.password);
 
       if (!isMatch) {
         req.flash("error_msg", "Invalid email or password");
@@ -31,7 +30,7 @@ const AuthController = {
 
       req.session.user = {
         id: user._id,
-        name: user.name,
+        name: user.username,
         email: user.email,
         role: user.role,
       };
@@ -99,7 +98,7 @@ const AuthController = {
 
       req.session.user = {
         id: user._id,
-        name: user.name,
+        name: user.username,
         email: user.email,
         role: user.role,
       };
