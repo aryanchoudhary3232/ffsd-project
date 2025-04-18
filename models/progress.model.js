@@ -1,6 +1,13 @@
 const { ObjectId } = require("mongodb");
 const { getDb } = require("../config/database"); // Assuming getDb returns the MongoDB database instance
 
+// Helper to ensure an ObjectId instance, or return input if not valid
+const toObjectId = id => {
+  if (id instanceof ObjectId) return id;
+  if (typeof id === 'string' && /^[a-fA-F0-9]{24}$/.test(id)) return new ObjectId(id);
+  return id; // Return as-is if not a valid ObjectId string
+};
+
 // Helper function to get collections
 const getCollections = () => {
   const db = getDb();
@@ -15,8 +22,8 @@ const ProgressModel = {
   // Get progress by user and course
   getProgress: async (userId, courseId) => {
     const { progress } = getCollections();
-    const userObjectId = new ObjectId(userId);
-    const courseObjectId = new ObjectId(courseId);
+    const userObjectId = toObjectId(userId);
+    const courseObjectId = toObjectId(courseId);
 
     return (
       (await progress.findOne({ userId: userObjectId, courseId: courseObjectId })) || {
@@ -32,8 +39,8 @@ const ProgressModel = {
   markLessonAsComplete: async (userId, courseId, lessonId) => {
     // Assuming lessonId is a unique identifier (string or number) within the course
     const { progress, courses } = getCollections();
-    const userObjectId = new ObjectId(userId);
-    const courseObjectId = new ObjectId(courseId);
+    const userObjectId = toObjectId(userId);
+    const courseObjectId = toObjectId(courseId);
 
     // Find the course to get total lesson count
     const course = await courses.findOne({ _id: courseObjectId });
@@ -90,7 +97,7 @@ const ProgressModel = {
   // Get user's overall progress
   getUserOverallProgress: async (userId) => {
     const { progress } = getCollections();
-    const userObjectId = new ObjectId(userId);
+    const userObjectId = toObjectId(userId);
 
     const userProgressRecords = await progress.find({ userId: userObjectId }).toArray();
 
@@ -113,7 +120,7 @@ const ProgressModel = {
   // Get course completion rate
   getCourseCompletionRate: async (courseId) => {
     const { progress } = getCollections();
-    const courseObjectId = new ObjectId(courseId);
+    const courseObjectId = toObjectId(courseId);
 
     const courseProgressRecords = await progress.find({ courseId: courseObjectId }).toArray();
 
