@@ -80,7 +80,8 @@ const CourseModel = {
   // Update course
   updateCourse: async (id, courseData) => {
     const { courses, users } = getCollections();
-    const courseId = ObjectId.createFromTime(id);
+    // Fix: Use new ObjectId() instead of createFromTime
+    const courseId = new ObjectId(id);
 
     // Get current course
     const course = await courses.findOne({ _id: courseId });
@@ -114,7 +115,8 @@ const CourseModel = {
   // Delete course
   deleteCourse: async (id) => {
     const { courses } = getCollections();
-    const courseId = ObjectId.createFromTime(id);
+    // Fix: Use new ObjectId() instead of createFromTime
+    const courseId = new ObjectId(id);
 
     // Find and delete the course
     const result = await courses.deleteOne({ _id: courseId });
@@ -124,7 +126,8 @@ const CourseModel = {
   // Add module to course
   addModuleToCourse: async (courseId, moduleData) => {
     const { courses } = getCollections();
-    const courseObjId =  ObjectId.createFromTime(courseId);
+    // Fix: Use new ObjectId() instead of createFromTime
+    const courseObjId = new ObjectId(courseId);
 
     // Create new module
     const newModule = {
@@ -148,8 +151,10 @@ const CourseModel = {
   // Add lesson to module
   addLessonToModule: async (courseId, moduleId, lessonData) => {
     const { courses } = getCollections();
-    const courseObjId = ObjectId.createFromTime(courseId);
-    const moduleObjId = ObjectId.createFromTime(moduleId);
+    // Fix: Use new ObjectId() instead of createFromTime
+    const courseObjId = new ObjectId(courseId);
+    // Fix: For moduleId, we need to convert it correctly
+    const moduleObjId = new ObjectId(moduleId);
 
     // Create new lesson
     const newLesson = {
@@ -245,7 +250,8 @@ const CourseModel = {
   // Mark course as featured
   markAsFeatured: async (courseId, featured = true) => {
     const { courses } = getCollections();
-    const courseObjId = ObjectId.createFromTime(courseId);
+    // Fix: Use new ObjectId() instead of createFromTime
+    const courseObjId = new ObjectId(courseId);
 
     await courses.updateOne(
       { _id: courseObjId },

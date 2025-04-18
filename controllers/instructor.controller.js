@@ -286,7 +286,11 @@ const InstructorController = {
   },
 
   addModule: async (req, res) => {
+    console.log("--- addModule Controller ---"); // Added log
+    console.log("Request Body:", req.body); // Added log
+    console.log("Course ID Param:", req.params.id); // Added log
     if (!req.session.user || req.session.user.role !== "instructor") {
+      console.log("Unauthorized access attempt."); // Added log
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
@@ -294,25 +298,46 @@ const InstructorController = {
     const instructorId = req.session.user.id;
     const { title } = req.body;
 
+    if (!title || title.trim() === "") { // Added check for empty title
+        console.log("Module title is missing or empty.");
+        const errorMsg = "Module title cannot be empty.";
+        if (req.xhr || req.headers.accept.includes('json')) {
+            return res.status(400).json({ success: false, message: errorMsg });
+        }
+        req.flash("error_msg", errorMsg);
+        return res.redirect(`/instructor/courses/${courseId}/content`);
+    }
+
     try {
+      console.log(`Fetching course with ID: ${courseId}`); // Added log
       const course = await Course.getCourseById(courseId);
 
-      if (!course || course.instructorId.toString() !== instructorId) {
-        return res.status(403).json({ success: false, message: "Course not found or permission denied" });
+      if (!course) { // Added specific log for course not found
+          console.log(`Course not found for ID: ${courseId}`);
+          return res.status(404).json({ success: false, message: "Course not found" });
       }
 
+      if (course.instructorId.toString() !== instructorId) {
+        console.log(`Permission denied: Instructor ${instructorId} does not own course ${courseId}`); // Added log
+        return res.status(403).json({ success: false, message: "Permission denied" });
+      }
+
+      console.log(`Calling Course.addModuleToCourse for course ${courseId} with title "${title}"`); // Added log
       // Use the native model method to add a module
       const newModule = await Course.addModuleToCourse(courseId, { title: title });
+      console.log("Module added successfully via model:", newModule); // Added log
 
       if (req.xhr || req.headers.accept.includes('json')) {
+        console.log("Responding with JSON success."); // Added log
         return res.json({ success: true, message: "Module added", module: newModule });
       }
       req.flash("success_msg", "Module added successfully");
       res.redirect(`/instructor/courses/${courseId}/content`);
     } catch (error) {
-      console.error("Add Module error:", error);
+      console.error("Add Module error in controller:", error); // Enhanced log
       const errorMsg = error.message || "Error adding module";
       if (req.xhr || req.headers.accept.includes('json')) {
+        console.log("Responding with JSON error."); // Added log
         return res.status(500).json({ success: false, message: errorMsg });
       }
       req.flash("error_msg", errorMsg);
