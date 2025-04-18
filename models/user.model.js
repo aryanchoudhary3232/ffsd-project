@@ -50,7 +50,7 @@ const UserModel = {
     const hashedPassword = await bcrypt.hash(userData.password, salt);
 
     const userToSave = {
-      name: userData.name,
+      username: userData.username,
       email: userData.email,
       password: hashedPassword,
       role: userData.role || "student",

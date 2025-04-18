@@ -11,6 +11,7 @@ const UserController = {
 
     try {
         const userId = req.session.user.id;
+        // const userId = id;
         const user = await User.findById(userId).populate('enrolledCourses');
         
         if (!user) {

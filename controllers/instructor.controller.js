@@ -4,6 +4,7 @@ const Order = require("../models/order.model"); // Assuming Mongoose Order model
 const Progress = require("../models/progress.model"); // Assuming Mongoose Progress model
 const path = require("path");
 const multer = require("multer");
+const fs = require("fs");
 
 // Set up multer for file uploads
 const storage = multer.diskStorage({
@@ -30,25 +31,23 @@ const InstructorController = {
 
     try {
       const userId = req.session.user.id;
-      const instructorCourses = await Course.find({ instructorId: userId });
+      const instructorCourses = await Course.getCoursesByInstructor(userId);
       const courseIds = instructorCourses.map(course => course._id);
 
       const totalStudents = await User.countDocuments({ enrolledCourses: { $in: courseIds } });
 
-      const completedOrders = await Order.find({ courseId: { $in: courseIds }, status: "completed" });
+      // Get all orders and filter for this instructor's courses
+      const allOrders = await Order.getAllOrders();
+      const completedOrders = allOrders.filter(order =>
+        courseIds.some(id => id.equals(order.courseId)) && order.status === 'completed'
+      );
       const totalRevenue = completedOrders.reduce((sum, order) => sum + order.amount, 0);
 
-      const recentOrdersData = await Order.find({ courseId: { $in: courseIds } })
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .populate('userId', 'name')
-        .populate('courseId', 'title');
-
-      const recentOrders = recentOrdersData.map(order => ({
-        ...order.toObject(),
-        userName: order.userId ? order.userId.name : "Unknown User",
-        courseTitle: order.courseId ? order.courseId.title : "Unknown Course",
-      }));
+      // Get recent orders across all courses, then filter and limit
+      const recentOrdersRaw = await Order.getRecentOrders(20);
+      const recentOrders = recentOrdersRaw
+        .filter(order => courseIds.some(id => id.equals(order.courseId)))
+        .slice(0, 5);
 
       res.render("instructor/dashboard", {
         courses: instructorCourses,
@@ -71,22 +70,35 @@ const InstructorController = {
     try {
       const userId = req.session.user.id;
       const sortFilter = req.query.sort || "newest";
-      let sortOption = { createdAt: -1 };
 
+      // Fetch courses via native model and sort in JS
+      let instructorCourses = await Course.getCoursesByInstructor(userId);
+      // Apply sorting filter
       switch (sortFilter) {
-        case "oldest": sortOption = { createdAt: 1 }; break;
-        case "title-asc": sortOption = { title: 1 }; break;
-        case "title-desc": sortOption = { title: -1 }; break;
+        case "oldest":
+          instructorCourses.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+          break;
+        case "title-asc":
+          instructorCourses.sort((a, b) => a.title.localeCompare(b.title));
+          break;
+        case "title-desc":
+          instructorCourses.sort((a, b) => b.title.localeCompare(a.title));
+          break;
+        default:
+          instructorCourses.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       }
-
-      let instructorCourses = await Course.find({ instructorId: userId }).sort(sortOption);
 
       const enhancedCoursesPromises = instructorCourses.map(async (course) => {
         const studentCount = await User.countDocuments({ enrolledCourses: course._id });
-        const courseOrders = await Order.find({ courseId: course._id, status: "completed" });
+        // Get all orders and filter for this course
+        const allOrders = await Order.getAllOrders();
+        const courseOrders = allOrders.filter(order => 
+          order.courseId.toString() === course._id.toString() && 
+          order.status === "completed"
+        );
         const revenue = courseOrders.reduce((sum, order) => sum + order.amount, 0);
         return {
-          ...course.toObject(),
+          ...course, // Native MongoDB objects don't need toObject()
           studentCount,
           revenue,
         };
@@ -152,7 +164,7 @@ const InstructorController = {
           status: 'draft'
         };
 
-        const newCourse = await Course.create(newCourseData);
+        const newCourse = await Course.createCourse(newCourseData);
 
         req.flash("success_msg", "Course created successfully. Add content now.");
         res.redirect(`/instructor/courses/${newCourse._id}/content`);
@@ -172,9 +184,9 @@ const InstructorController = {
     try {
       const courseId = req.params.id;
       const instructorId = req.session.user.id;
-      const course = await Course.findById(courseId);
+      const course = await Course.getCourseById(courseId);
 
-      if (!course || !course.instructorId.equals(instructorId)) {
+      if (!course || course.instructorId.toString() !== instructorId) {
         req.flash(
           "error_msg",
           "Course not found or you do not have permission to edit it"
@@ -210,9 +222,9 @@ const InstructorController = {
       const { title, description, category, price, status } = req.body;
 
       try {
-        const course = await Course.findById(courseId);
+        const course = await Course.getCourseById(courseId);
 
-        if (!course || !course.instructorId.equals(instructorId)) {
+        if (!course || course.instructorId.toString() !== instructorId) {
           req.flash(
             "error_msg",
             "Course not found or you do not have permission to edit it"
@@ -233,7 +245,7 @@ const InstructorController = {
           updates.thumbnail = `/uploads/${req.file.filename}`;
         }
 
-        await Course.findByIdAndUpdate(courseId, updates);
+        await Course.updateCourse(courseId, updates);
 
         req.flash("success_msg", "Course updated successfully");
         res.redirect("/instructor/courses");
@@ -253,9 +265,9 @@ const InstructorController = {
     try {
       const courseId = req.params.id;
       const instructorId = req.session.user.id;
-      const course = await Course.findById(courseId);
+      const course = await Course.getCourseById(courseId);
 
-      if (!course || !course.instructorId.equals(instructorId)) {
+      if (!course || course.instructorId.toString() !== instructorId) {
         req.flash(
           "error_msg",
           "Course not found or you do not have permission to manage its content"
@@ -283,21 +295,17 @@ const InstructorController = {
     const { title } = req.body;
 
     try {
-      const course = await Course.findById(courseId);
+      const course = await Course.getCourseById(courseId);
 
-      if (!course || !course.instructorId.equals(instructorId)) {
+      if (!course || course.instructorId.toString() !== instructorId) {
         return res.status(403).json({ success: false, message: "Course not found or permission denied" });
       }
 
-      const newModule = { title: title, lessons: [] };
-      course.modules.push(newModule);
-      course.updatedAt = new Date();
-      await course.save();
-
-      const addedModule = course.modules[course.modules.length - 1];
+      // Use the native model method to add a module
+      const newModule = await Course.addModuleToCourse(courseId, { title: title });
 
       if (req.xhr || req.headers.accept.includes('json')) {
-        return res.json({ success: true, message: "Module added", module: addedModule });
+        return res.json({ success: true, message: "Module added", module: newModule });
       }
       req.flash("success_msg", "Module added successfully");
       res.redirect(`/instructor/courses/${courseId}/content`);
@@ -322,23 +330,31 @@ const InstructorController = {
     const { title } = req.body;
 
     try {
-      const course = await Course.findById(courseId);
+      const course = await Course.getCourseById(courseId);
 
-      if (!course || !course.instructorId.equals(instructorId)) {
+      if (!course || course.instructorId.toString() !== instructorId) {
         return res.status(403).json({ success: false, message: "Course not found or permission denied" });
       }
 
-      const module = course.modules.id(moduleId);
-      if (!module) {
+      // Find the module in the course
+      const moduleIndex = course.modules.findIndex(mod => mod._id.toString() === moduleId);
+      if (moduleIndex === -1) {
         return res.status(404).json({ success: false, message: "Module not found" });
       }
 
-      module.title = title;
-      course.updatedAt = new Date();
-      await course.save();
+      // Update the course with modified module using updateCourse
+      const updatedModules = [...course.modules];
+      updatedModules[moduleIndex].title = title;
+      await Course.updateCourse(courseId, { 
+        modules: updatedModules,
+        updatedAt: new Date() 
+      });
+      
+      // Return the updated module
+      const updatedModule = updatedModules[moduleIndex];
 
       if (req.xhr || req.headers.accept.includes('json')) {
-        return res.json({ success: true, message: "Module updated", module: module });
+        return res.json({ success: true, message: "Module updated", module: updatedModule });
       }
       req.flash("success_msg", "Module updated successfully");
       res.redirect(`/instructor/courses/${courseId}/content`);
@@ -362,19 +378,25 @@ const InstructorController = {
     const instructorId = req.session.user.id;
 
     try {
-      const course = await Course.findById(courseId);
+      const course = await Course.getCourseById(courseId);
 
-      if (!course || !course.instructorId.equals(instructorId)) {
+      if (!course || course.instructorId.toString() !== instructorId) {
         return res.status(403).json({ success: false, message: "Course not found or permission denied" });
       }
 
-      const module = course.modules.id(moduleId);
-      if (!module) {
+      // Find the module index in the modules array
+      const moduleIndex = course.modules.findIndex(mod => mod._id.toString() === moduleId);
+      if (moduleIndex === -1) {
         return res.status(404).json({ success: false, message: "Module not found" });
       }
-      module.remove();
-      course.updatedAt = new Date();
-      await course.save();
+      
+      // Remove the module from the array and update the course
+      const updatedModules = [...course.modules];
+      updatedModules.splice(moduleIndex, 1);
+      await Course.updateCourse(courseId, { 
+        modules: updatedModules,
+        updatedAt: new Date() 
+      });
 
       if (req.xhr || req.headers.accept.includes('json')) {
         return res.json({ success: true, message: "Module deleted", moduleId: moduleId });
@@ -413,9 +435,9 @@ const InstructorController = {
       const { title, type, duration } = req.body;
 
       try {
-        const course = await Course.findById(courseId);
+        const course = await Course.getCourseById(courseId);
 
-        if (!course || !course.instructorId.equals(instructorId)) {
+        if (!course || course.instructorId.toString() !== instructorId) {
           const errorMsg = "Course not found or permission denied";
           if (req.xhr || req.headers.accept.includes('json')) {
             return res.status(403).json({ success: false, message: errorMsg });
@@ -424,8 +446,9 @@ const InstructorController = {
           return res.redirect("/instructor/courses");
         }
 
-        const module = course.modules.id(moduleId);
-        if (!module) {
+        // Find the module in the course
+        const moduleIndex = course.modules.findIndex(mod => mod._id.toString() === moduleId);
+        if (moduleIndex === -1) {
           const errorMsg = "Module not found";
           if (req.xhr || req.headers.accept.includes('json')) {
             return res.status(404).json({ success: false, message: errorMsg });
@@ -440,11 +463,9 @@ const InstructorController = {
           duration: duration || "",
           file: req.file ? `/uploads/${req.file.filename}` : null,
         };
-        module.lessons.push(newLesson);
-        course.updatedAt = new Date();
-        await course.save();
-
-        const addedLesson = module.lessons[module.lessons.length - 1];
+        
+        // Use the native model method to add a lesson to module
+        const addedLesson = await Course.addLessonToModule(courseId, moduleId, newLesson);
 
         if (req.xhr || req.headers.accept.includes('json')) {
           return res.json({ success: true, message: "Lesson added", lesson: addedLesson });
@@ -484,9 +505,9 @@ const InstructorController = {
       const { title, type, duration } = req.body;
 
       try {
-        const course = await Course.findById(courseId);
+        const course = await Course.getCourseById(courseId);
 
-        if (!course || !course.instructorId.equals(instructorId)) {
+        if (!course || course.instructorId.toString() !== instructorId) {
           const errorMsg = "Course not found or permission denied";
           if (req.xhr || req.headers.accept.includes('json')) {
             return res.status(403).json({ success: false, message: errorMsg });
@@ -495,7 +516,9 @@ const InstructorController = {
           return res.redirect("/instructor/courses");
         }
 
-        const module = course.modules.id(moduleId);
+        // Find the module in the course
+        const moduleIndex = course.modules.findIndex(mod => mod._id.toString() === moduleId);
+        const module = moduleIndex !== -1 ? course.modules[moduleIndex] : null;
         if (!module) {
           const errorMsg = "Module not found";
           if (req.xhr || req.headers.accept.includes('json')) {
@@ -504,7 +527,10 @@ const InstructorController = {
           req.flash("error_msg", errorMsg);
           return res.redirect(`/instructor/courses/${courseId}/content`);
         }
-        const lesson = module.lessons.id(lessonId);
+
+        // Find the lesson in the module
+        const lessonIndex = module.lessons.findIndex(les => les._id.toString() === lessonId);
+        const lesson = lessonIndex !== -1 ? module.lessons[lessonIndex] : null;
         if (!lesson) {
           const errorMsg = "Lesson not found";
           if (req.xhr || req.headers.accept.includes('json')) {
@@ -514,17 +540,29 @@ const InstructorController = {
           return res.redirect(`/instructor/courses/${courseId}/content`);
         }
 
-        lesson.title = title;
-        lesson.type = type;
-        lesson.duration = duration || "";
+        // Create updated modules array with the modified lesson
+        const updatedModules = [...course.modules];
+        const updatedLesson = {
+          ...updatedModules[moduleIndex].lessons[lessonIndex],
+          title,
+          type,
+          duration: duration || "",
+        };
         if (req.file) {
-          lesson.file = `/uploads/${req.file.filename}`;
+          updatedLesson.file = `/uploads/${req.file.filename}`;
         }
-        course.updatedAt = new Date();
-        await course.save();
+        
+        // Replace the lesson in the modules structure
+        updatedModules[moduleIndex].lessons[lessonIndex] = updatedLesson;
+        
+        // Update the course with the modified modules array
+        await Course.updateCourse(courseId, {
+          modules: updatedModules,
+          updatedAt: new Date()
+        });
 
         if (req.xhr || req.headers.accept.includes('json')) {
-          return res.json({ success: true, message: "Lesson updated", lesson: lesson });
+          return res.json({ success: true, message: "Lesson updated", lesson: updatedLesson });
         }
         req.flash("success_msg", "Lesson updated successfully");
         res.redirect(`/instructor/courses/${courseId}/content`);
@@ -549,9 +587,9 @@ const InstructorController = {
     const instructorId = req.session.user.id;
 
     try {
-      const course = await Course.findById(courseId);
+      const course = await Course.getCourseById(courseId);
 
-      if (!course || !course.instructorId.equals(instructorId)) {
+      if (!course || course.instructorId.toString() !== instructorId) {
         const errorMsg = "Course not found or permission denied";
         if (req.xhr || req.headers.accept.includes('json')) {
           return res.status(403).json({ success: false, message: errorMsg });
@@ -560,7 +598,9 @@ const InstructorController = {
         return res.redirect("/instructor/courses");
       }
 
-      const module = course.modules.id(moduleId);
+      // Find the module in the course
+      const moduleIndex = course.modules.findIndex(mod => mod._id.toString() === moduleId);
+      const module = moduleIndex !== -1 ? course.modules[moduleIndex] : null;
       if (!module) {
         const errorMsg = "Module not found";
         if (req.xhr || req.headers.accept.includes('json')) {
@@ -569,7 +609,9 @@ const InstructorController = {
         req.flash("error_msg", errorMsg);
         return res.redirect(`/instructor/courses/${courseId}/content`);
       }
-      const lesson = module.lessons.id(lessonId);
+      // Find the lesson in the module
+      const lessonIndex = module.lessons.findIndex(les => les._id.toString() === lessonId);
+      const lesson = lessonIndex !== -1 ? module.lessons[lessonIndex] : null;
       if (!lesson) {
         const errorMsg = "Lesson not found";
         if (req.xhr || req.headers.accept.includes('json')) {
@@ -579,9 +621,15 @@ const InstructorController = {
         return res.redirect(`/instructor/courses/${courseId}/content`);
       }
 
-      lesson.remove();
-      course.updatedAt = new Date();
-      await course.save();
+      // Create a new modules array without the lesson to be deleted
+      const updatedModules = [...course.modules];
+      updatedModules[moduleIndex].lessons.splice(lessonIndex, 1);
+      
+      // Update the course with the modified modules array
+      await Course.updateCourse(courseId, {
+        modules: updatedModules,
+        updatedAt: new Date()
+      });
 
       if (req.xhr || req.headers.accept.includes('json')) {
         return res.json({ success: true, message: "Lesson deleted", lessonId: lessonId });
@@ -606,10 +654,16 @@ const InstructorController = {
 
     try {
       const userId = req.session.user.id;
-      const instructorCourses = await Course.find({ instructorId: userId });
+      const instructorCourses = await Course.getCoursesByInstructor(userId);
       const courseIds = instructorCourses.map(c => c._id);
 
-      const orders = await Order.find({ courseId: { $in: courseIds }, status: 'completed' });
+      // Get all orders and filter for instructor's completed courses
+      const allOrders = await Order.getAllOrders();
+      const orders = allOrders.filter(order => 
+        courseIds.some(id => id.toString() === order.courseId.toString()) && 
+        order.status === 'completed'
+      );
+
       const revenueByCourseName = {};
       let totalRevenue = 0;
 
@@ -620,12 +674,19 @@ const InstructorController = {
         totalRevenue += courseRevenue;
       });
 
-      const progressRecords = await Progress.find({ courseId: { $in: courseIds } });
+      // We need to use the Progress model's native methods instead of Mongoose's
+      const allProgress = [];
+      for (const courseId of courseIds) {
+        // Get course completion rate for each course
+        const courseProgress = await Progress.getCourseCompletionRate(courseId);
+        allProgress.push({
+          courseId: courseId,
+          progress: courseProgress
+        });
+      }
+
       const courseCompletionRates = instructorCourses.map(course => {
-        const courseProgress = progressRecords.filter(p => p.courseId.equals(course._id));
-        const completedCount = courseProgress.filter(p => p.progress === 100).length;
-        const totalEnrolled = courseProgress.length;
-        const completionRate = totalEnrolled > 0 ? Math.round((completedCount / totalEnrolled) * 100) : 0;
+        const completionRate = allProgress.find(p => p.courseId.toString() === course._id.toString())?.progress || 0;
         return {
           course: course.title,
           completionRate,
@@ -652,7 +713,7 @@ const InstructorController = {
 
     try {
       const userId = req.session.user.id;
-      const instructorCourses = await Course.find({ instructorId: userId });
+      const instructorCourses = await Course.getCoursesByInstructor(userId);
       const courseIds = instructorCourses.map((course) => course._id);
 
       const students = await User.find({

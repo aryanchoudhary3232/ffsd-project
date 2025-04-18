@@ -24,14 +24,20 @@ const CourseModel = {
       if (!id) {
         console.error('getCourseById called with null or undefined id');
         return null;
-      }     
+      }
       const { courses } = getCollections();
-      const course = await courses.findOne({ id: id });
-     
+      let course = null;
+      // Try to find by ObjectId if possible
+      if (ObjectId.isValid(id)) {
+        course = await courses.findOne({ _id: new ObjectId(id) });
+      }
+      // If not found, try to find by string id field
+      if (!course) {
+        course = await courses.findOne({ id: id.toString() });
+      }
       if (!course) {
         console.log(`No course found with ID: ${id}`);
       }
-     
       return course;
     } catch (error) {
       console.error(`Error in getCourseById(${id}):`, error);
