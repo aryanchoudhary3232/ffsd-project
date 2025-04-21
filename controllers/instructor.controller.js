@@ -36,14 +36,12 @@ const InstructorController = {
 
       const totalStudents = await User.countDocuments({ enrolledCourses: { $in: courseIds } });
 
-      // Get all orders and filter for this instructor's courses
       const allOrders = await Order.getAllOrders();
       const completedOrders = allOrders.filter(order =>
         courseIds.some(id => id.equals(order.courseId)) && order.status === 'completed'
       );
       const totalRevenue = completedOrders.reduce((sum, order) => sum + order.amount, 0);
 
-      // Get recent orders across all courses, then filter and limit
       const recentOrdersRaw = await Order.getRecentOrders(20);
       const recentOrders = recentOrdersRaw
         .filter(order => courseIds.some(id => id.equals(order.courseId)))

@@ -3,6 +3,11 @@ const Course = require("../models/course.model");
 const Order = require("../models/order.model");
 
 const AdminController = {
+  isValidObjectId: (id) => {
+    const ObjectId = require('mongoose').Types.ObjectId;
+    return ObjectId.isValid(id) && new ObjectId(id).toString() === id;
+  },
+
   getAdminDashboard: async (req, res) => {
     if (!req.session.user || req.session.user.role !== "admin") {
       return res.redirect("/login");
@@ -17,26 +22,49 @@ const AdminController = {
             totalCourses,
             completedOrders,
             recentUsersData,
-            recentCoursesData
+            allCourses
         ] = await Promise.all([
             User.countDocuments(),
             User.countDocuments({ role: "instructor" }),
             User.countDocuments({ role: "student" }),
             User.countDocuments({ role: "admin" }),
-            Course.countDocuments(),
-            Order.find({ status: "completed" }),
+            Course.getCourseCount(),
+            Order.getAllOrders(),
             User.find().sort({ joinDate: -1 }).limit(5),
-            Course.find().sort({ createdAt: -1 }).limit(5).populate('instructorId', 'name')
+            Course.getAllCourses() // Get all courses then manually sort and limit
         ]);
 
-        const totalRevenue = completedOrders.reduce((sum, order) => sum + order.amount, 0);
+        // Manually sort and limit courses
+        const recentCoursesData = allCourses
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .slice(0, 5);
+            
+        // Since we don't have populate functionality, we need to manually fetch instructor data
+        const recentCoursesWithInstructors = await Promise.all(
+            recentCoursesData.map(async (course) => {
+                let instructor = null;
+                if (course.instructorId && AdminController.isValidObjectId(course.instructorId)) {
+                    instructor = await User.findById(course.instructorId);
+                }
+                return {
+                    ...course,
+                    instructorId: instructor ? { name: instructor.name } : null
+                };
+            })
+        );
+
+        // Filter completed orders since we got all orders
+        const filteredCompletedOrders = completedOrders.filter(order => order.status === "completed");
+        const totalRevenue = filteredCompletedOrders.reduce((sum, order) => sum + order.amount, 0);
 
         // Process recent users/courses if needed (e.g., formatting dates)
         const recentUsers = recentUsersData.map(user => ({
             ...user.toObject(),
         }));
-        const recentCourses = recentCoursesData.map(course => ({
-            ...course.toObject(),
+        
+        // Since courses are already plain objects from our custom model, no need for toObject()
+        const recentCourses = recentCoursesWithInstructors.map(course => ({
+            ...course,
             instructor: course.instructorId ? course.instructorId.name : "Unknown Instructor",
         }));
 
@@ -231,22 +259,25 @@ const AdminController = {
     }
 
     try { // Add try-catch
-        let courses = await Course.find(query)
-                                .populate('instructorId', 'name') // Populate instructor name
-                                .sort(sortOption);
-
+        let courses = await Course.getAllCourses();
+        
+        // Since getAllCourses doesn't support population, we need to fetch instructor data separately
         // Enhance with student count (consider aggregation for performance)
         const enhancedCoursesPromises = courses.map(async (course) => {
+            let instructor = null;
+            if (course.instructorId && AdminController.isValidObjectId(course.instructorId)) {
+                instructor = await User.findById(course.instructorId);
+            }
             const studentCount = await User.countDocuments({ enrolledCourses: course._id });
             return {
-                ...course.toObject(),
+                ...course,
                 students: studentCount,
-                instructor: course.instructorId ? course.instructorId.name : "Unknown Instructor",
+                instructor: instructor ? instructor.name : "Unknown Instructor",
             };
         });
         const enhancedCourses = await Promise.all(enhancedCoursesPromises);
 
-        const categories = await Course.distinct('category');
+        const categories = await Course.getAllCategories();
 
         res.render("admin/courses", {
           courses: enhancedCourses,
@@ -290,24 +321,30 @@ const AdminController = {
     }
     try {
         const courseId = req.params.id;
-        const course = await Course.findById(courseId).populate('instructorId', 'name email'); // Populate instructor
+        const course = await Course.getCourseById(courseId);
 
         if (!course) {
           req.flash("error_msg", "Course not found");
           return res.redirect("/admin/courses");
         }
 
+        // Find the instructor separately since we can't use populate
+        let instructor = null;
+        if (course.instructorId && AdminController.isValidObjectId(course.instructorId)) {
+            instructor = await User.findById(course.instructorId);
+        }
+        
         // Find enrolled students
-        const enrolledStudents = await User.find({ enrolledCourses: courseId }, 'name email'); // Select only name and email
+        const enrolledStudents = await User.find({ enrolledCourses: courseId }, 'name email');
 
         res.render("admin/course-details", {
           course: {
-            ...course.toObject(),
-            instructor: course.instructorId ? course.instructorId.name : "Unknown Instructor",
-            students: enrolledStudents.length, // Count fetched students
+            ...course,
+            instructor: instructor ? instructor.name : "Unknown Instructor",
+            students: enrolledStudents.length,
             rating: course.rating || "N/A",
           },
-          instructor: course.instructorId || { name: "Unknown", email: "N/A", _id: null }, // Pass instructor object
+          instructor: instructor || { name: "Unknown", email: "N/A", _id: null },
           enrolledStudents,
         });
     } catch (error) {
@@ -324,7 +361,7 @@ const AdminController = {
     
     try {
       const courseId = req.params.id;
-      const course = await Course.findById(courseId);
+      const course = await Course.getCourseById(courseId);
       
       if (!course) {
         req.flash("error_msg", "Course not found");
@@ -362,20 +399,23 @@ const AdminController = {
         return res.redirect("/admin/courses/new");
       }
       
-      const newCourse = new Course({
+      let instructor = null;
+      if (instructorId && AdminController.isValidObjectId(instructorId)) {
+        instructor = await User.findById(instructorId);
+      }
+      
+      const courseData = {
         title,
         description,
         category,
         price: parseFloat(price) || 0,
         instructorId: instructorId || req.session.user.id, // Default to current user if no instructor selected
-        status: 'draft',
-        featured: false,
-        thumbnail: req.file ? `/uploads/${req.file.filename}` : '/img/placeholder.svg',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      });
+        instructor: instructor ? instructor.name : "Unknown Instructor",
+        thumbnail: req.file ? `/uploads/${req.file.filename}` : '/img/placeholder.svg'
+      };
       
-      await newCourse.save();
+      const newCourse = await Course.createCourse(courseData);
+      
       req.flash("success_msg", "Course created successfully");
       res.redirect(`/admin/courses/${newCourse._id}`);
     } catch (error) {
@@ -385,45 +425,57 @@ const AdminController = {
     }
   },
 
-  updateCourse: async (req, res) => { // Add async, handle thumbnail upload
+  updateCourse: async (req, res) => {
     if (!req.session.user || req.session.user.role !== "admin") {
       return res.redirect("/login");
     }
 
     const courseId = req.params.id;
     // Assuming Multer middleware runs before this to handle req.file
-    const { title, description, category, price, status, featured, instructorId } = req.body; // Add instructorId if editable by admin
+    const { title, description, category, price, status, featured, instructorId } = req.body;
 
     try {
-        const course = await Course.findById(courseId);
+        const course = await Course.getCourseById(courseId);
         if (!course) {
           req.flash("error_msg", "Course not found");
           return res.redirect("/admin/courses");
         }
 
-        const updates = {
+        // Get instructor name if instructorId is provided
+        let instructorName = course.instructor;
+        if (instructorId && instructorId !== course.instructorId) {
+          // Add validation for ObjectId
+          if (AdminController.isValidObjectId(instructorId)) {
+            const instructor = await User.findById(instructorId);
+            instructorName = instructor ? instructor.name : "Unknown Instructor";
+          } else {
+            req.flash("error_msg", "Invalid instructor ID format");
+            return res.redirect(`/admin/courses/${courseId}/edit`);
+          }
+        }
+
+        const courseData = {
           title,
           description,
           category,
           price: parseFloat(price) || 0,
           status: status || 'draft',
           featured: featured === 'on', // Checkbox value
-          updatedAt: new Date(),
-          instructorId: instructorId || course.instructorId // Update instructor if provided
+          instructorId: instructorId || course.instructorId,
+          instructor: instructorName
         };
 
         if (req.file) {
-          updates.thumbnail = `/uploads/${req.file.filename}`;
-          // Optionally delete old thumbnail
+          courseData.thumbnail = `/uploads/${req.file.filename}`;
         }
 
-        await Course.findByIdAndUpdate(courseId, updates);
+        await Course.updateCourse(courseId, courseData);
         req.flash("success_msg", "Course updated successfully");
-        res.redirect(`/admin/courses/${courseId}`); // Redirect to details page
+        res.redirect(`/admin/courses/${courseId}`);
     } catch (error) {
         console.error("Admin Update Course error:", error);
         req.flash("error_msg", error.message || "Error updating course.");
-        res.redirect(`/admin/courses/${courseId}/edit`); // Redirect back to edit form on error
+        res.redirect(`/admin/courses/${courseId}/edit`);
     }
   },
 
@@ -436,14 +488,20 @@ const AdminController = {
     const { status } = req.body;
     
     try {
-      const course = await Course.findById(courseId);
+      const course = await Course.getCourseById(courseId);
       if (!course) {
         return res.status(404).json({ success: false, message: "Course not found" });
       }
       
-      course.status = status;
-      course.updatedAt = new Date();
-      await course.save();
+      // Create updated course data
+      const courseData = {
+        ...course,
+        status: status,
+        updatedAt: new Date()
+      };
+      
+      // Update the course
+      await Course.updateCourse(courseId, courseData);
       
       return res.json({ success: true, message: "Course status updated" });
     } catch (error) {
@@ -451,7 +509,7 @@ const AdminController = {
       return res.status(500).json({ success: false, message: error.message || "Error updating course status" });
     }
   },
-  
+
   updateCourseFeatured: async (req, res) => {
     if (!req.session.user || req.session.user.role !== "admin") {
       return res.redirect("/login");
@@ -461,14 +519,14 @@ const AdminController = {
     const { featured } = req.body;
     
     try {
-      const course = await Course.findById(courseId);
+      // Get the course with the custom method
+      const course = await Course.getCourseById(courseId);
       if (!course) {
         return res.status(404).json({ success: false, message: "Course not found" });
       }
       
-      course.featured = featured === 'true' || featured === true;
-      course.updatedAt = new Date();
-      await course.save();
+      // Use the markAsFeatured method from your custom Course model
+      await Course.markAsFeatured(courseId, featured === 'true' || featured === true);
       
       return res.json({ success: true, message: "Course featured status updated" });
     } catch (error) {
@@ -477,7 +535,7 @@ const AdminController = {
     }
   },
 
-  deleteCourse: async (req, res) => { // Add async
+  deleteCourse: async (req, res) => {
     if (!req.session.user || req.session.user.role !== "admin") {
       return res.redirect("/login");
     }
@@ -485,10 +543,11 @@ const AdminController = {
     const courseId = req.params.id;
 
     try {
-        const deletedCourse = await Course.findByIdAndDelete(courseId);
+        // Use the deleteCourse method from your custom Course model
+        const deleted = await Course.deleteCourse(courseId);
 
-        if (!deletedCourse) {
-          req.flash("error_msg", "Course not found");
+        if (!deleted) {
+          req.flash("error_msg", "Course not found or could not be deleted");
           return res.redirect("/admin/courses");
         }
 
@@ -507,21 +566,40 @@ const AdminController = {
     }
   },
 
-  getOrders: async (req, res) => { // Add async
+  getOrders: async (req, res) => {
     if (!req.session.user || req.session.user.role !== "admin") {
       return res.redirect("/login");
     }
     try {
-        const orders = await Order.find()
-                                .populate('userId', 'name') // Populate user name
-                                .populate('courseId', 'title') // Populate course title
-                                .sort({ createdAt: -1 }); // Sort by most recent
-
-        const enhancedOrders = orders.map(order => ({
-            ...order.toObject(),
-            userName: order.userId ? order.userId.name : "Unknown User",
-            courseTitle: order.courseId ? order.courseId.title : "Unknown Course",
-        }));
+        // Use the custom getAllOrders method
+        const orders = await Order.getAllOrders();
+        
+        // Since we don't have populate for the custom model, we need to fetch user and course details separately
+        const enhancedOrdersPromises = orders.map(async (order) => {
+            let user = null;
+            let course = null;
+            
+            // Validate userId is a valid ObjectId before querying
+            if (order.userId && AdminController.isValidObjectId(order.userId)) {
+                user = await User.findById(order.userId);
+            }
+            
+            // Get course data using our custom model method
+            if (order.courseId) {
+                course = await Course.getCourseById(order.courseId);
+            }
+            
+            return {
+                ...order,
+                userName: user ? user.name : "Unknown User",
+                courseTitle: course ? course.title : "Unknown Course",
+            };
+        });
+        
+        const enhancedOrders = await Promise.all(enhancedOrdersPromises);
+        
+        // Sort by creation date (most recent first)
+        enhancedOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         res.render("admin/orders", { orders: enhancedOrders });
     } catch (error) {
@@ -540,14 +618,8 @@ const AdminController = {
     const { status } = req.body;
     
     try {
-      const order = await Order.findById(orderId);
-      if (!order) {
-        return res.status(404).json({ success: false, message: "Order not found" });
-      }
-      
-      order.status = status;
-      order.updatedAt = new Date();
-      await order.save();
+      // Use the custom updateOrderStatus method from your Order model
+      await Order.updateOrderStatus(orderId, status);
       
       return res.json({ success: true, message: "Order status updated" });
     } catch (error) {
@@ -556,33 +628,14 @@ const AdminController = {
     }
   },
 
-  getRevenue: async (req, res) => { // Add async
+  getRevenue: async (req, res) => {
     if (!req.session.user || req.session.user.role !== "admin") {
       return res.redirect("/login");
     }
     try {
-        const completedOrders = await Order.find({ status: "completed" });
-        const totalRevenue = completedOrders.reduce((sum, order) => sum + order.amount, 0);
-
-        // Use aggregation pipeline for monthly revenue (more efficient)
-        const monthlyRevenueData = await Order.aggregate([
-            { $match: { status: "completed" } }, // Filter completed orders
-            {
-                $group: {
-                    _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } }, // Group by year-month
-                    monthlyTotal: { $sum: "$amount" } // Sum amount for each group
-                }
-            },
-            { $sort: { _id: 1 } }, // Sort by month
-            {
-                $project: { // Reshape the output
-                    _id: 0, // Exclude the default _id
-                    month: "$_id",
-                    revenue: { $round: ["$monthlyTotal", 2] } // Round revenue
-                }
-            }
-        ]);
-
+        // Use the custom Order model methods
+        const totalRevenue = await Order.getTotalRevenue();
+        const monthlyRevenueData = await Order.getRevenueByMonth();
 
         res.render("admin/revenue", {
           totalRevenue: totalRevenue.toFixed(2),
