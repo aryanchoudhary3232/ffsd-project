@@ -1,0 +1,38 @@
+<%- include('partials/head', { title: 'About Us - SeekoBharat' }) %>
+<body class="bg-gray-900 text-white">
+  <%- include('partials/navbar') %>
+
+  <main class="container mx-auto px-6 py-12">
+    <section class="text-center">
+      <h2 class="text-4xl font-bold mb-6">About SeekoBharat</h2>
+      <p class="text-gray-300 max-w-3xl mx-auto">
+        SeekoBharat is dedicated to providing high-quality online courses that help learners develop new skills and advance their careers.
+        Our platform offers a variety of technical courses in Web Development, JavaScript, React, and Backend technologies.
+      </p>
+    </section>
+
+    <section class="mt-12">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="p-6 bg-gray-800 rounded-lg shadow-lg">
+          <h3 class="text-2xl font-semibold">Our Mission</h3>
+          <p class="mt-2 text-gray-300">
+            To make learning accessible, engaging, and career-oriented through expert-led courses.
+          </p>
+        </div>
+        <div class="p-6 bg-gray-800 rounded-lg shadow-lg">
+          <h3 class="text-2xl font-semibold">Why Choose Us?</h3>
+          <ul class="mt-2 space-y-2 text-gray-300">
+            <li>✔ High-quality curated courses</li>
+            <li>✔ Learn from industry experts</li>
+            <li>✔ Self-paced learning experience</li>
+            <li>✔ Career advancement opportunities</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <%- include('partials/footer') %>
+  <%- include('partials/scripts') %>
+</body>
+</html>
