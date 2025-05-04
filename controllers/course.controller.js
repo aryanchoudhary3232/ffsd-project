@@ -6,58 +6,73 @@ const ProgressModel = require("../models/progress.model");
 const CourseController = {
   // Get all courses
   getAllCourses: async (req, res) => {
-    const { search, category, sort } = req.query;
+    const { search, category, language, sort } = req.query;
 
     try {
-        let courses;
-        
-        // Handle search query
-        if (search) {
-            courses = await CourseModel.searchCourses(search);
-        } else if (category && category !== "all") {
-            courses = await CourseModel.getCoursesByCategory(category);
-        } else {
-            courses = await CourseModel.getAllCourses();
-        }
-        
-        // Apply sorting
-        if (sort) {
-            switch (sort) {
-                case "price-low":
-                    courses = courses.sort((a, b) => a.price - b.price);
-                    break;
-                case "price-high":
-                    courses = courses.sort((a, b) => b.price - a.price);
-                    break;
-                case "rating":
-                    courses = courses.sort((a, b) => b.rating - a.rating);
-                    break;
-                case "newest":
-                    courses = courses.sort((a, b) => 
-                        new Date(b.createdAt) - new Date(a.createdAt)
-                    );
-                    break;
-            }
-        } else {
-            // Default sort by newest
-            courses = courses.sort((a, b) => 
-                new Date(b.createdAt) - new Date(a.createdAt)
+      let courses;
+
+      // Handle search query
+      if (search) {
+        courses = await CourseModel.searchCourses(search);
+      } else if (category && category !== "all") {
+        courses = await CourseModel.getCoursesByCategory(category);
+      } else if (language && language !== "all") {
+        courses = await CourseModel.getCoursesByLanguage(language);
+      } else {
+        courses = await CourseModel.getAllCourses();
+      }
+
+      // Apply language filter if both category and language are provided
+      if (category && category !== "all" && language && language !== "all") {
+        courses = courses.filter((course) => course.language === language);
+      }
+
+      // Apply category filter if both language and category are provided
+      if (language && language !== "all" && category && category !== "all") {
+        courses = courses.filter((course) => course.category === category);
+      }
+
+      // Apply sorting
+      if (sort) {
+        switch (sort) {
+          case "price-low":
+            courses = courses.sort((a, b) => a.price - b.price);
+            break;
+          case "price-high":
+            courses = courses.sort((a, b) => b.price - a.price);
+            break;
+          case "rating":
+            courses = courses.sort((a, b) => b.rating - a.rating);
+            break;
+          case "newest":
+            courses = courses.sort(
+              (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
             );
+            break;
         }
+      } else {
+        // Default sort by newest
+        courses = courses.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+      }
 
-        const categories = await CourseModel.getAllCategories();
+      const categories = await CourseModel.getAllCategories();
+      const languages = await CourseModel.getAllLanguages();
 
-        res.render("courses/index", {
-            courses,
-            categories,
-            search: search || "",
-            category: category || "all",
-            sort: sort || "newest",
-        });
+      res.render("courses/index", {
+        courses,
+        categories,
+        languages,
+        search: search || "",
+        category: category || "all",
+        language: language || "all",
+        sort: sort || "newest",
+      });
     } catch (error) {
-        console.error("Get All Courses error:", error);
-        req.flash("error_msg", "Could not load courses.");
-        res.redirect('/');
+      console.error("Get All Courses error:", error);
+      req.flash("error_msg", "Could not load courses.");
+      res.redirect("/");
     }
   },
 
@@ -66,182 +81,207 @@ const CourseController = {
     const courseId = req.params.id;
 
     try {
-        const course = await CourseModel.getCourseById(courseId);
+      const course = await CourseModel.getCourseById(courseId);
 
-        if (!course) {
-            req.flash("error_msg", "Course not found");
-            return res.redirect("/courses");
+      if (!course) {
+        req.flash("error_msg", "Course not found");
+        return res.redirect("/courses");
+      }
+
+      // Get instructor info if needed
+      let instructorName = course.instructor || "Unknown Instructor";
+
+      // Check if user is enrolled
+      let isEnrolled = false;
+      let progress = 0;
+
+      if (req.session.user) {
+        const user = await User.findById(req.session.user.id);
+        // Check if user exists and has enrolledCourses array
+        // Ensure comparison works between string courseId and ObjectId array
+        if (
+          user &&
+          user.enrolledCourses &&
+          user.enrolledCourses.some(
+            (enrolledCourseId) => enrolledCourseId.toString() === courseId
+          )
+        ) {
+          isEnrolled = true;
+          // Find progress record
+          const userProgress = await ProgressModel.getProgress(
+            user._id,
+            courseId
+          );
+          progress = userProgress ? userProgress.progress : 0;
         }
+      }
 
-        // Get instructor info if needed
-        let instructorName = course.instructor || 'Unknown Instructor';
-
-        // Check if user is enrolled
-        let isEnrolled = false;
-        let progress = 0;
-
-        if (req.session.user) {
-            const user = await User.findById(req.session.user.id);
-            // Check if user exists and has enrolledCourses array
-            // Ensure comparison works between string courseId and ObjectId array
-            if (user && user.enrolledCourses && 
-                user.enrolledCourses.some(enrolledCourseId => enrolledCourseId.toString() === courseId)) { 
-                isEnrolled = true;
-                // Find progress record
-                const userProgress = await ProgressModel.getProgress(user._id, courseId);
-                progress = userProgress ? userProgress.progress : 0;
-            }
-        }
-
-        res.render("courses/details", {
-            course,
-            instructorName,
-            isEnrolled,
-            progress,
-        });
+      res.render("courses/details", {
+        course,
+        instructorName,
+        isEnrolled,
+        progress,
+      });
     } catch (error) {
-        console.error("Get Course Details error:", error);
-        req.flash("error_msg", "Could not load course details.");
-        res.redirect('/courses');
+      console.error("Get Course Details error:", error);
+      req.flash("error_msg", "Could not load course details.");
+      res.redirect("/courses");
     }
   },
 
   // Course learning page
   getCourseLearningPage: async (req, res) => {
     if (!req.session.user) {
-        req.flash("error_msg", "Please login to access course content");
-        return res.redirect("/login");
+      req.flash("error_msg", "Please login to access course content");
+      return res.redirect("/login");
     }
 
     const courseId = req.params.id;
     const userId = req.session.user.id;
 
     try {
-        const course = await CourseModel.getCourseById(courseId);
-        const user = await User.findById(userId);
+      const course = await CourseModel.getCourseById(courseId);
+      const user = await User.findById(userId);
 
-        if (!course || !user) {
-            req.flash("error_msg", "Course or user not found");
-            return res.redirect("/courses");
+      if (!course || !user) {
+        req.flash("error_msg", "Course or user not found");
+        return res.redirect("/courses");
+      }
+
+      // Check if enrolled
+      if (!user.enrolledCourses.includes(courseId)) {
+        req.flash("error_msg", "You are not enrolled in this course");
+        return res.redirect(`/courses/${courseId}`);
+      }
+
+      // Get progress
+      const userProgress = await ProgressModel.getProgress(userId, courseId);
+
+      // Determine current lesson
+      let currentLesson = null;
+      let currentModule = null;
+      const lessonId = req.query.lesson;
+
+      if (lessonId && course.modules) {
+        for (const module of course.modules) {
+          // Ensure lessons array exists and find the lesson by id
+          const lesson = module.lessons?.find((l) => l.id === lessonId);
+          if (lesson) {
+            currentLesson = lesson;
+            currentModule = module;
+            break;
+          }
         }
+      }
 
-        // Check if enrolled
-        if (!user.enrolledCourses.includes(courseId)) {
-            req.flash("error_msg", "You are not enrolled in this course");
-            return res.redirect(`/courses/${courseId}`);
-        }
+      // Default to first lesson if not found or no lessonId provided
+      if (
+        !currentLesson &&
+        course.modules &&
+        course.modules.length > 0 &&
+        course.modules[0].lessons &&
+        course.modules[0].lessons.length > 0
+      ) {
+        currentModule = course.modules[0];
+        currentLesson = currentModule.lessons[0];
+      } else if (!currentLesson) {
+        // Handle case where course has no modules or lessons
+        req.flash("error_msg", "Course content not available yet.");
+        return res.redirect(`/courses/${courseId}`);
+      }
 
-        // Get progress
-        const userProgress = await ProgressModel.getProgress(userId, courseId);
+      const completedLessons = userProgress.completedLessons || [];
 
-        // Determine current lesson
-        let currentLesson = null;
-        let currentModule = null;
-        const lessonId = req.query.lesson;
-
-        if (lessonId && course.modules) {
-            for (const module of course.modules) {
-                // Ensure lessons array exists and find the lesson by id
-                const lesson = module.lessons?.find(l => l.id === lessonId);
-                if (lesson) {
-                    currentLesson = lesson;
-                    currentModule = module;
-                    break;
-                }
-            }
-        }
-
-        // Default to first lesson if not found or no lessonId provided
-        if (!currentLesson && course.modules && course.modules.length > 0 && 
-            course.modules[0].lessons && course.modules[0].lessons.length > 0) {
-            currentModule = course.modules[0];
-            currentLesson = currentModule.lessons[0];
-        } else if (!currentLesson) {
-            // Handle case where course has no modules or lessons
-            req.flash("error_msg", "Course content not available yet.");
-            return res.redirect(`/courses/${courseId}`);
-        }
-
-        const completedLessons = userProgress.completedLessons || [];
-
-        res.render("courses/learn", {
-            course,
-            currentModule,
-            currentLesson,
-            progress: userProgress.progress,
-            completedLessons: completedLessons.map(id => id),
-        });
+      res.render("courses/learn", {
+        course,
+        currentModule,
+        currentLesson,
+        progress: userProgress.progress,
+        completedLessons: completedLessons.map((id) => id),
+      });
     } catch (error) {
-        console.error("Course Learning Page error:", error);
-        req.flash("error_msg", "Could not load course content.");
-        res.redirect(`/courses/${courseId}`);
+      console.error("Course Learning Page error:", error);
+      req.flash("error_msg", "Could not load course content.");
+      res.redirect(`/courses/${courseId}`);
     }
   },
 
   // Mark lesson as complete
   markLessonAsComplete: async (req, res) => {
     if (!req.session.user) {
-        return res.status(401).json({ success: false, message: "Unauthorized" });
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
     const { courseId, lessonId } = req.params;
     const userId = req.session.user.id;
 
     try {
-        // First verify the course exists
-        const course = await CourseModel.getCourseById(courseId);
-        if (!course) {
-            return res.status(404).json({ 
-                success: false, 
-                message: "Course not found" 
-            });
-        }
-
-        // Verify the lesson exists
-        let lessonExists = false;
-        for (const module of course.modules || []) {
-            if (Array.isArray(module.lessons)) {
-                if (module.lessons.some(lesson => lesson && lesson.id && lesson.id.toString() === lessonId)) {
-                    lessonExists = true;
-                    break;
-                }
-            }
-        }
-
-        if (!lessonExists) {
-            return res.status(404).json({
-                success: false,
-                message: "Lesson not found in this course"
-            });
-        }
-
-        // Calculate total lessons from the fetched course
-        const totalLessons = course.modules.reduce((total, module) => total + (module.lessons?.length || 0), 0);
-
-        // Now proceed with marking the lesson as complete, passing totalLessons
-        const updatedProgress = await ProgressModel.markLessonAsComplete(userId, course.id, lessonId, totalLessons);
-        
-        if (!updatedProgress) {
-            return res.status(500).json({ 
-                success: false, 
-                message: "Could not update progress" 
-            });
-        }
-
-        res.json({
-            success: true,
-            progress: updatedProgress.progress,
-            completedLessonId: lessonId
+      // First verify the course exists
+      const course = await CourseModel.getCourseById(courseId);
+      if (!course) {
+        return res.status(404).json({
+          success: false,
+          message: "Course not found",
         });
+      }
+
+      // Verify the lesson exists
+      let lessonExists = false;
+      for (const module of course.modules || []) {
+        if (Array.isArray(module.lessons)) {
+          if (
+            module.lessons.some(
+              (lesson) =>
+                lesson && lesson.id && lesson.id.toString() === lessonId
+            )
+          ) {
+            lessonExists = true;
+            break;
+          }
+        }
+      }
+
+      if (!lessonExists) {
+        return res.status(404).json({
+          success: false,
+          message: "Lesson not found in this course",
+        });
+      }
+
+      // Calculate total lessons from the fetched course
+      const totalLessons = course.modules.reduce(
+        (total, module) => total + (module.lessons?.length || 0),
+        0
+      );
+
+      // Now proceed with marking the lesson as complete, passing totalLessons
+      const updatedProgress = await ProgressModel.markLessonAsComplete(
+        userId,
+        course.id,
+        lessonId,
+        totalLessons
+      );
+
+      if (!updatedProgress) {
+        return res.status(500).json({
+          success: false,
+          message: "Could not update progress",
+        });
+      }
+
+      res.json({
+        success: true,
+        progress: updatedProgress.progress,
+        completedLessonId: lessonId,
+      });
     } catch (error) {
-        console.error("Mark Lesson Complete error:", error);
-        res.status(500).json({ 
-            success: false, 
-            message: error.message || "Error marking lesson complete" 
-        });
+      console.error("Mark Lesson Complete error:", error);
+      res.status(500).json({
+        success: false,
+        message: error.message || "Error marking lesson complete",
+      });
     }
   },
 };
 
 module.exports = CourseController;
-
