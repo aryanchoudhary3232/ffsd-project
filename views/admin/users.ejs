@@ -42,7 +42,7 @@
                       <span class="text-gray-400 font-medium"><%= user.name.charAt(0) %></span>
                     </div>
                     <div class="ml-4">
-                      <div class="text-sm font-medium text-gray-100"><%= user.name %></div>
+                      <div class="text-sm font-medium text-gray-100"><%= user.username %></div>
                     </div>
                   </div>
                 </td>
@@ -50,7 +50,7 @@
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300"><%= user.role %></td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300"><%= new Date(user.joinDate).toLocaleDateString() %></td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <a href="/admin/users/<%= user.id %>" class="text-indigo-400 hover:text-indigo-200 mr-3">View</a>
+                  <a href="/admin/users/<%= user._id %>" class="text-indigo-400 hover:text-indigo-200 mr-3">View</a>
                   <!-- Add more actions like Edit/Delete if needed later -->
                 </td>
               </tr>

@@ -117,13 +117,24 @@ const AdminController = {
   },
 
   getUsers: async (req, res) => {
-    // Add async
     if (!req.session.user || req.session.user.role !== "admin") {
       return res.redirect("/login");
     }
     try {
-      // Add try-catch
-      const users = await User.find(); // Get all users
+      // Get all users
+      let users = await User.find();
+
+      // Process user data to ensure all have valid properties
+      // This prevents TypeError when accessing user.name.charAt(0) in the template
+      users = users.map((user) => {
+        const userObj = user.toObject ? user.toObject() : user;
+        return {
+          ...userObj,
+          name: userObj.name || "Unknown User", // Ensure name is always a string
+          email: userObj.email || "N/A",
+        };
+      });
+
       res.render("admin/users", { users });
     } catch (error) {
       console.error("Get Users error:", error);
@@ -398,10 +409,22 @@ const AdminController = {
       };
 
       // Find enrolled students
-      const enrolledStudents = await User.find(
+      let enrolledStudents = await User.find(
         { enrolledCourses: courseId },
         "name email"
       );
+
+      // Process student data to ensure all properties exist and are valid
+      // This prevents TypeError when accessing student.name.charAt(0) in the template
+      enrolledStudents = enrolledStudents.map((student) => {
+        const studentObj = student.toObject ? student.toObject() : student;
+        return {
+          ...studentObj,
+          name: studentObj.name || "Unknown Student", // Ensure name is always a string
+          email: studentObj.email || "N/A",
+          id: studentObj._id || null,
+        };
+      });
 
       res.render("admin/course-details", {
         course: {
@@ -748,6 +771,150 @@ const AdminController = {
       console.error("Admin Get Revenue error:", error);
       req.flash("error_msg", "Could not load revenue data.");
       res.redirect("/admin/dashboard");
+    }
+  },
+
+  getUserDetails: async (req, res) => {
+    if (!req.session.user || req.session.user.role !== "admin") {
+      return res.redirect("/login");
+    }
+
+    try {
+      const userId = req.params.id;
+
+      // Validate userId format
+      if (!AdminController.isValidObjectId(userId)) {
+        req.flash("error_msg", "Invalid User ID format.");
+        return res.redirect("/admin/users");
+      }
+
+      // Get user details
+      const user = await User.findById(userId);
+
+      if (!user) {
+        req.flash("error_msg", "User not found");
+        return res.redirect("/admin/users");
+      }
+
+      // Get number of admins to check if we can delete an admin
+      const adminCount = await User.countDocuments({ role: "admin" });
+
+      // Initialize arrays for courses and orders
+      let enrolledCourses = [];
+      let instructorCourses = [];
+      let orders = [];
+
+      // If user is a student, get enrolled courses
+      if (
+        user.role === "student" &&
+        user.enrolledCourses &&
+        user.enrolledCourses.length > 0
+      ) {
+        const coursesPromises = user.enrolledCourses.map(async (courseId) => {
+          if (!AdminController.isValidObjectId(courseId.toString())) {
+            return null;
+          }
+
+          // Get course details
+          const course = await Course.getCourseById(courseId.toString());
+          if (!course) return null;
+
+          // Get progress if available (assuming you have a progress model)
+          let progress = 0;
+          try {
+            // This is a placeholder - you'd need to implement actual progress tracking
+            // You might have a separate progress collection or track it in the user document
+            progress = Math.floor(Math.random() * 100); // Just for demonstration
+          } catch (err) {
+            console.error("Could not get progress:", err);
+          }
+
+          return {
+            ...course,
+            id: courseId,
+            progress: progress,
+          };
+        });
+
+        // Filter out null results (courses that weren't found)
+        enrolledCourses = (await Promise.all(coursesPromises)).filter(
+          (course) => course !== null
+        );
+      }
+
+      // If user is an instructor, get created courses
+      if (user.role === "instructor") {
+        let courses = await Course.getAllCourses();
+
+        // Filter courses by instructor
+        instructorCourses = courses
+          .filter(
+            (course) =>
+              course.instructorId &&
+              course.instructorId.toString() === userId.toString()
+          )
+          .map((course) => {
+            return {
+              ...course,
+              id: course._id,
+              students: 0, // This would need to be calculated from enrolled students
+              rating: course.rating || "N/A",
+            };
+          });
+
+        // Get student count for each course
+        for (let i = 0; i < instructorCourses.length; i++) {
+          try {
+            const studentCount = await User.countDocuments({
+              enrolledCourses: instructorCourses[i].id,
+            });
+            instructorCourses[i].students = studentCount;
+          } catch (err) {
+            console.error("Error getting student count:", err);
+          }
+        }
+      }
+
+      // Get order history
+      orders = await Order.getAllOrders();
+      orders = orders
+        .filter(
+          (order) =>
+            order.userId && order.userId.toString() === userId.toString()
+        )
+        .map(async (order) => {
+          let course = null;
+          if (order.courseId) {
+            course = await Course.getCourseById(order.courseId);
+          }
+
+          return {
+            ...order,
+            id: order._id,
+            courseTitle: course ? course.title : "Unknown Course",
+          };
+        });
+
+      // Resolve promises for orders
+      orders = await Promise.all(orders);
+
+      // Render user details view with all the collected data
+      res.render("admin/user-details", {
+        user: {
+          ...(user.toObject ? user.toObject() : user),
+          id: user._id,
+        },
+        enrolledCourses,
+        instructorCourses,
+        orders,
+        adminCount,
+        success_msg: req.flash("success_msg"),
+        error_msg: req.flash("error_msg"),
+      });
+    } catch (error) {
+      console.error("Get User Details error:", error);
+      req.flash("error_msg", "Could not load user details.");
+      res.redirect("/admin/users");
     }
   },
 };

@@ -98,7 +98,7 @@
         </div>
       </div>
       
-      <!-- Right Column: Course Description, Featured Status, Content & Students -->
+      <!-- Right Column: Course Description, Content & Students -->
       <div class="md:col-span-2">
         <!-- Course Description -->
         <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden mb-6">
@@ -107,21 +107,7 @@
           </div>
           
           <div class="p-6">
-            <p class="text-gray-400 mb-4"><%= course.description %></p>
-            
-            <div class="mt-4">
-              <h3 class="font-medium mb-2 text-gray-100">Featured Status</h3>
-              <form action="/admin/courses/<%= course._id %>/featured?_method=PUT" method="POST" class="flex items-center">
-                <label class="inline-flex items-center cursor-pointer mr-4">
-                  <input type="checkbox" name="featured" <%= course.featured ? 'checked' : '' %> class="sr-only peer">
-                  <div class="relative w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-500 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
-                  <span class="ml-2 text-sm font-medium text-gray-100">Featured on Homepage</span>
-                </label>
-                <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 transition-colors text-sm">
-                  Save
-                </button>
-              </form>
-            </div>
+            <p class="text-gray-400"><%= course.description %></p>
           </div>
         </div>
         
