@@ -134,7 +134,7 @@ const CartController = {
 
             // 2. Create order record
             orderPromises.push(
-                Order.create({
+                Order.createOrder({
                   userId,
                   courseId: course._id,
                   amount: course.price,
@@ -146,11 +146,7 @@ const CartController = {
 
             // 3. Create initial progress record
              progressPromises.push(
-                Progress.findOneAndUpdate(
-                    { userId: userId, courseId: course._id },
-                    { userId: userId, courseId: course._id },
-                    { upsert: true, setDefaultsOnInsert: true }
-                )
+                Progress.initializeProgress(userId, course._id)
             );
         }
 

@@ -35,6 +35,31 @@ const ProgressModel = {
     );
   },
 
+  // Initialize progress record on enrollment
+  initializeProgress: async (userId, courseId) => {
+    const { progress } = getCollections();
+    const userObjectId = toObjectId(userId);
+    const courseObjectId = toObjectId(courseId);
+
+    // Check if progress already exists
+    const existingProgress = await progress.findOne({ userId: userObjectId, courseId: courseObjectId });
+
+    if (!existingProgress) {
+      // Create initial progress record if it doesn't exist
+      const initialProgress = {
+        userId: userObjectId,
+        courseId: courseObjectId,
+        progress: 0,
+        completedLessons: [],
+      };
+      const result = await progress.insertOne(initialProgress);
+      return await progress.findOne({_id: result.insertedId}); // Return the newly created doc
+    } else {
+      // Return existing progress if found
+      return existingProgress;
+    }
+  },
+
   // Mark lesson as complete
   markLessonAsComplete: async (userId, courseId, lessonId, totalLessons) => {
     // Assuming lessonId is a unique identifier (string or number) within the course
