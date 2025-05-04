@@ -390,13 +390,12 @@ const AdminController = {
       }
 
       // Ensure instructor is never undefined, provide default values if instructor not found
-      if (!instructor) {
-        instructor = {
-          name: course.instructor || "Unknown Instructor",
-          email: "N/A",
-          id: null,
-        };
-      }
+      // Make sure name is always a string to prevent TypeError with .charAt(0)
+      instructor = {
+        name: instructor?.name || course.instructor || "Unknown Instructor",
+        email: instructor?.email || "N/A",
+        id: instructor?._id || null,
+      };
 
       // Find enrolled students
       const enrolledStudents = await User.find(
@@ -407,7 +406,7 @@ const AdminController = {
       res.render("admin/course-details", {
         course: {
           ...course,
-          instructor: instructor ? instructor.name : "Unknown Instructor",
+          instructor: instructor.name,
           students: enrolledStudents.length,
           rating: course.rating || "N/A",
         },
@@ -513,8 +512,8 @@ const AdminController = {
 
     // Validate courseId
     if (!AdminController.isValidObjectId(courseId)) {
-        req.flash("error_msg", "Invalid Course ID format.");
-        return res.redirect("/admin/courses"); // Redirect to courses list or appropriate page
+      req.flash("error_msg", "Invalid Course ID format.");
+      return res.redirect("/admin/courses"); // Redirect to courses list or appropriate page
     }
 
     try {
@@ -591,12 +590,10 @@ const AdminController = {
       return res.json({ success: true, message: "Course status updated" });
     } catch (error) {
       console.error("Update Course Status error:", error);
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: error.message || "Error updating course status",
-        });
+      return res.status(500).json({
+        success: false,
+        message: error.message || "Error updating course status",
+      });
     }
   },
 
@@ -629,12 +626,10 @@ const AdminController = {
       });
     } catch (error) {
       console.error("Update Course Featured error:", error);
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: error.message || "Error updating course featured status",
-        });
+      return res.status(500).json({
+        success: false,
+        message: error.message || "Error updating course featured status",
+      });
     }
   },
 
@@ -729,12 +724,10 @@ const AdminController = {
       return res.json({ success: true, message: "Order status updated" });
     } catch (error) {
       console.error("Update Order Status error:", error);
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: error.message || "Error updating order status",
-        });
+      return res.status(500).json({
+        success: false,
+        message: error.message || "Error updating order status",
+      });
     }
   },
 
