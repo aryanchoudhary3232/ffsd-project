@@ -36,25 +36,18 @@ const ProgressModel = {
   },
 
   // Mark lesson as complete
-  markLessonAsComplete: async (userId, courseId, lessonId) => {
+  markLessonAsComplete: async (userId, courseId, lessonId, totalLessons) => {
     // Assuming lessonId is a unique identifier (string or number) within the course
-    const { progress, courses } = getCollections();
+    const { progress } = getCollections();
     const userObjectId = toObjectId(userId);
     const courseObjectId = toObjectId(courseId);
 
-    // Find the course to get total lesson count
-    const course = await courses.findOne({ _id: courseObjectId });
-    if (!course) {
-      throw new Error("Course not found");
-    }
-    // Calculate total lessons (assuming modules structure)
-    const totalLessons = course.modules.reduce((total, module) => total + (module.lessons?.length || 0), 0);
+    // totalLessons is now passed as an argument, no need to fetch course here
     if (totalLessons === 0) {
         // Avoid division by zero if course has no lessons
          console.warn(`Course ${courseId} has no lessons.`);
          // Optionally update progress to 100 or handle as needed
     }
-
 
     // Find the progress document
     let progressDoc = await progress.findOne({ userId: userObjectId, courseId: courseObjectId });

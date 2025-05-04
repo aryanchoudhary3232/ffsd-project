@@ -181,8 +181,8 @@ const CourseController = {
 
         if (lessonId && course.modules) {
             for (const module of course.modules) {
-                // Ensure lessons array exists and find the lesson
-                const lesson = module.lessons?.find(l => l._id.toString() === lessonId);
+                // Ensure lessons array exists and find the lesson by id
+                const lesson = module.lessons?.find(l => l.id === lessonId);
                 if (lesson) {
                     currentLesson = lesson;
                     currentModule = module;
@@ -209,7 +209,7 @@ const CourseController = {
             currentModule,
             currentLesson,
             progress: userProgress.progress,
-            completedLessons: completedLessons.map(id => id.toString()),
+            completedLessons: completedLessons.map(id => id),
         });
     } catch (error) {
         console.error("Course Learning Page error:", error);
@@ -228,8 +228,38 @@ const CourseController = {
     const userId = req.session.user.id;
 
     try {
-        // Use the ProgressModel's markLessonAsComplete method
-        const updatedProgress = await ProgressModel.markLessonAsComplete(userId, courseId, lessonId);
+        // First verify the course exists
+        const course = await CourseModel.getCourseById(courseId);
+        if (!course) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "Course not found" 
+            });
+        }
+
+        // Verify the lesson exists
+        let lessonExists = false;
+        for (const module of course.modules || []) {
+            if (Array.isArray(module.lessons)) {
+                if (module.lessons.some(lesson => lesson && lesson.id && lesson.id.toString() === lessonId)) {
+                    lessonExists = true;
+                    break;
+                }
+            }
+        }
+
+        if (!lessonExists) {
+            return res.status(404).json({
+                success: false,
+                message: "Lesson not found in this course"
+            });
+        }
+
+        // Calculate total lessons from the fetched course
+        const totalLessons = course.modules.reduce((total, module) => total + (module.lessons?.length || 0), 0);
+
+        // Now proceed with marking the lesson as complete, passing totalLessons
+        const updatedProgress = await ProgressModel.markLessonAsComplete(userId, course.id, lessonId, totalLessons);
         
         if (!updatedProgress) {
             return res.status(500).json({ 
