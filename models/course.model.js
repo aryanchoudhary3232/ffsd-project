@@ -22,7 +22,7 @@ const CourseModel = {
   getCourseById: async (id) => {
     try {
       if (!id) {
-        console.error('getCourseById called with null or undefined id');
+        console.error("getCourseById called with null or undefined id");
         return null;
       }
       const { courses } = getCollections();
@@ -68,8 +68,9 @@ const CourseModel = {
       students: 0, // Will be updated dynamically
       createdAt: new Date(),
       updatedAt: new Date(),
-      modules: [],
+      modules: [], // Ensure modules array exists
       featured: false,
+      status: courseData.status || "draft", // Ensure status exists
     };
 
     // Add course to collection
@@ -80,7 +81,13 @@ const CourseModel = {
   // Update course
   updateCourse: async (id, courseData) => {
     const { courses, users } = getCollections();
-    // Fix: Use new ObjectId() instead of createFromTime
+
+    // Validate ID before creating ObjectId
+    if (!id || !ObjectId.isValid(id)) {
+      throw new Error("Invalid course ID format");
+    }
+
+    // Create ObjectId safely
     const courseId = new ObjectId(id);
 
     // Get current course
@@ -90,8 +97,8 @@ const CourseModel = {
     }
 
     // Calculate student count
-    const enrolledStudents = await users.countDocuments({ 
-      enrolledCourses: id.toString() 
+    const enrolledStudents = await users.countDocuments({
+      enrolledCourses: id.toString(),
     });
 
     // Update course data
@@ -107,7 +114,7 @@ const CourseModel = {
 
     // Update in database
     await courses.updateOne({ _id: courseId }, { $set: updatedCourse });
-    
+
     // Return the updated course
     return { _id: courseId, ...updatedCourse };
   },
@@ -139,9 +146,9 @@ const CourseModel = {
     // Add module to course
     await courses.updateOne(
       { _id: courseObjId },
-      { 
+      {
         $push: { modules: newModule },
-        $set: { updatedAt: new Date() }
+        $set: { updatedAt: new Date() },
       }
     );
 
@@ -168,9 +175,9 @@ const CourseModel = {
     // Add lesson to module
     await courses.updateOne(
       { _id: courseObjId, "modules._id": moduleObjId },
-      { 
+      {
         $push: { "modules.$.lessons": newLesson },
-        $set: { updatedAt: new Date() }
+        $set: { updatedAt: new Date() },
       }
     );
 
@@ -180,22 +187,24 @@ const CourseModel = {
   // Get courses by instructor
   getCoursesByInstructor: async (instructorId) => {
     const { courses, users } = getCollections();
-    
-    const instructorCourses = await courses.find({ 
-      instructorId: instructorId.toString() 
-    }).toArray();
+
+    const instructorCourses = await courses
+      .find({
+        instructorId: instructorId.toString(),
+      })
+      .toArray();
 
     // Update student count for each course
     const updatedCourses = [];
-    
+
     for (const course of instructorCourses) {
-      const enrolledStudents = await users.countDocuments({ 
-        enrolledCourses: course._id.toString() 
+      const enrolledStudents = await users.countDocuments({
+        enrolledCourses: course._id.toString(),
       });
-      
+
       updatedCourses.push({
         ...course,
-        students: enrolledStudents
+        students: enrolledStudents,
       });
     }
 
@@ -213,14 +222,16 @@ const CourseModel = {
     const { courses } = getCollections();
     const searchLower = query.toLowerCase();
 
-    return await courses.find({ 
-      $or: [
-        { title: { $regex: searchLower, $options: 'i' } },
-        { instructor: { $regex: searchLower, $options: 'i' } },
-        { category: { $regex: searchLower, $options: 'i' } },
-        { description: { $regex: searchLower, $options: 'i' } }
-      ]
-    }).toArray();
+    return await courses
+      .find({
+        $or: [
+          { title: { $regex: searchLower, $options: "i" } },
+          { instructor: { $regex: searchLower, $options: "i" } },
+          { category: { $regex: searchLower, $options: "i" } },
+          { description: { $regex: searchLower, $options: "i" } },
+        ],
+      })
+      .toArray();
   },
 
   // Get all categories
@@ -242,9 +253,11 @@ const CourseModel = {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    return await courses.find({ 
-      createdAt: { $gte: thirtyDaysAgo } 
-    }).toArray();
+    return await courses
+      .find({
+        createdAt: { $gte: thirtyDaysAgo },
+      })
+      .toArray();
   },
 
   // Mark course as featured
@@ -253,10 +266,7 @@ const CourseModel = {
     // Fix: Use new ObjectId() instead of createFromTime
     const courseObjId = new ObjectId(courseId);
 
-    await courses.updateOne(
-      { _id: courseObjId },
-      { $set: { featured } }
-    );
+    await courses.updateOne({ _id: courseObjId }, { $set: { featured } });
 
     return await courses.findOne({ _id: courseObjId });
   },
