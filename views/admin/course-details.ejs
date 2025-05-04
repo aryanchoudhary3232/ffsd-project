@@ -134,47 +134,55 @@
           <div class="p-6">
             <div class="mb-4">
               <p class="text-sm text-gray-400">
-                <%= course.modules.length %> modules • 
-                <%= course.modules.reduce((total, module) => total + module.lessons.length, 0) %> lessons
+                <%= course.modules && course.modules.length ? course.modules.length : 0 %> modules • 
+                <%= course.modules && course.modules.length ? course.modules.reduce((total, module) => total + (module.lessons ? module.lessons.length : 0), 0) : 0 %> lessons
               </p>
             </div>
             
             <div class="space-y-4">
-              <% course.modules.forEach(function(module, moduleIndex) { %>
-                <div class="border border-gray-700 rounded-md overflow-hidden">
-                  <div class="bg-gray-700 p-3 flex justify-between items-center cursor-pointer" onclick="toggleModule(<%= moduleIndex %>)">
-                    <h3 class="font-medium text-gray-100"><%= module.title %></h3>
-                    <div class="flex items-center">
-                      <span class="text-xs text-gray-400 mr-2"><%= module.lessons.length %> lessons</span>
-                      <i class="fas fa-chevron-down text-gray-400 module-icon-<%= moduleIndex %>"></i>
+              <% if (course.modules && course.modules.length > 0) { %>
+                <% course.modules.forEach(function(module, moduleIndex) { %>
+                  <div class="border border-gray-700 rounded-md overflow-hidden">
+                    <div class="bg-gray-700 p-3 flex justify-between items-center cursor-pointer" onclick="toggleModule(<%= moduleIndex %>)">
+                      <h3 class="font-medium text-gray-100"><%= module.title %></h3>
+                      <div class="flex items-center">
+                        <span class="text-xs text-gray-400 mr-2"><%= module.lessons ? module.lessons.length : 0 %> lessons</span>
+                        <i class="fas fa-chevron-down text-gray-400 module-icon-<%= moduleIndex %>"></i>
+                      </div>
+                    </div>
+                    
+                    <div class="p-3 hidden module-content-<%= moduleIndex %>">
+                      <div class="space-y-2">
+                        <% if (module.lessons && module.lessons.length > 0) { %>
+                          <% module.lessons.forEach(function(lesson) { %>
+                            <div class="flex items-center justify-between text-sm">
+                              <div class="flex items-center">
+                                <% if (lesson.type === 'video') { %>
+                                  <i class="fas fa-play-circle text-blue-500 mr-2"></i>
+                                <% } else if (lesson.type === 'pdf') { %>
+                                  <i class="fas fa-file-pdf text-red-500 mr-2"></i>
+                                <% } else if (lesson.type === 'quiz') { %>
+                                  <i class="fas fa-question-circle text-blue-500 mr-2"></i>
+                                <% } else { %>
+                                  <i class="fas fa-file-alt text-gray-400 mr-2"></i>
+                                <% } %>
+                                <span class="text-gray-100"><%= lesson.title %></span>
+                              </div>
+                              <% if (lesson.duration) { %>
+                                <span class="text-xs text-gray-400"><%= lesson.duration %></span>
+                              <% } %>
+                            </div>
+                          <% }); %>
+                        <% } else { %>
+                          <p class="text-gray-400 text-sm">No lessons in this module yet.</p>
+                        <% } %>
+                      </div>
                     </div>
                   </div>
-                  
-                  <div class="p-3 hidden module-content-<%= moduleIndex %>">
-                    <div class="space-y-2">
-                      <% module.lessons.forEach(function(lesson) { %>
-                        <div class="flex items-center justify-between text-sm">
-                          <div class="flex items-center">
-                            <% if (lesson.type === 'video') { %>
-                              <i class="fas fa-play-circle text-blue-500 mr-2"></i>
-                            <% } else if (lesson.type === 'pdf') { %>
-                              <i class="fas fa-file-pdf text-red-500 mr-2"></i>
-                            <% } else if (lesson.type === 'quiz') { %>
-                              <i class="fas fa-question-circle text-blue-500 mr-2"></i>
-                            <% } else { %>
-                              <i class="fas fa-file-alt text-gray-400 mr-2"></i>
-                            <% } %>
-                            <span class="text-gray-100"><%= lesson.title %></span>
-                          </div>
-                          <% if (lesson.duration) { %>
-                            <span class="text-xs text-gray-400"><%= lesson.duration %></span>
-                          <% } %>
-                        </div>
-                      <% }); %>
-                    </div>
-                  </div>
-                </div>
-              <% }); %>
+                <% }); %>
+              <% } else { %>
+                <p class="text-gray-400">No modules have been added to this course yet.</p>
+              <% } %>
             </div>
           </div>
         </div>
