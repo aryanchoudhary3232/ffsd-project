@@ -1,4 +1,4 @@
-<%- include('../partials/head', { title: user.name + ' - User Details - LearnHub' }) %>
+<%- include('../partials/head', { title: (user && user.name ? user.name : 'User') + ' - User Details - LearnHub' }) %>
 <body class="bg-black text-white">
   <%- include('../partials/navbar') %>
   <% var instructorCourses = typeof instructorCourses !== 'undefined' ? instructorCourses : []; %>
@@ -30,26 +30,26 @@
         <div class="bg-gray-800 rounded-lg shadow-md p-6">
           <div class="flex flex-col items-center">
             <div class="w-32 h-32 rounded-full bg-gray-700 flex items-center justify-center mb-4">
-              <% if (user.avatar) { %>
-                <img src="<%= user.avatar %>" alt="<%= user.name %>" class="w-32 h-32 rounded-full object-cover">
+              <% if (user && user.avatar) { %>
+                <img src="<%= user.avatar %>" alt="<%= user.name || 'User' %>" class="w-32 h-32 rounded-full object-cover">
               <% } else { %>
-                <span class="text-gray-400 text-4xl font-medium"><%= user.name.charAt(0) %></span>
+                <span class="text-gray-400 text-4xl font-medium"><%= user && user.name ? user.name.charAt(0) : 'U' %></span>
               <% } %>
             </div>
-            <h2 class="text-xl font-bold text-gray-100"><%= user.name %></h2>
-            <p class="text-gray-400 mb-2"><%= user.email %></p>
+            <h2 class="text-xl font-bold text-gray-100"><%= user && user.name ? user.name : 'Unknown User' %></h2>
+            <p class="text-gray-400 mb-2"><%= user && user.email ? user.email : 'No email' %></p>
             <span class="px-3 py-1 rounded-full text-sm font-medium 
-              <% if (user.role === 'admin') { %>
+              <% if (user && user.role === 'admin') { %>
                 bg-red-800 text-red-300
-              <% } else if (user.role === 'instructor') { %>
+              <% } else if (user && user.role === 'instructor') { %>
                 bg-blue-800 text-blue-300
               <% } else { %>
                 bg-green-800 text-green-300
               <% } %>
             ">
-              <%= user.role.charAt(0).toUpperCase() + user.role.slice(1) %>
+              <%= user && user.role ? (user.role.charAt(0).toUpperCase() + user.role.slice(1)) : 'Unknown' %>
             </span>
-            <p class="text-sm text-gray-400 mt-2">Member since <%= new Date(user.joinDate).toLocaleDateString() %></p>
+            <p class="text-sm text-gray-400 mt-2">Member since <%= user && user.joinDate ? new Date(user.joinDate).toLocaleDateString() : 'Unknown date' %></p>
           </div>
           
           <div class="mt-6 pt-6 border-t border-gray-700">
@@ -59,14 +59,14 @@
             </div>
             
             <div class="flex justify-between items-center">
-              <a href="/admin/users/<%= user.id %>/edit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors w-full text-center">
+              <a href="/admin/users/<%= user && user._id ? user._id : '#' %>/edit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors w-full text-center">
                 Edit User
               </a>
             </div>
             
-            <% if (user.role !== 'admin' || (user.role === 'admin' && adminCount > 1)) { %>
+            <% if (user && (user.role !== 'admin' || (user.role === 'admin' && adminCount > 1))) { %>
               <div class="mt-4">
-                <form action="/admin/users/<%= user.id %>?_method=DELETE" method="POST" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.')">
+                <form action="/admin/users/<%= user._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.')">
                   <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors w-full">
                     Delete User
                   </button>
@@ -89,21 +89,21 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h3 class="text-sm font-medium text-gray-400 mb-1">Full Name</h3>
-                <p class="text-gray-100"><%= user.name %></p>
+                <p class="text-gray-100"><%= user && user.name ? user.name : 'Unknown User' %></p>
               </div>
               <div>
                 <h3 class="text-sm font-medium text-gray-400 mb-1">Email</h3>
-                <p class="text-gray-100"><%= user.email %></p>
+                <p class="text-gray-100"><%= user && user.email ? user.email : 'No email' %></p>
               </div>
               <div>
                 <h3 class="text-sm font-medium text-gray-400 mb-1">Role</h3>
-                <p class="text-gray-100"><%= user.role.charAt(0).toUpperCase() + user.role.slice(1) %></p>
+                <p class="text-gray-100"><%= user && user.role ? (user.role.charAt(0).toUpperCase() + user.role.slice(1)) : 'Unknown' %></p>
               </div>
               <div>
                 <h3 class="text-sm font-medium text-gray-400 mb-1">Join Date</h3>
-                <p class="text-gray-100"><%= new Date(user.joinDate).toLocaleDateString() %></p>
+                <p class="text-gray-100"><%= user && user.joinDate ? new Date(user.joinDate).toLocaleDateString() : 'Unknown date' %></p>
               </div>
-              <% if (user.bio) { %>
+              <% if (user && user.bio) { %>
                 <div class="md:col-span-2">
                   <h3 class="text-sm font-medium text-gray-400 mb-1">Bio</h3>
                   <p class="text-gray-100"><%= user.bio %></p>
@@ -114,7 +114,7 @@
         </div>
         
         <!-- For Students: Enrolled Courses -->
-        <% if (user.role === 'student') { %>
+        <% if (user && user.role === 'student') { %>
           <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden mb-6">
             <div class="p-4 border-b border-gray-700">
               <h2 class="text-lg font-semibold">Enrolled Courses (<%= enrolledCourses.length %>)</h2>
@@ -135,7 +135,7 @@
                         <span class="text-xs text-gray-400"><%= course.progress %>% complete</span>
                       </div>
                     </div>
-                    <a href="/courses/<%= course.id %>" target="_blank" class="<text-red></text-red> hover:text-blue-400">
+                    <a href="/courses/<%= course.id %>" target="_blank" class="text-blue-500 hover:text-blue-400">
                       <i class="fas fa-external-link-alt"></i>
                     </a>
                   </div>
@@ -147,7 +147,7 @@
               </div>
             <% } %>
           </div>
-        <% } else if (user.role === 'instructor') { %>
+        <% } else if (user && user.role === 'instructor') { %>
           <!-- For Instructors: Created Courses -->
           <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden mb-6">
             <div class="p-4 border-b border-gray-700">
