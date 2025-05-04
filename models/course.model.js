@@ -81,7 +81,13 @@ const CourseModel = {
   // Update course
   updateCourse: async (id, courseData) => {
     const { courses, users } = getCollections();
-    // Fix: Use new ObjectId() instead of createFromTime
+
+    // Validate ID before creating ObjectId
+    if (!id || !ObjectId.isValid(id)) {
+      throw new Error("Invalid course ID format");
+    }
+
+    // Create ObjectId safely
     const courseId = new ObjectId(id);
 
     // Get current course
