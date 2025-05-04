@@ -16,7 +16,7 @@
       </div>
     <% } %>
 
-    <form action="<%= isEdit ? `/instructor/courses/${course.id}` : '/instructor/courses/new' %>" method="POST" enctype="multipart/form-data" class="bg-gray-800 p-6 rounded-lg">
+    <form action="<%= isEdit ? `/instructor/courses/${course._id}` : '/instructor/courses/new' %>" method="POST" enctype="multipart/form-data" class="bg-gray-800 p-6 rounded-lg">
       <% if (isEdit) { %>
         <input type="hidden" name="_method" value="PUT">
       <% } %>
