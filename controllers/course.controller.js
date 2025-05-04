@@ -95,26 +95,23 @@ const CourseController = {
       let isEnrolled = false;
       let progress = 0;
 
-      if (req.session.user) {
-        const user = await User.findById(req.session.user.id);
-        // Check if user exists and has enrolledCourses array
-        // Ensure comparison works between string courseId and ObjectId array
-        if (
-          user &&
-          user.enrolledCourses &&
-          user.enrolledCourses.some(
-            (enrolledCourseId) => enrolledCourseId.toString() === courseId
-          )
-        ) {
-          isEnrolled = true;
-          // Find progress record
-          const userProgress = await ProgressModel.getProgress(
-            user._id,
-            courseId
-          );
-          progress = userProgress ? userProgress.progress : 0;
+        if (req.session.user) {
+            const user = await User.findById(req.session.user.id);
+            if (user && user.enrolledCourses) {
+                // Check against multiple ID formats
+                isEnrolled = user.enrolledCourses.some(id => 
+                    id === course._id.toString() || 
+                    id === course.id || 
+                    id === courseId
+                );
+                
+                if (isEnrolled) {
+                    // Find progress record
+                    const userProgress = await ProgressModel.getProgress(user._id, courseId);
+                    progress = userProgress ? userProgress.progress : 0;
+                }
+            }
         }
-      }
 
       res.render("courses/details", {
         course,
@@ -148,11 +145,27 @@ const CourseController = {
         return res.redirect("/courses");
       }
 
-      // Check if enrolled
-      if (!user.enrolledCourses.includes(courseId)) {
-        req.flash("error_msg", "You are not enrolled in this course");
-        return res.redirect(`/courses/${courseId}`);
-      }
+        console.log("COURSE DATA:", { 
+            courseId: courseId,
+            courseMongoId: course._id.toString(),
+            courseCustomId: course.id,
+            userEnrolledCourses: user.enrolledCourses 
+        });
+
+        // Check if enrolled - handle multiple ID formats
+        const isEnrolled = user.enrolledCourses && (
+            // Check against MongoDB _id
+            user.enrolledCourses.some(id => id === course._id.toString()) ||
+            // Check against custom id field
+            user.enrolledCourses.some(id => id === course.id) ||
+            // Check against provided courseId
+            user.enrolledCourses.some(id => id === courseId)
+        );
+
+        if (!isEnrolled) {
+            req.flash("error_msg", "You are not enrolled in this course");
+            return res.redirect(`/courses/${courseId}`);
+        }
 
       // Get progress
       const userProgress = await ProgressModel.getProgress(userId, courseId);
