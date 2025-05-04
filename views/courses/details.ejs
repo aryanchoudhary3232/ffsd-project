@@ -89,6 +89,10 @@
               <span>Instructor: <%= course.instructor %></span>
             </div>
             <div class="flex items-center">
+              <i class="fas fa-globe text-gray-500 mr-2"></i>
+              <span>Language: <%= course.language || 'English' %></span>
+            </div>
+            <div class="flex items-center">
               <i class="fas fa-calendar-alt text-gray-500 mr-2"></i>
               <span>Last updated: <%= new Date(course.updatedAt).toLocaleDateString() %></span>
             </div>

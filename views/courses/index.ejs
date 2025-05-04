@@ -7,7 +7,9 @@
   .bg-white {
     background-color: #111;
   }
-  .text-gray-600, .text-gray-500, .text-gray-700 {
+  .text-gray-600,
+  .text-gray-500,
+  .text-gray-700 {
     color: #ccc;
   }
   .bg-primary {
@@ -32,12 +34,14 @@
   .text-white {
     color: #000;
   }
-  input, select {
+  input,
+  select {
     background-color: #222;
     color: #fff;
     border: 1px solid #555;
   }
 </style>
+
 <body>
   <%- include('../partials/navbar') %>
 
@@ -46,20 +50,20 @@
       <h1 class="text-2xl font-bold mb-4 md:mb-0">Browse Courses</h1>
       <div class="flex flex-col md:flex-row gap-4">
         <form action="/courses/search" method="GET" class="flex">
-          <input 
-            type="text" 
-            name="query" 
-            placeholder="Search courses..." 
+          <input
+            type="text"
+            name="query"
+            placeholder="Search courses..."
             value="<%= search %>"
             class="px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-primary focus:border-primary"
-          >
+          />
           <button type="submit" class="bg-primary px-4 py-2 rounded-r-md hover:bg-primary-dark">
             <i class="fas fa-search"></i>
           </button>
         </form>
         <div class="flex gap-2">
-          <select 
-            id="category-filter" 
+          <select
+            id="category-filter"
             class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
           >
             <option value="all" <%= category === 'all' ? 'selected' : '' %>>All Categories</option>
@@ -67,8 +71,62 @@
               <option value="<%= cat %>" <%= category === cat ? 'selected' : '' %>><%= cat %></option>
             <% }); %>
           </select>
-          <select 
-            id="sort-filter" 
+          <select
+            id="language-filter"
+            class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
+          >
+            <option value="all" <%= language === 'all' ? 'selected' : '' %>>All Languages</option>
+            <% if(languages.includes('English')) { %>
+              <option value="English" <%= language === 'English' ? 'selected' : '' %>>English</option>
+            <% } %>
+            <% if(languages.includes('Hindi')) { %>
+              <option value="Hindi" <%= language === 'Hindi' ? 'selected' : '' %>>Hindi</option>
+            <% } %>
+            <% if(languages.includes('Marathi')) { %>
+              <option value="Marathi" <%= language === 'Marathi' ? 'selected' : '' %>>Marathi</option>
+            <% } %>
+            <% if(languages.includes('Telugu')) { %>
+              <option value="Telugu" <%= language === 'Telugu' ? 'selected' : '' %>>Telugu</option>
+            <% } %>
+            <% if(languages.includes('Malayalam')) { %>
+              <option value="Malayalam" <%= language === 'Malayalam' ? 'selected' : '' %>>Malayalam</option>
+            <% } %>
+            <% if(languages.includes('Kannada')) { %>
+              <option value="Kannada" <%= language === 'Kannada' ? 'selected' : '' %>>Kannada</option>
+            <% } %>
+            <% if(languages.includes('Marwadi')) { %>
+              <option value="Marwadi" <%= language === 'Marwadi' ? 'selected' : '' %>>Marwadi</option>
+            <% } %>
+            <% if(languages.includes('Haryanvi')) { %>
+              <option value="Haryanvi" <%= language === 'Haryanvi' ? 'selected' : '' %>>Haryanvi</option>
+            <% } %>
+            <% if(languages.includes('Tamil')) { %>
+              <option value="Tamil" <%= language === 'Tamil' ? 'selected' : '' %>>Tamil</option>
+            <% } %>
+            <% if(languages.includes('Bengali')) { %>
+              <option value="Bengali" <%= language === 'Bengali' ? 'selected' : '' %>>Bengali</option>
+            <% } %>
+            <% if(languages.includes('Gujarati')) { %>
+              <option value="Gujarati" <%= language === 'Gujarati' ? 'selected' : '' %>>Gujarati</option>
+            <% } %>
+            <% if(languages.includes('Punjabi')) { %>
+              <option value="Punjabi" <%= language === 'Punjabi' ? 'selected' : '' %>>Punjabi</option>
+            <% } %>
+            <% if(languages.includes('Odia')) { %>
+              <option value="Odia" <%= language === 'Odia' ? 'selected' : '' %>>Odia</option>
+            <% } %>
+            <% if(languages.includes('Bhojpuri')) { %>
+              <option value="Bhojpuri" <%= language === 'Bhojpuri' ? 'selected' : '' %>>Bhojpuri</option>
+            <% } %>
+            <% languages.filter(lang => 
+              !['English', 'Hindi', 'Marathi', 'Telugu', 'Malayalam', 'Kannada', 'Marwadi', 
+                'Haryanvi', 'Tamil', 'Bengali', 'Gujarati', 'Punjabi', 'Odia', 'Bhojpuri'].includes(lang)
+            ).forEach(function(lang) { %>
+              <option value="<%= lang %>" <%= language === lang ? 'selected' : '' %>><%= lang %></option>
+            <% }); %>
+          </select>
+          <select
+            id="sort-filter"
             class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
           >
             <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Newest</option>
@@ -92,7 +150,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <% courses.forEach(function(course) { %>
           <div class="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:transform hover:scale-105 border border-gray-300">
-            <img src="<%= course.thumbnail %>" alt="<%= course.title %>" class="w-full h-48 object-cover">
+            <img src="<%= course.thumbnail %>" alt="<%= course.title %>" class="w-full h-48 object-cover" />
             <div class="p-6">
               <div class="flex justify-between items-start mb-2">
                 <h3 class="text-xl font-bold"><%= course.title %></h3>
@@ -106,6 +164,10 @@
                   <span class="text-gray-500 ml-1">(<%= course.students %>)</span>
                 </div>
                 <span class="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-xs"><%= course.category %></span>
+              </div>
+              <div class="flex items-center mb-4">
+                <i class="fas fa-globe text-gray-500 mr-2"></i>
+                <span class="text-gray-600 text-sm"><%= course.language || 'English' %></span>
               </div>
               <p class="text-gray-700 mb-4 line-clamp-2"><%= course.description %></p>
               <a href="/courses/<%= course.id %>" class="block w-full text-center bg-primary py-2 px-4 rounded-md hover:bg-primary-dark transition-colors">View Course</a>
@@ -124,18 +186,22 @@
 
   <%- include('../partials/footer') %>
   <%- include('../partials/scripts') %>
+  
   <script>
     // Filter and sort functionality
     document.getElementById('category-filter').addEventListener('change', applyFilters);
+    document.getElementById('language-filter').addEventListener('change', applyFilters);
     document.getElementById('sort-filter').addEventListener('change', applyFilters);
 
     function applyFilters() {
       const category = document.getElementById('category-filter').value;
+      const language = document.getElementById('language-filter').value;
       const sort = document.getElementById('sort-filter').value;
       const search = '<%= search %>';
       
       let url = '/courses?';
       if (category && category !== 'all') url += `category=${category}&`;
+      if (language && language !== 'all') url += `language=${language}&`;
       if (sort) url += `sort=${sort}&`;
       if (search) url += `search=${search}`;
       
