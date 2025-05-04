@@ -434,6 +434,12 @@ const AdminController = {
     // Assuming Multer middleware runs before this to handle req.file
     const { title, description, category, price, status, featured, instructorId } = req.body;
 
+    // Validate courseId
+    if (!AdminController.isValidObjectId(courseId)) {
+        req.flash("error_msg", "Invalid Course ID format.");
+        return res.redirect("/admin/courses"); // Redirect to courses list or appropriate page
+    }
+
     try {
         const course = await Course.getCourseById(courseId);
         if (!course) {
@@ -475,6 +481,7 @@ const AdminController = {
     } catch (error) {
         console.error("Admin Update Course error:", error);
         req.flash("error_msg", error.message || "Error updating course.");
+        // Redirect back to edit form on error
         res.redirect(`/admin/courses/${courseId}/edit`);
     }
   },
