@@ -83,7 +83,9 @@ const CourseController = {
         if (req.session.user) {
             const user = await User.findById(req.session.user.id);
             // Check if user exists and has enrolledCourses array
-            if (user && user.enrolledCourses && user.enrolledCourses.includes(courseId)) {
+            // Ensure comparison works between string courseId and ObjectId array
+            if (user && user.enrolledCourses && 
+                user.enrolledCourses.some(enrolledCourseId => enrolledCourseId.toString() === courseId)) { 
                 isEnrolled = true;
                 // Find progress record
                 const userProgress = await ProgressModel.getProgress(user._id, courseId);
@@ -101,48 +103,6 @@ const CourseController = {
         console.error("Get Course Details error:", error);
         req.flash("error_msg", "Could not load course details.");
         res.redirect('/courses');
-    }
-  },
-
-  // Enroll in course
-  enrollInCourse: async (req, res) => {
-    if (!req.session.user) {
-        req.flash("error_msg", "Please login to enroll in courses");
-        return res.redirect("/login");
-    }
-
-    const courseId = req.params.id;
-    const userId = req.session.user.id;
-
-    try {
-        // Check if course exists
-        const course = await CourseModel.getCourseById(courseId);
-        if (!course) {
-            req.flash("error_msg", "Course not found");
-            return res.redirect(`/courses`);
-        }
-
-        // Add course to user's enrolledCourses array if not already present
-        const updatedUser = await User.findByIdAndUpdate(
-            userId,
-            { $addToSet: { enrolledCourses: courseId } },
-            { new: true }
-        );
-
-        if (!updatedUser) {
-            req.flash("error_msg", "User not found");
-            return res.redirect("/login");
-        }
-
-        // Initialize progress for this course
-        await ProgressModel.getProgress(userId, courseId);
-
-        req.flash("success_msg", "Successfully enrolled in the course");
-        res.redirect(`/courses/${courseId}/learn`);
-    } catch (error) {
-        console.error("Enrollment error:", error);
-        req.flash("error_msg", error.message || "Error enrolling in course");
-        res.redirect(`/courses/${courseId}`);
     }
   },
 

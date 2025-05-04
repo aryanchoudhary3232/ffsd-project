@@ -44,6 +44,11 @@ const CartController = {
         res.json(result);
     } catch (error) {
       console.error("Add to Cart error:", error);
+      // Check if the error is the "Already enrolled" error
+      if (error.message === "Already enrolled in this course") {
+          return res.status(400).json({ success: false, message: "You are already enrolled in this course." });
+      }
+      // Handle other errors
       res.status(500).json({ success: false, message: error.message || "Error adding to cart" });
     }
   },
@@ -129,7 +134,7 @@ const CartController = {
 
             // 1. Add course to user's enrolledCourses
             enrollPromises.push(
-                User.findByIdAndUpdate(userId, { $addToSet: { enrolledCourses: course._id } })
+                User.findByIdAndUpdate(userId, { $addToSet: { enrolledCourses: course._id.toString() } }) // Explicitly add as string
             );
 
             // 2. Create order record
