@@ -31,7 +31,7 @@ const AdminController = {
             Course.getCourseCount(),
             Order.getAllOrders(),
             User.find().sort({ joinDate: -1 }).limit(5),
-            Course.getAllCourses() // Get all courses then manually sort and limit
+            Course.getAllCourses()
         ]);
 
         // Manually sort and limit courses
