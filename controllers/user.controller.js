@@ -83,8 +83,8 @@ const UserController = {
     }
 
     const userId = req.session.user.id;
-    const { name, email, currentPassword, newPassword, confirmPassword } = req.body;
-    const updates = { name, email };
+    const { username, email, currentPassword, newPassword, confirmPassword } = req.body; // Changed name to username
+    const updates = { username, email }; // Changed name to username
 
     try {
       const user = await User.findById(userId);
@@ -113,7 +113,7 @@ const UserController = {
 
       req.session.user = {
         ...req.session.user,
-        name: updatedUser.name,
+        name: updatedUser.username,
         email: updatedUser.email
       };
 
