@@ -1,29 +1,26 @@
 const express = require("express");
 const router = express.Router();
 const CourseController = require("../controllers/course.controller");
+const RatingController = require("../controllers/rating.controller");
 const { isAuthenticated } = require("../middleware/auth.middleware");
 
-// Get all courses
+// Course listings
 router.get("/", CourseController.getAllCourses);
-
-// Get course details
 router.get("/:id", CourseController.getCourseDetails);
 
-// Course learning page
+// Course Learning
 router.get(
   "/:id/learn",
   isAuthenticated,
   CourseController.getCourseLearningPage
 );
-
-// Mark lesson as complete
 router.post(
   "/:courseId/lessons/:lessonId/complete",
   isAuthenticated,
   CourseController.markLessonAsComplete
 );
 
-// Add comment routes
+// Course Comments
 router.post(
   "/:courseId/lessons/:lessonId/comments",
   isAuthenticated,
@@ -31,8 +28,25 @@ router.post(
 );
 router.get(
   "/:courseId/lessons/:lessonId/comments",
-  isAuthenticated,
   CourseController.getComments
+);
+
+// Course Ratings
+router.post(
+  "/:courseId/ratings",
+  isAuthenticated,
+  RatingController.submitRating
+);
+router.get("/:courseId/ratings", RatingController.getCourseRatings);
+router.get(
+  "/:courseId/ratings/user",
+  isAuthenticated,
+  RatingController.getUserRating
+);
+router.delete(
+  "/:courseId/ratings/:ratingId",
+  isAuthenticated,
+  RatingController.deleteRating
 );
 
 module.exports = router;

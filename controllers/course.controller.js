@@ -125,7 +125,9 @@ const CourseController = {
         instructorName,
         isEnrolled,
         progress,
-        user,
+        user: user || null, // Pass fetched user or null
+        success_msg: req.flash("success_msg") || "",
+        error_msg: req.flash("error_msg") || "",
       });
     } catch (error) {
       console.error("Get Course Details error:", error);
@@ -172,7 +174,7 @@ const CourseController = {
           // Ensure lessons array exists and find the lesson by _id
           const lesson = module.lessons?.find(
             (l) => l._id.toString() === lessonId
-          ); // Changed l.id to l._id.toString()
+          );
           if (lesson) {
             currentLesson = lesson;
             currentModule = module;
@@ -204,7 +206,7 @@ const CourseController = {
         currentModule,
         currentLesson,
         progress: userProgress.progress,
-        completedLessons: completedLessons, // Pass the array directly
+        completedLessons: completedLessons,
       });
     } catch (error) {
       console.error("Course Learning Page error:", error);
@@ -239,7 +241,7 @@ const CourseController = {
           if (
             module.lessons.some(
               (lesson) =>
-                lesson && lesson._id && lesson._id.toString() === lessonId // Changed lesson.id to lesson._id
+                lesson && lesson._id && lesson._id.toString() === lessonId
             )
           ) {
             lessonExists = true;
@@ -264,7 +266,7 @@ const CourseController = {
       // Now proceed with marking the lesson as complete, passing totalLessons
       const updatedProgress = await ProgressModel.markLessonAsComplete(
         userId,
-        course._id, // Changed course.id to course._id
+        course._id,
         lessonId,
         totalLessons
       );
