@@ -51,7 +51,7 @@ const AdminController = {
           }
           return {
             ...course,
-            instructorId: instructor ? { name: instructor.name } : null,
+            instructorId: instructor ? { name: instructor.username } : null,
           };
         })
       );
@@ -74,7 +74,7 @@ const AdminController = {
       const recentCourses = recentCoursesWithInstructors.map((course) => ({
         ...course,
         instructor: course.instructorId
-          ? course.instructorId.name
+          ? course.instructorId.username
           : "Unknown Instructor",
       }));
 
@@ -428,9 +428,9 @@ const AdminController = {
       }
 
       // Ensure instructor is never undefined, provide default values if instructor not found
-      // Make sure name is always a string to prevent TypeError with .charAt(0)
+      // Make sure username is always a string to prevent TypeError with .charAt(0)
       instructor = {
-        name: instructor?.name || course.instructor || "Unknown Instructor",
+        name: instructor?.username || course.instructor || "Unknown Instructor",
         email: instructor?.email || "N/A",
         id: instructor?._id || null,
       };
