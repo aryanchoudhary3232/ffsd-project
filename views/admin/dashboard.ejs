@@ -48,7 +48,7 @@
               <% recentUsers.forEach(function(user) { %>
                 <tr>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-medium text-gray-100"><%= user.name %></div>
+                    <div class="text-sm font-medium text-gray-100"><%= user.name || user.username || user.firstName + ' ' + (user.lastName || '') %></div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm text-gray-300"><%= user.email %></div>
@@ -60,7 +60,7 @@
                       <% } else if (user.role === 'instructor') { %>
                         bg-blue-600 text-blue-200
                       <% } else { %>
-                        bg-green-600 text-green-200
+                        bg-yellow-600 text-yellow-200
                       <% } %>
                     ">
                       <%= user.role %>

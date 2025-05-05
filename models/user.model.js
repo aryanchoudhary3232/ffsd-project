@@ -1,237 +1,213 @@
-const fs = require("fs");
-const path = require("path");
 const bcrypt = require("bcryptjs");
-const db = require("../config/database");
+const { ObjectId } = require("mongodb");
+const { getDb } = require("../config/database");
 
-const dataPath = path.join(__dirname, "../data/data.json");
+const getUsersCollection = () => {
+  const db = getDb();
+  return db.collection("users");
+};
 
-// Helper function to read data.json
-function readData() {
-  const rawData = fs.readFileSync(dataPath);
-  return JSON.parse(rawData);
-}
+const getProgressCollection = () => {
+  const db = getDb();
+  return db.collection("progress");
+};
 
-// Helper function to write to data.json
-function writeData(data) {
-  fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
-}
+const getCoursesCollection = () => {
+  const db = getDb();
+  return db.collection("courses");
+};
 
-// User model
 const UserModel = {
-  // Get all users
-  getAllUsers: () => {
-    const data = readData();
-    return data.users;
+  getAllUsers: async () => {
+    const usersCollection = getUsersCollection();
+    return await usersCollection.find({}, { projection: { password: 0 } }).toArray();
   },
 
-  // Get user by ID
-  getUserById: (id) => {
-    const data = readData();
-    return data.users.find((user) => user.id === id);
+  getUserById: async (id) => {
+    const usersCollection = getUsersCollection();
+    return await usersCollection.findOne({ _id: new ObjectId(id) }, { projection: { password: 0 } });
   },
 
-  // Get user by email
-  getUserByEmail: (email) => {
-    const data = readData();
-    return data.users.find((user) => user.email === email);
+  getUserByEmail: async (email) => {
+    const usersCollection = getUsersCollection();
+    return await usersCollection.findOne({ email: email });
   },
 
-  // Get count of admins
-  getAdminCount: () => {
-    const data = readData();
-    return data.users.filter((user) => user.role === "admin").length;
+  getAdminCount: async () => {
+    const usersCollection = getUsersCollection();
+    return await usersCollection.countDocuments({ role: "admin" });
   },
 
-  // Create new user
   createUser: async (userData) => {
-    const data = readData();
+    const usersCollection = getUsersCollection();
 
-    // Check if email already exists
-    if (data.users.some((user) => user.email === userData.email)) {
+    const existingUser = await usersCollection.findOne({ email: userData.email });
+    if (existingUser) {
       throw new Error("Email already in use");
     }
 
-    // Hash password
-    const hashedPassword = userData.password;
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(userData.password, salt);
 
-    // Prepare user data
     const userToSave = {
-      name: userData.name,
+      username: userData.username,
       email: userData.email,
       password: hashedPassword,
       role: userData.role || "student",
-      joinDate: new Date().toISOString().split("T")[0],
+      joinDate: new Date(),
       enrolledCourses: [],
       completedCourses: [],
     };
 
     try {
-      // Use the database.js saveUser function to save to both SQLite and JSON
-      const result = await db.saveUser(userToSave);
-      
-      // Return user without password
-      const { password, ...userWithoutPassword } = result.user || userToSave;
-      return userWithoutPassword;
+      const result = await usersCollection.insertOne(userToSave);
+      const newUser = await usersCollection.findOne({ _id: result.insertedId }, { projection: { password: 0 } });
+      return newUser;
     } catch (error) {
-      console.error("Error saving user:", error);
+      console.error("Error creating user:", error);
       throw new Error("Failed to create user: " + error.message);
     }
   },
 
-  // Update user
-  updateUser: (id, userData) => {
-    const data = readData();
-    const userIndex = data.users.findIndex((user) => user.id === id);
+  updateUser: async (id, userData) => {
+    const usersCollection = getUsersCollection();
+    const userObjectId = new ObjectId(id);
 
-    if (userIndex === -1) {
+    const updateData = { ...userData };
+
+    if (userData.password) {
+      const salt = await bcrypt.genSalt(10);
+      updateData.password = await bcrypt.hash(userData.password, salt);
+    } else {
+      delete updateData.password;
+    }
+
+    delete updateData._id;
+
+    const result = await usersCollection.updateOne(
+      { _id: userObjectId },
+      { $set: updateData }
+    );
+
+    if (result.matchedCount === 0) {
       throw new Error("User not found");
     }
 
-    // Update user data
-    data.users[userIndex] = {
-      ...data.users[userIndex],
-      ...userData,
-    };
-
-    // If password is provided, hash it
-    if (userData.password) {
-      data.users[userIndex].password = userData.password;
-    }
-
-    writeData(data);
-
-    // Return user without password
-    const { password, ...userWithoutPassword } = data.users[userIndex];
-    return userWithoutPassword;
+    return await usersCollection.findOne({ _id: userObjectId }, { projection: { password: 0 } });
   },
 
-  // Delete user
-  deleteUser: (id) => {
-    const data = readData();
-    const userIndex = data.users.findIndex((user) => user.id === id);
+  deleteUser: async (id) => {
+    const usersCollection = getUsersCollection();
+    const result = await usersCollection.deleteOne({ _id: new ObjectId(id) });
 
-    if (userIndex === -1) {
+    if (result.deletedCount === 0) {
       throw new Error("User not found");
     }
-
-    // Remove user
-    data.users.splice(userIndex, 1);
-    writeData(data);
-
     return true;
   },
 
-  // Authenticate user
-  authenticateUser: (email, password) => {
-    const data = readData();
-    const user = data.users.find((user) => user.email === email);
+  authenticateUser: async (email, password) => {
+    const usersCollection = getUsersCollection();
+    const user = await usersCollection.findOne({ email: email });
 
-    if (!user || !(password === user.password)) {
+    if (!user) {
       return null;
     }
 
-    // Return user without password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return null;
+    }
+
     const { password: pwd, ...userWithoutPassword } = user;
     return userWithoutPassword;
   },
 
-  // Enroll user in course
-  enrollUserInCourse: (userId, courseId) => {
-    const data = readData();
-    const userIndex = data.users.findIndex((user) => user.id === userId);
+  enrollUserInCourse: async (userId, courseId) => {
+    const usersCollection = getUsersCollection();
+    const progressCollection = getProgressCollection();
+    const userObjectId = new ObjectId(userId);
+    const courseObjectId = new ObjectId(courseId);
 
-    if (userIndex === -1) {
-      throw new Error("User not found");
+    const user = await usersCollection.findOne({ _id: userObjectId, enrolledCourses: courseObjectId });
+    if (user) {
+        return false;
     }
 
-    // Check if already enrolled
-    if (data.users[userIndex].enrolledCourses.includes(courseId)) {
-      return false;
+    const updateResult = await usersCollection.updateOne(
+      { _id: userObjectId },
+      { $addToSet: { enrolledCourses: courseObjectId } }
+    );
+
+    if (updateResult.modifiedCount === 0 && updateResult.matchedCount === 0) {
+        throw new Error("User not found");
+    }
+     if (updateResult.modifiedCount === 0 && updateResult.matchedCount > 0) {
+        return false;
     }
 
-    // Add to enrolled courses
-    data.users[userIndex].enrolledCourses.push(courseId);
+    const existingProgress = await progressCollection.findOne({ userId: userObjectId, courseId: courseObjectId });
+    if (!existingProgress) {
+        await progressCollection.insertOne({
+            userId: userObjectId,
+            courseId: courseObjectId,
+            progress: 0,
+            completedLessons: [],
+        });
+    }
 
-    // Initialize progress
-    data.progress.push({
-      userId,
-      courseId,
-      progress: 0,
-      completedLessons: [],
-    });
-
-    writeData(data);
     return true;
   },
 
-  // Get user's enrolled courses
-  getUserEnrolledCourses: (userId) => {
-    const data = readData();
-    const user = data.users.find((user) => user.id === userId);
+  getUserEnrolledCourses: async (userId) => {
+    const usersCollection = getUsersCollection();
+    const coursesCollection = getCoursesCollection();
+    const progressCollection = getProgressCollection();
+    const userObjectId = new ObjectId(userId);
 
-    if (!user) {
-      throw new Error("User not found");
+    const user = await usersCollection.findOne({ _id: userObjectId }, { projection: { enrolledCourses: 1 } });
+
+    if (!user || !user.enrolledCourses || user.enrolledCourses.length === 0) {
+      return [];
     }
 
-    return user.enrolledCourses
-      .map((courseId) => {
-        const course = data.courses.find((course) => course.id === courseId);
-        if (!course) return null;
+    const courses = await coursesCollection.find({ _id: { $in: user.enrolledCourses } }).toArray();
 
-        const userProgress = data.progress.find(
-          (p) => p.userId === userId && p.courseId === courseId
-        ) || {
-          progress: 0,
-        };
+    const progressRecords = await progressCollection.find({ userId: userObjectId, courseId: { $in: user.enrolledCourses } }).toArray();
+    const progressMap = progressRecords.reduce((map, p) => {
+        map[p.courseId.toString()] = p;
+        return map;
+    }, {});
 
+    return courses.map(course => {
+        const userProgress = progressMap[course._id.toString()] || { progress: 0 };
         return {
-          ...course,
-          progress: userProgress.progress,
+            ...course,
+            progress: userProgress.progress,
         };
-      })
-      .filter(Boolean);
-  },
-
-  // Get users by role
-  getUsersByRole: (role) => {
-    const data = readData();
-    return data.users.filter((user) => user.role === role);
-  },
-
-  // Get user count
-  getUserCount: () => {
-    const data = readData();
-    return data.users.length;
-  },
-
-  // Get new users (joined in the last 30 days)
-  getNewUsers: () => {
-    const data = readData();
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    return data.users.filter((user) => {
-      const joinDate = new Date(user.joinDate);
-      return joinDate >= thirtyDaysAgo;
     });
   },
 
-  deleteUserById: (userId) => {
-    console.log('Reached model');
-    
-    const User = require("../models/User");
+  getUsersByRole: async (role) => {
+    const usersCollection = getUsersCollection();
+    return await usersCollection.find({ role: role }, { projection: { password: 0 } }).toArray();
+  },
 
-    return new Promise((resolve, reject) => {
-      db.run("DELETE FROM users WHERE id = ?", [userId], function (err) {
-          if (err) {
-              reject(new Error("Error deleting user: " + err.message));
-              return;
-          }
-          resolve({ message: "User deleted successfully", changes: this.changes });
-      });
-  });
-  }
-  
+  getUserCount: async () => {
+    const usersCollection = getUsersCollection();
+    return await usersCollection.countDocuments();
+  },
+
+  getNewUsers: async () => {
+    const usersCollection = getUsersCollection();
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    return await usersCollection.find(
+        { joinDate: { $gte: thirtyDaysAgo } },
+        { projection: { password: 0 } }
+    ).toArray();
+  },
 };
 
 module.exports = UserModel;

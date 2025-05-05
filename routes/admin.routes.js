@@ -3,11 +3,12 @@ const router = express.Router();
 const AdminController = require("../controllers/admin.controller");
 const { isAuthenticated, isAdmin } = require("../middleware/auth.middleware");
 const multer = require("multer");
+const path = require("path");
 
 // Multer setup for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "public/uploads/");
+    cb(null, path.join(__dirname, "../public/uploads/"));
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + "-" + file.originalname);
@@ -22,6 +23,15 @@ router.get(
   AdminController.getAdminDashboard
 );
 router.get("/users", isAuthenticated, isAdmin, AdminController.getUsers);
+
+// Add new route for user details
+router.get(
+  "/users/:id",
+  isAuthenticated,
+  isAdmin,
+  AdminController.getUserDetails
+);
+
 router.get(
   "/users/:id/edit",
   isAuthenticated,
@@ -91,6 +101,12 @@ router.delete(
   isAuthenticated,
   isAdmin,
   AdminController.deleteCourse
+);
+router.get(
+  "/courses/:id/ratings",
+  isAuthenticated,
+  isAdmin,
+  AdminController.getCourseRatings
 );
 router.get("/orders", isAuthenticated, isAdmin, AdminController.getOrders);
 router.put(

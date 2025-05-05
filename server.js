@@ -1,12 +1,25 @@
 const express = require("express");
 const path = require("path");
-const fs = require("fs");
-const bodyParser = require("body-parser");
+// const fs = require("fs"); // Removed fs
+const { mongoose } = require("./config/database"); // Import mongoose from database
 const session = require("express-session");
 const multer = require("multer");
-const bcrypt = require("bcryptjs");
+// const bcrypt = require("bcryptjs"); // Keep if needed elsewhere, otherwise remove
 const methodOverride = require("method-override");
 const flash = require("connect-flash");
+
+// Import and initialize indexes after connection is established
+const { initializeIndexes } = require("./scripts/init-indexes");
+
+// Wait for MongoDB connection before initializing indexes
+mongoose.connection.once("open", async () => {
+  try {
+    await initializeIndexes();
+    console.log("Database indexes initialized successfully");
+  } catch (err) {
+    console.error("Error initializing indexes:", err);
+  }
+});
 
 // Import routes
 const authRoutes = require("./routes/auth.routes");
@@ -26,8 +39,8 @@ app.set("views", path.join(__dirname, "views"));
 
 // Middleware
 app.use(express.static(path.join(__dirname, "public")));
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true })); // Replaced bodyParser
+app.use(express.json()); // Replaced bodyParser
 app.use(methodOverride("_method"));
 app.use(
   session({
@@ -37,7 +50,7 @@ app.use(
     cookie: { maxAge: 24 * 60 * 60 * 1000 }, // 24 hours
   })
 );
-// app.use(express.static("public"));
+// app.use(express.static("public")); // This is redundant with the one above
 app.use(flash());
 
 // Global middleware
@@ -59,16 +72,11 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// Helper function to read data.json
-function readData() {
-  const rawData = fs.readFileSync("data.json");
-  return JSON.parse(rawData);
-}
+// Helper function to read data.json - REMOVED
+// function readData() { ... }
 
-// Helper function to write to data.json
-function writeData(data) {
-  fs.writeFileSync("data.json", JSON.stringify(data, null, 2));
-}
+// Helper function to write to data.json - REMOVED
+// function writeData(data) { ... }
 
 // Middleware to check if user is logged in
 function isAuthenticated(req, res, next) {
@@ -103,10 +111,15 @@ app.use("/instructor", instructorRoutes);
 app.use("/cart", cartRoutes);
 
 // Home page
-app.get("/", (req, res) => {
-  const courseModel = require("./models/course.model");
-  const featuredCourses = courseModel.getFeaturedCourses();
-  res.render("index", { featuredCourses });
+app.get("/", async (req, res) => {
+  try {
+    const CourseModel = require("./models/course.model");
+    const featuredCourses = await CourseModel.getFeaturedCourses();
+    res.render("index", { featuredCourses });
+  } catch (error) {
+    console.error("Error fetching featured courses:", error);
+    res.render("index", { featuredCourses: [] });
+  }
 });
 
 // About Us Page
@@ -120,48 +133,49 @@ app.get("/contact-us", (req, res) => {
 });
 
 // Contact form submission handler
-app.post("/contact-us/submit", (req, res) => {
+app.post("/contact-us/submit", async (req, res) => {
+  // Make async for DB operations
   // Extract form data
   const { name, email, subject, message } = req.body;
-  
+
   // Basic validation
   if (!name || !email || !subject || !message) {
     req.flash("error_msg", "Please fill in all fields");
     return res.redirect("/contact-us");
   }
-  
+
   // Email validation using simple regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     req.flash("error_msg", "Please provide a valid email address");
     return res.redirect("/contact-us");
   }
-  
-  // Log the inquiry for now (you would typically save to DB or send email)
-  console.log("Contact Form Submission:");
-  console.log({
-    name,
-    email,
-    subject,
-    message,
-    timestamp: new Date().toISOString()
-  });
-  
-  // Create a new contact message (this is a placeholder for database integration)
+
+  // Log the inquiry (optional, good for debugging)
+  console.log("Contact Form Submission Received:", { name, email, subject });
+
   try {
-    // Here you would typically save to a database
-    // Example with a theoretical contactModel:
-    // const contactModel = require('./models/contact.model');
-    // contactModel.saveContactMessage({ name, email, subject, message });
-    
-    // Flash two separate messages for submission and email confirmation
-    req.flash("success_msg", "Thank you for your message. We'll be in touch soon!");
-    req.flash("success_msg", "A confirmation email has been sent to your email address.");
-    
+    // TODO: Integrate with a Mongoose model to save the contact message
+    // Example (assuming you create a Contact model):
+    // const Contact = require('./models/contact.model');
+    // const newContactMessage = new Contact({ name, email, subject, message });
+    // await newContactMessage.save();
+
+    // Flash success messages
+    req.flash(
+      "success_msg",
+      "Thank you for your message. We'll be in touch soon!"
+    );
+    // Optionally add email confirmation message if you implement sending emails
+    // req.flash("success_msg", "A confirmation email has been sent to your email address.");
+
     res.redirect("/contact-us");
   } catch (error) {
     console.error("Error handling contact form:", error);
-    req.flash("error_msg", "There was a problem submitting your message. Please try again later.");
+    req.flash(
+      "error_msg",
+      "There was a problem submitting your message. Please try again later."
+    );
     res.redirect("/contact-us");
   }
 });

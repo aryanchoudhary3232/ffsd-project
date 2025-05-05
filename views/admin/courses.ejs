@@ -49,6 +49,13 @@
                 <option value="<%= cat %>" <%= category === cat ? 'selected' : '' %>><%= cat %></option>
               <% }) %>
             </select>
+            <!-- Language Filter -->
+            <select id="language-filter" class="px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white">
+              <option value="all" <%= language === 'all' ? 'selected' : '' %>>All Languages</option>
+              <% languages.forEach(function(lang) { %>
+                <option value="<%= lang %>" <%= language === lang ? 'selected' : '' %>><%= lang %></option>
+              <% }) %>
+            </select>
             <!-- Sort Filter -->
             <select id="sort-filter" class="px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white">
               <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Newest First</option>
@@ -110,9 +117,9 @@
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <a href="/admin/courses/<%= course.id %>" class="text-indigo-400 hover:text-indigo-200 mr-3">View</a>
-                  <a href="/admin/courses/<%= course.id %>/edit-course" class="text-blue-400 hover:text-blue-200 mr-3">Edit</a>
-                  <form action="/admin/courses/<%= course.id %>/delete?_method=DELETE" method="POST" class="inline">
+                  <a href="/admin/courses/<%= course._id %>" class="text-indigo-400 hover:text-indigo-200 mr-3">View</a>
+                  <a href="/admin/courses/<%= course._id %>/edit-course" class="text-blue-400 hover:text-blue-200 mr-3">Edit</a>
+                  <form action="/admin/courses/<%= course._id %>/delete?_method=DELETE" method="POST" class="inline">
                     <button type="submit" class="text-red-400 hover:text-red-200" onclick="return confirm('Are you sure you want to delete this course?');">Delete</button>
                   </form>
                 </td>
@@ -151,33 +158,106 @@
     document.addEventListener('DOMContentLoaded', function() {
       const searchInput = document.getElementById('search-input');
       const categoryFilter = document.getElementById('category-filter');
+      const languageFilter = document.getElementById('language-filter');
       const sortFilter = document.getElementById('sort-filter');
+      const allCourseRows = document.querySelectorAll('tbody tr');
       
-      function applyFilters() {
+      // Function for server-side filtering (when filters change)
+      function applyServerFilters() {
         const search = searchInput.value.trim();
         const category = categoryFilter.value;
+        const language = languageFilter.value;
         const sort = sortFilter.value;
         
         let url = '/admin/courses?';
         if (search) url += `search=${encodeURIComponent(search)}&`;
         if (category !== 'all') url += `category=${encodeURIComponent(category)}&`;
+        if (language !== 'all') url += `language=${encodeURIComponent(language)}&`;
         if (sort) url += `sort=${sort}`;
         
         window.location.href = url;
       }
       
+      // Function for client-side filtering (as user types)
+      function applyClientSideSearch() {
+        const searchTerm = searchInput.value.trim().toLowerCase();
+        let matchFound = false;
+        
+        allCourseRows.forEach(row => {
+          const courseTitle = row.querySelector('.text-sm.font-medium.text-gray-100').textContent.toLowerCase();
+          const instructorName = row.querySelector('td:nth-child(2) .text-sm.text-gray-100').textContent.toLowerCase();
+          const category = row.querySelector('td:nth-child(3) .text-sm.text-gray-100').textContent.toLowerCase();
+          
+          // If search term is empty, or it matches course title, instructor, or category
+          if (searchTerm === '' || 
+              courseTitle.includes(searchTerm) || 
+              instructorName.includes(searchTerm) || 
+              category.includes(searchTerm)) {
+            row.style.display = '';
+            matchFound = true;
+          } else {
+            row.style.display = 'none';
+          }
+        });
+        
+        // Show or hide "no results" message
+        const noResultsEl = document.querySelector('.p-8.text-center');
+        if (noResultsEl) {
+          if (!matchFound && searchTerm !== '') {
+            noResultsEl.style.display = 'block';
+            noResultsEl.querySelector('p').textContent = `No courses found containing "${searchTerm}"`;
+          } else {
+            noResultsEl.style.display = 'none';
+          }
+        }
+        
+        // Update course count in header
+        updateVisibleCount();
+      }
+      
+      // Function to update the visible count of courses
+      function updateVisibleCount() {
+        const visibleRows = document.querySelectorAll('tbody tr[style=""]').length;
+        const countElement = document.querySelector('.text-sm.text-gray-300 .font-medium');
+        if (countElement) {
+          countElement.textContent = visibleRows;
+        }
+      }
+      
       if (searchInput) {
+        // Real-time searching as user types
+        searchInput.addEventListener('input', applyClientSideSearch);
+        
+        // Also keep the Enter key functionality for server-side filtering
         searchInput.addEventListener('keypress', function(e) {
-          if (e.key === 'Enter') applyFilters();
+          if (e.key === 'Enter') applyServerFilters();
         });
       }
       
       if (categoryFilter) {
-        categoryFilter.addEventListener('change', applyFilters);
+        categoryFilter.addEventListener('change', applyServerFilters);
+      }
+      
+      if (languageFilter) {
+        languageFilter.addEventListener('change', applyServerFilters);
       }
       
       if (sortFilter) {
-        sortFilter.addEventListener('change', applyFilters);
+        sortFilter.addEventListener('change', applyServerFilters);
+      }
+      
+      // Create no results element if it doesn't exist
+      let noResultsEl = document.querySelector('.p-8.text-center');
+      if (!noResultsEl) {
+        const tableContainer = document.querySelector('.overflow-x-auto');
+        noResultsEl = document.createElement('div');
+        noResultsEl.className = 'p-8 text-center';
+        noResultsEl.style.display = 'none';
+        const noResultsText = document.createElement('p');
+        noResultsText.className = 'text-gray-400';
+        noResultsText.textContent = 'No courses found matching your criteria.';
+        noResultsEl.appendChild(noResultsText);
+        tableContainer.parentNode.insertBefore(noResultsEl, tableContainer.nextSibling);
       }
     });
   </script>

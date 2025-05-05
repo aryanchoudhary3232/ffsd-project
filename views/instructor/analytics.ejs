@@ -1,0 +1,90 @@
+<%- include('../partials/head', { title: 'Course Analytics - SeekoBharat' }) %>
+
+<body class="bg-black text-white">
+  <%- include('../partials/navbar') %>
+
+  <div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="flex items-center mb-6">
+      <a href="/instructor/dashboard" class="text-gray-400 hover:text-gray-200 mr-4">
+        <i class="fas fa-arrow-left"></i>
+      </a>
+      <h1 class="text-2xl font-bold">Course Analytics</h1>
+    </div>
+
+    <!-- Alerts -->
+    <%- include('../partials/flash-message') %>
+
+    <!-- Overall Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-gray-800 p-6 rounded-lg shadow-md">
+        <h3 class="text-gray-400 text-sm font-medium mb-2">Total Revenue</h3>
+        <p class="text-3xl font-bold">$<%= totalRevenue.toFixed(2) %></p>
+      </div>
+      <div class="bg-gray-800 p-6 rounded-lg shadow-md">
+        <h3 class="text-gray-400 text-sm font-medium mb-2">Total Courses</h3>
+        <p class="text-3xl font-bold"><%= courses.length %></p>
+      </div>
+       <div class="bg-gray-800 p-6 rounded-lg shadow-md">
+        <h3 class="text-gray-400 text-sm font-medium mb-2">Avg. Completion Rate</h3>
+        <%
+          let totalCompletion = 0;
+          courseCompletionRates.forEach(rate => totalCompletion += rate.completionRate);
+          const avgCompletion = courses.length > 0 ? (totalCompletion / courses.length) : 0;
+        %>
+        <p class="text-3xl font-bold"><%= avgCompletion.toFixed(1) %>%</p>
+      </div>
+    </div>
+
+    <!-- Revenue by Course -->
+    <div class="bg-gray-800 rounded-lg shadow-md mb-8">
+      <div class="p-4 border-b border-gray-700">
+        <h2 class="text-lg font-semibold">Revenue by Course</h2>
+      </div>
+      <div class="p-6">
+        <% if (Object.keys(revenueByCourseName).length > 0) { %>
+          <ul class="space-y-3">
+            <% Object.entries(revenueByCourseName).forEach(([title, revenue]) => { %>
+              <li class="flex justify-between items-center">
+                <span><%= title %></span>
+                <span class="font-medium">$<%= revenue.toFixed(2) %></span>
+              </li>
+            <% }); %>
+          </ul>
+        <% } else { %>
+          <p class="text-gray-400">No revenue data available yet.</p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Completion Rate by Course -->
+    <div class="bg-gray-800 rounded-lg shadow-md">
+      <div class="p-4 border-b border-gray-700">
+        <h2 class="text-lg font-semibold">Completion Rate by Course</h2>
+      </div>
+      <div class="p-6">
+        <% if (courseCompletionRates.length > 0) { %>
+          <ul class="space-y-3">
+            <% courseCompletionRates.forEach(rate => { %>
+              <li class="flex justify-between items-center">
+                <span><%= rate.course %></span>
+                <div class="w-1/2 bg-gray-700 rounded-full h-2.5">
+                  <div class="bg-blue-500 h-2.5 rounded-full" style="width: <%= rate.completionRate %>%;"></div>
+                </div>
+                <span class="font-medium"><%= rate.completionRate.toFixed(1) %>%</span>
+              </li>
+            <% }); %>
+          </ul>
+        <% } else { %>
+          <p class="text-gray-400">No completion data available yet.</p>
+        <% } %>
+      </div>
+    </div>
+
+  </div>
+
+  <%- include('../partials/footer') %>
+  <%- include('../partials/scripts') %>
+</body>
+
+</html>

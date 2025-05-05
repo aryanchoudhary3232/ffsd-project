@@ -56,33 +56,40 @@
                   <div class="mt-4 pl-6 space-y-4">
                     <div>
                       <label for="card-number" class="block text-sm font-medium text-gray-300 mb-1">Card Number</label>
-                      <input type="text" id="card-number" placeholder="1234 5678 9012 3456" class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                      <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19" pattern="[0-9]{4} [0-9]{4} [0-9]{4} [0-9]{4}" class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" onkeyup="formatCardNumber(this)">
+                      <p class="text-xs text-gray-400 mt-1">Enter 16 digits number</p>
                     </div>
                     
                     <div class="flex gap-4">
                       <div class="w-1/2">
                         <label for="expiry-date" class="block text-sm font-medium text-gray-300 mb-1">Expiry Date</label>
-                        <input type="text" id="expiry-date" placeholder="MM/YY" class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <input type="month" id="expiry-date" class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" min="<%= new Date().toISOString().slice(0,7) %>">
                       </div>
                       <div class="w-1/2">
                         <label for="cvv" class="block text-sm font-medium text-gray-300 mb-1">CVV</label>
-                        <input type="text" id="cvv" placeholder="123" class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <input type="text" id="cvv" placeholder="123" maxlength="3" pattern="[0-9]{3}" class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" onkeypress="return onlyNumbers(event)">
                       </div>
                     </div>
                     
                     <div>
                       <label for="card-name" class="block text-sm font-medium text-gray-300 mb-1">Name on Card</label>
-                      <input type="text" id="card-name" placeholder="John Doe" class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                      <input type="text" id="card-name" placeholder="John Doe" class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" onkeypress="return onlyAlphabets(event)" pattern="[A-Za-z ]+">
                     </div>
                   </div>
                 </div>
                 
                 <div class="border-t border-gray-700 pt-4">
                   <label class="flex items-center cursor-pointer">
-                    <input type="radio" name="paymentMethod" value="paypal" class="h-4 w-4 text-blue-500 focus:ring-blue-500 border-gray-700">
-                    <span class="ml-2">PayPal</span>
-                    <i class="fab fa-paypal text-blue-400 ml-2"></i>
+                    <input type="radio" name="paymentMethod" value="upi" class="h-4 w-4 text-blue-500 focus:ring-blue-500 border-gray-700">
+                    <span class="ml-2">UPI</span>
+                    <i class="fas fa-mobile-alt text-blue-400 ml-2"></i>
                   </label>
+                  <div id="upi-form" class="mt-4 pl-6 hidden">
+                    <div>
+                      <label for="upi-id" class="block text-sm font-medium text-gray-300 mb-1">UPI ID</label>
+                      <input type="text" id="upi-id" placeholder="username@upi" class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                  </div>
                 </div>
               </div>
               
@@ -152,6 +159,60 @@
       const submitButton = this.querySelector('button[type="submit"]');
       submitButton.disabled = true;
       submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
+    });
+
+    // Format credit card number with spaces after every 4 digits
+    function formatCardNumber(input) {
+      // Remove all spaces
+      let value = input.value.replace(/\s/g, '');
+      // Only allow numbers
+      value = value.replace(/\D/g, '');
+      
+      // Add a space after every 4 digits
+      let formattedValue = '';
+      for (let i = 0; i < value.length; i++) {
+        if (i > 0 && i % 4 === 0) {
+          formattedValue += ' ';
+        }
+        formattedValue += value[i];
+      }
+      
+      // Update input value
+      input.value = formattedValue;
+    }
+
+    // Only allow numbers for CVV
+    function onlyNumbers(e) {
+      const charCode = e.which ? e.which : e.keyCode;
+      if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+        return false;
+      }
+      return true;
+    }
+
+    // Only allow alphabets for Name on Card
+    function onlyAlphabets(e) {
+      const charCode = e.which ? e.which : e.keyCode;
+      if ((charCode > 64 && charCode < 91) || (charCode > 96 && charCode < 123) || charCode === 32) {
+        return true;
+      }
+      return false;
+    }
+
+    // Toggle UPI form visibility
+    document.querySelectorAll('input[name="paymentMethod"]').forEach(input => {
+      input.addEventListener('change', function() {
+        const upiForm = document.getElementById('upi-form');
+        const creditCardForm = document.querySelector('.mt-4.pl-6.space-y-4');
+        
+        if (this.value === 'upi') {
+          upiForm.classList.remove('hidden');
+          creditCardForm.classList.add('hidden');
+        } else {
+          upiForm.classList.add('hidden');
+          creditCardForm.classList.remove('hidden');
+        }
+      });
     });
   </script>
 </body>

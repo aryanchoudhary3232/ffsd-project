@@ -1,58 +1,58 @@
-const db = require('../config/database');
-const bcrypt = require('bcrypt');
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const Schema = mongoose.Schema;
 
-class User {
-    static async findByEmail(email) {
-        return new Promise((resolve, reject) => {
-            db.get('SELECT * FROM users WHERE email = ?', [email], (err, row) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                resolve(row);
-            });
-        });
+const UserSchema = new Schema({
+    username: {
+        type: String,
+        required: false
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    password: {
+        type: String,
+        required: true
+    },
+    role: {
+        type: String,
+        enum: ['student', 'instructor', 'admin'],
+        default: 'student'
+    },
+    joinDate: {
+        type: Date,
+        default: Date.now
+    },
+    enrolledCourses: [{
+        type: String
+    }],
+    completedCourses: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Course'
+    }]
+});
+
+UserSchema.pre('save', async function(next) {
+    if (!this.isModified('password')) return next();
+    
+    try {
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password, salt);
+        next();
+    } catch (error) {
+        next(error);
     }
+});
 
-    static async findByUsername(username) {
-        return new Promise((resolve, reject) => {
-            db.get('SELECT * FROM users WHERE username = ?', [username], (err, row) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                resolve(row);
-            });
-        });
+UserSchema.methods.comparePassword = async function(candidatePassword) {
+    try {
+        return await bcrypt.compare(candidatePassword, this.password);
+    } catch (error) {
+        throw error;
     }
+};
 
-    static async create(userData) {
-        const { username, email, password } = userData;
-        
-        // Hash the password
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-        
-        return new Promise((resolve, reject) => {
-            db.run('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', 
-                [username, email, hashedPassword], 
-                function(err) {
-                    if (err) {
-                        reject(err);
-                        return;
-                    }
-                    resolve({
-                        id: this.lastID,
-                        username,
-                        email
-                    });
-                });
-        });
-    }
-
-    static async verifyPassword(plainPassword, hashedPassword) {
-        return bcrypt.compare(plainPassword, hashedPassword);
-    }
-}
-
+const User = mongoose.model('User', UserSchema);
 module.exports = User;

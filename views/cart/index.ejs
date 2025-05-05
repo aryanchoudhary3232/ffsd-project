@@ -47,7 +47,7 @@
                   <div class="md:w-1/4 flex flex-col justify-between items-end">
                     <div class="text-xl font-bold">$<%= item.course.price.toFixed(2) %></div>
                     <form action="/cart/remove" method="POST" class="mt-2 remove-from-cart-form">
-                      <input type="hidden" name="courseId" value="<%= item.course.id %>">
+                      <input type="hidden" name="courseId" value="<%= item.course._id %>">
                       <button type="submit" class="text-red-400 hover:text-red-600">
                         <i class="fas fa-trash-alt mr-1"></i> Remove
                       </button>

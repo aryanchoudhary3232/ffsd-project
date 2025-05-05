@@ -58,11 +58,29 @@
                     <div class="text-sm text-gray-300">$<%= (course.price * course.students).toFixed(2) %></div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray3900"><%= course.rating %> ★</div>
+                    <div class="flex items-center">
+                      <% if (course.rating > 0) { %>
+                        <div class="text-sm mr-2"><%= course.rating.toFixed(1) %></div>
+                        <div class="flex">
+                          <% for(let i = 1; i <= 5; i++) { %>
+                            <% if (i <= Math.floor(course.rating)) { %>
+                              <i class="fas fa-star text-yellow-500 text-xs"></i>
+                            <% } else if (i <= Math.floor(course.rating) + 0.5) { %>
+                              <i class="fas fa-star-half-alt text-yellow-500 text-xs"></i>
+                            <% } else { %>
+                              <i class="far fa-star text-yellow-500 text-xs"></i>
+                            <% } %>
+                          <% } %>
+                        </div>
+                        <div class="text-xs text-gray-400 ml-2">(<%= course.ratingCount || 0 %>)</div>
+                      <% } else { %>
+                        <div class="text-sm text-gray-400">Not rated yet</div>
+                      <% } %>
+                    </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <a href="/instructor/courses/<%= course.id %>/edit" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
-                    <a href="/instructor/courses/<%= course.id %>/content" class="text-green-600 hover:text-green-900">Content</a>
+                    <a href="/instructor/courses/<%= course._id %>/edit" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
+                    <a href="/instructor/courses/<%= course._id %>/content" class="text-green-600 hover:text-green-900">Content</a>
                   </td>
                 </tr>
               <% }); %>
@@ -94,7 +112,7 @@
               <% recentOrders.forEach(function(order) { %>
                 <tr>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-medium text-gray-200"><%= order.userName %></div>
+                    <div class="text-sm font-medium text-gray-200"><%= order.username %></div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm text-gray-200"><%= order.courseTitle %></div>
