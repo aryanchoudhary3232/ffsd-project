@@ -56,7 +56,7 @@
                   <div class="space-y-2 mb-3">
                     <% module.lessons.forEach(function(lesson) { %>
                     <div class="flex items-center justify-between text-sm">
-                      <div class="flex items-center">
+                      <a href="/courses/<%= course._id %>/learn?lesson=<%= lesson._id %>" class="flex items-center hover:text-blue-300" target="_blank">
                         <% if (lesson.type === 'video') { %>
                         <i class="fas fa-play-circle text-blue-400 mr-2"></i>
                         <% } else if (lesson.type === 'pdf') { %>
@@ -67,7 +67,7 @@
                         <i class="fas fa-file-alt text-gray-400 mr-2"></i>
                         <% } %>
                         <span><%= lesson.title %></span>
-                      </div>
+                      </a>
                       <div class="flex items-center">
                         <button class="text-gray-400 hover:text-blue-400 edit-lesson-btn" data-module-id="<%= module._id %>" data-lesson-id="<%= lesson._id %>" data-lesson-title="<%= lesson.title %>" data-lesson-type="<%= lesson.type %>" data-lesson-duration="<%= lesson.duration || '' %>">
                           <i class="fas fa-edit"></i>
@@ -236,6 +236,8 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      const courseId = '<%= course._id %>'; // Define courseId JS variable
+
       // Toggle module content
       document.querySelectorAll('.module-header').forEach(header => {
         header.addEventListener('click', function() {
@@ -706,23 +708,24 @@
                     icon = '<i class="fas fa-file-alt text-gray-400 mr-2"></i>';
                   }
                   // Create lesson HTML to insert into the DOM
+                  // FIX: Use courseId variable in the link href
                   const lessonHtml = `
             <div class="flex items-center justify-between text-sm">
-              <div class="flex items-center">
+              <a href="/courses/${courseId}/learn?lesson=${data.lesson._id}" class="flex items-center hover:text-blue-300" target="_blank">
                 ${icon}
                 <span>${data.lesson.title}</span>
-              </div>
+              </a>
               <div class="flex items-center">
-                <button class="text-gray-400 hover:text-blue-400 edit-lesson-btn" 
-                        data-module-id="${moduleId}" 
-                        data-lesson-id="${data.lesson._id}" 
-                        data-lesson-title="${data.lesson.title}" 
+                <button class="text-gray-400 hover:text-blue-400 edit-lesson-btn"
+                        data-module-id="${moduleId}"
+                        data-lesson-id="${data.lesson._id}"
+                        data-lesson-title="${data.lesson.title}"
                         data-lesson-type="${data.lesson.type}"
                         data-lesson-duration="${data.lesson.duration || ''}">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button class="text-gray-400 hover:text-red-500 ml-2 delete-lesson-btn" 
-                        data-module-id="${moduleId}" 
+                <button class="text-gray-400 hover:text-red-500 ml-2 delete-lesson-btn"
+                        data-module-id="${moduleId}"
                         data-lesson-id="${data.lesson._id}">
                   <i class="fas fa-trash-alt"></i>
                 </button>

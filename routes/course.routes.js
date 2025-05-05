@@ -1,19 +1,38 @@
-const express = require("express")
-const router = express.Router()
-const CourseController = require("../controllers/course.controller")
-const { isAuthenticated } = require("../middleware/auth.middleware")
+const express = require("express");
+const router = express.Router();
+const CourseController = require("../controllers/course.controller");
+const { isAuthenticated } = require("../middleware/auth.middleware");
 
 // Get all courses
-router.get("/", CourseController.getAllCourses)
+router.get("/", CourseController.getAllCourses);
 
 // Get course details
-router.get("/:id", CourseController.getCourseDetails)
+router.get("/:id", CourseController.getCourseDetails);
 
 // Course learning page
-router.get("/:id/learn", isAuthenticated, CourseController.getCourseLearningPage)
+router.get(
+  "/:id/learn",
+  isAuthenticated,
+  CourseController.getCourseLearningPage
+);
 
 // Mark lesson as complete
-router.post("/:courseId/lessons/:lessonId/complete", isAuthenticated, CourseController.markLessonAsComplete)
+router.post(
+  "/:courseId/lessons/:lessonId/complete",
+  isAuthenticated,
+  CourseController.markLessonAsComplete
+);
 
-module.exports = router
+// Add comment routes
+router.post(
+  "/:courseId/lessons/:lessonId/comments",
+  isAuthenticated,
+  CourseController.addComment
+);
+router.get(
+  "/:courseId/lessons/:lessonId/comments",
+  isAuthenticated,
+  CourseController.getComments
+);
 
+module.exports = router;

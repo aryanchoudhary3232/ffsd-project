@@ -51,7 +51,7 @@ const AdminController = {
           }
           return {
             ...course,
-            instructorId: instructor ? { name: instructor.name } : null,
+            instructorId: instructor ? { name: instructor.username } : null,
           };
         })
       );
@@ -74,7 +74,7 @@ const AdminController = {
       const recentCourses = recentCoursesWithInstructors.map((course) => ({
         ...course,
         instructor: course.instructorId
-          ? course.instructorId.name
+          ? course.instructorId.username
           : "Unknown Instructor",
       }));
 
@@ -280,7 +280,12 @@ const AdminController = {
       return res.redirect("/login");
     }
 
-    const { search = "", category = "all", sort = "newest" } = req.query;
+    const {
+      search = "",
+      category = "all",
+      language = "all",
+      sort = "newest",
+    } = req.query;
     let query = {};
     let sortOption = { createdAt: -1 };
 
@@ -293,6 +298,9 @@ const AdminController = {
     }
     if (category !== "all") {
       query.category = category;
+    }
+    if (language !== "all") {
+      query.language = language;
     }
 
     // Build sort option
@@ -339,13 +347,32 @@ const AdminController = {
       });
       const enhancedCourses = await Promise.all(enhancedCoursesPromises);
 
+      // Apply language filter in JavaScript if we're not doing it in the database query
+      let filteredCourses = enhancedCourses;
+      if (language !== "all") {
+        filteredCourses = enhancedCourses.filter(
+          (course) => course.language === language
+        );
+      }
+
       const categories = await Course.getAllCategories();
 
+      // Get all unique languages from courses
+      const languages = [
+        ...new Set(
+          enhancedCourses
+            .map((course) => course.language)
+            .filter((lang) => lang) // Remove undefined or empty languages
+        ),
+      ];
+
       res.render("admin/courses", {
-        courses: enhancedCourses,
+        courses: filteredCourses,
         categories,
+        languages,
         search,
         category,
+        language,
         sort,
       });
     } catch (error) {
@@ -401,9 +428,9 @@ const AdminController = {
       }
 
       // Ensure instructor is never undefined, provide default values if instructor not found
-      // Make sure name is always a string to prevent TypeError with .charAt(0)
+      // Make sure username is always a string to prevent TypeError with .charAt(0)
       instructor = {
-        name: instructor?.name || course.instructor || "Unknown Instructor",
+        name: instructor?.username || course.instructor || "Unknown Instructor",
         email: instructor?.email || "N/A",
         id: instructor?._id || null,
       };

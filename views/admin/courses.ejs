@@ -49,6 +49,13 @@
                 <option value="<%= cat %>" <%= category === cat ? 'selected' : '' %>><%= cat %></option>
               <% }) %>
             </select>
+            <!-- Language Filter -->
+            <select id="language-filter" class="px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white">
+              <option value="all" <%= language === 'all' ? 'selected' : '' %>>All Languages</option>
+              <% languages.forEach(function(lang) { %>
+                <option value="<%= lang %>" <%= language === lang ? 'selected' : '' %>><%= lang %></option>
+              <% }) %>
+            </select>
             <!-- Sort Filter -->
             <select id="sort-filter" class="px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white">
               <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Newest First</option>
@@ -151,16 +158,19 @@
     document.addEventListener('DOMContentLoaded', function() {
       const searchInput = document.getElementById('search-input');
       const categoryFilter = document.getElementById('category-filter');
+      const languageFilter = document.getElementById('language-filter');
       const sortFilter = document.getElementById('sort-filter');
       
       function applyFilters() {
         const search = searchInput.value.trim();
         const category = categoryFilter.value;
+        const language = languageFilter.value;
         const sort = sortFilter.value;
         
         let url = '/admin/courses?';
         if (search) url += `search=${encodeURIComponent(search)}&`;
         if (category !== 'all') url += `category=${encodeURIComponent(category)}&`;
+        if (language !== 'all') url += `language=${encodeURIComponent(language)}&`;
         if (sort) url += `sort=${sort}`;
         
         window.location.href = url;
@@ -174,6 +184,10 @@
       
       if (categoryFilter) {
         categoryFilter.addEventListener('change', applyFilters);
+      }
+      
+      if (languageFilter) {
+        languageFilter.addEventListener('change', applyFilters);
       }
       
       if (sortFilter) {

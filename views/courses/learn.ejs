@@ -46,7 +46,7 @@
               <% 
                 const totalLessons = module.lessons.length;
                 const completedModuleLessons = module.lessons.filter(lesson => 
-                  completedLessons.includes(lesson.id)
+                  completedLessons.includes(lesson._id)
                 ).length;
                 const isModuleCompleted = totalLessons === completedModuleLessons && totalLessons > 0;
               %>
@@ -63,10 +63,10 @@
             <div class="space-y-2 pl-2">
               <% module.lessons.forEach(function(lesson) { %>
               <a 
-                href="/courses/<%= course.id %>/learn?lesson=<%= lesson.id %>" 
-                class="flex items-center p-2 rounded-md <%= currentLesson.id === lesson.id ? 'bg-purple-700 text-purple-200' : 'hover:bg-gray-700' %>"
+                href="/courses/<%= course._id %>/learn?lesson=<%= lesson._id %>" 
+                class="flex items-center p-2 rounded-md <%= currentLesson._id === lesson._id ? 'bg-purple-700 text-purple-200' : 'hover:bg-gray-700' %>"
               >
-                <% if (completedLessons.includes(lesson.id)) { %>
+                <% if (completedLessons.includes(lesson._id)) { %>
                 <i class="fas fa-check-circle text-green-400 mr-2"></i>
                 <% } else if (lesson.type === 'video') { %>
                 <i class="fas fa-play-circle text-gray-400 mr-2"></i>
@@ -77,7 +77,7 @@
                 <% } else { %>
                 <i class="fas fa-file-alt text-gray-400 mr-2"></i>
                 <% } %>
-                <span class="<%= currentLesson.id === lesson.id ? 'font-medium' : '' %>">
+                <span class="<%= currentLesson._id === lesson._id ? 'font-medium' : '' %>">
                   <%= lesson.title %>
                 </span>
                 <% if (lesson.duration) { %>
@@ -163,7 +163,7 @@
             <div class="p-6">
               <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold"><%= currentLesson.title %></h2>
-                <% if (completedLessons.includes(currentLesson.id)) { %>
+                <% if (completedLessons.includes(currentLesson._id)) { %>
                 <span class="inline-flex items-center text-green-400">
                   <i class="fas fa-check-circle mr-1"></i> Completed
                 </span>
@@ -196,7 +196,7 @@
                   allLessons.push(lesson);
                 });
               });
-              const currentIndex = allLessons.findIndex(l => l.id === currentLesson.id);
+              const currentIndex = allLessons.findIndex(l => l._id === currentLesson._id);
               if (currentIndex > 0) {
                 prevLesson = allLessons[currentIndex - 1];
               }
@@ -206,7 +206,7 @@
             %>
             <% if (prevLesson) { %>
             <a 
-              href="/courses/<%= course.id %>/learn?lesson=<%= prevLesson.id %>" 
+              href="/courses/<%= course._id %>/learn?lesson=<%= prevLesson._id %>" 
               class="inline-flex items-center bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors"
             >
               <i class="fas fa-arrow-left mr-2"></i> Previous Lesson
@@ -215,7 +215,7 @@
             <div></div>
             <% } %>
             <div class="flex flex-wrap gap-2">
-              <% if (!completedLessons.includes(currentLesson.id)) { %>
+              <% if (!completedLessons.includes(currentLesson._id)) { %>
               <button 
                 id="complete-lesson-btn"
                 class="inline-flex items-center bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-colors"
@@ -226,7 +226,7 @@
               <% } %>
               <% if (nextLesson) { %>
               <a 
-                href="/courses/<%= course.id %>/learn?lesson=<%= nextLesson.id %>" 
+                href="/courses/<%= course._id %>/learn?lesson=<%= nextLesson._id %>" 
                 class="inline-flex items-center bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-colors"
               >
                 Next Lesson <i class="fas fa-arrow-right ml-2"></i>
@@ -237,34 +237,10 @@
           
           <div class="bg-gray-800 rounded-lg shadow-md p-6 mb-8">
             <h3 class="text-xl font-bold mb-4">Discussion</h3>
-            <div class="space-y-4 mb-6 discussion-container">
-              <div class="flex gap-4">
-                <div class="flex-shrink-0">
-                  <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
-                    <i class="fas fa-user text-gray-300"></i>
-                  </div>
-                </div>
-                <div class="flex-1 bg-gray-700 rounded-lg p-4">
-                  <div class="flex justify-between items-center mb-2">
-                    <span class="font-medium">Sarah Johnson</span>
-                    <span class="text-xs text-gray-400">2 days ago</span>
-                  </div>
-                  <p class="text-gray-300">Great explanation!</p>
-                </div>
-              </div>
-              <div class="flex gap-4">
-                <div class="flex-shrink-0">
-                  <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
-                    <i class="fas fa-user text-gray-300"></i>
-                  </div>
-                </div>
-                <div class="flex-1 bg-gray-700 rounded-lg p-4">
-                  <div class="flex justify-between items-center mb-2">
-                    <span class="font-medium">Michael Wilson</span>
-                    <span class="text-xs text-gray-400">1 day ago</span>
-                  </div>
-                  <p class="text-gray-300">Question about the implementation...</p>
-                </div>
+            <div id="comments-container" class="space-y-4 mb-6 discussion-container">
+              <!-- Comments will be loaded dynamically -->
+              <div class="text-center p-4 loading-spinner">
+                <i class="fas fa-spinner fa-spin text-purple-500 text-2xl"></i>
               </div>
             </div>
             <div class="flex gap-4">
@@ -297,6 +273,17 @@
 
   <%- include('../partials/scripts') %>
   <script>
+    // Determine the correct lesson ID (prefer _id, fallback to id)
+    const lessonIdentifier = '<%= typeof currentLesson._id !== "undefined" ? currentLesson._id : currentLesson.id %>';
+    // Clean the identifier if it's an ObjectId string representation like {"$oid":"..."} or just a plain string ID
+    const lessonId = String(lessonIdentifier).replace(/\{\\"\\$oid\\":\\"(.+)\\"\\}/, '$1').replace(/[^a-f0-9]/gi, '');
+
+    // Determine the correct course ID (should always be _id)
+    const courseIdentifier = '<%= course._id %>';
+    // Clean the identifier if it's an ObjectId string representation
+    const courseId = String(courseIdentifier).replace(/\{\\"\\$oid\\":\\"(.+)\\"\\}/, '$1').replace(/[^a-f0-9]/gi, '');
+
+
     document.getElementById('sidebar-toggle').addEventListener('click', () => {
       const sidebar = document.getElementById('sidebar');
       const overlay = document.getElementById('sidebar-overlay');
@@ -319,19 +306,36 @@
       const completeBtn = document.getElementById('complete-lesson-btn');
       completeBtn.disabled = true;
       completeBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
-      fetch('/courses/<%= course.id %>/lessons/<%= currentLesson.id %>/complete', {
+      
+      // Use the pre-calculated courseId and lessonId
+      console.log('Using course ID:', courseId);
+      console.log('Using lesson ID:', lessonId);
+      
+      // Use the endpoint format that matches the backend controller
+      const apiUrl = `/courses/${courseId}/lessons/${lessonId}/complete`;
+      console.log('Complete API URL:', apiUrl);
+      
+      // Validate that we have both IDs before making the request
+      if (!courseId || !lessonId) {
+        console.error('Missing required IDs:', { courseId, lessonId });
+        completeBtn.innerHTML = '<i class="fas fa-times-circle mr-2"></i> Error';
+        completeBtn.disabled = false;
+        showToast('Error: Missing course or lesson information.', 'error');
+        return;
+      }
+      
+      fetch(apiUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+          'Content-Type': 'application/json'
         },
-        signal: controller.signal
+        credentials: 'same-origin' // Include cookies for authentication
       })
       .then(response => {
-        clearTimeout(timeoutId);
-        if (!response.ok) throw new Error('Network response was not ok');
+        if (!response.ok) {
+          console.error('Server response:', response.status, response.statusText);
+          throw new Error(`Network response was not ok: ${response.status}`);
+        }
         return response.json();
       })
       .then(data => {
@@ -349,19 +353,20 @@
         } else {
           completeBtn.innerHTML = '<i class="fas fa-times-circle mr-2"></i> Error';
           completeBtn.disabled = false;
-          showToast('An error occurred.', 'error');
+          showToast(data.message || 'An error occurred.', 'error');
         }
       })
-      .catch(() => {
-        clearTimeout(timeoutId);
+      .catch(error => {
+        console.error('Error marking lesson as complete:', error);
         completeBtn.innerHTML = '<i class="fas fa-times-circle mr-2"></i> Error';
         completeBtn.disabled = false;
-        showToast('Network error.', 'error');
+        showToast('Network error while marking lesson as complete. Check console for details.', 'error');
       });
     }
 
     function startQuiz() {
-      window.location.href = '/courses/<%= course.id %>/quiz/<%= currentLesson.id %>';
+      // Use the pre-calculated courseId and lessonId
+      window.location.href = `/courses/${courseId}/quiz/${lessonId}`;
     }
 
     const video = document.getElementById('lesson-video');
@@ -395,40 +400,43 @@
         setTimeout(() => { document.body.removeChild(toast); }, 300);
       }, 3000);
     }
+    // Load comments when the page loads
+    document.addEventListener('DOMContentLoaded', loadComments);
+    
     // Attach event listener to the Post Comment button
-document.getElementById('post-comment-btn').addEventListener('click', postComment);
+    document.getElementById('post-comment-btn').addEventListener('click', postComment);
 
-function postComment() {
-  const commentTextarea = document.getElementById('comment-text');
-  const commentText = commentTextarea.value.trim();
+    function loadComments() {
+      const commentsContainer = document.getElementById('comments-container');
+      
+      // Use the pre-calculated courseId and lessonId
+      fetch(`/courses/${courseId}/lessons/${lessonId}/comments`)
+        .then(response => {
+          if (!response.ok) throw new Error('Network error');
+          return response.json();
+        })
+        .then(data => {
+          if (data.success && data.comments) {
+            if (data.comments.length === 0) {
+              commentsContainer.innerHTML = '<p class="text-center text-gray-400">No comments yet. Be the first to comment!</p>';
+            } else {
+              commentsContainer.innerHTML = '';
+              data.comments.forEach(comment => {
+                commentsContainer.innerHTML += createCommentHTML(comment);
+              });
+            }
+          } else {
+            commentsContainer.innerHTML = '<p class="text-center text-red-400">Could not load comments</p>';
+          }
+        })
+        .catch(error => {
+          console.error('Error loading comments:', error);
+          commentsContainer.innerHTML = '<p class="text-center text-red-400">Error loading comments. Please try again later.</p>';
+        });
+    }
 
-  // If the textarea is empty, show an error toast and exit
-  if (!commentText) {
-    showToast('Please enter a comment.', 'error');
-    return;
-  }
-
-  const postButton = document.getElementById('post-comment-btn');
-  postButton.disabled = true;
-  postButton.innerHTML = 'Posting...';
-
-  // Send the comment to the backend; adjust the endpoint as needed
-  fetch('/courses/<%= course.id %>/lessons/<%= currentLesson.id %>/comments', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-    },
-    body: JSON.stringify({ comment: commentText })
-  })
-  .then(response => {
-    if (!response.ok) throw new Error('Network error');
-    return response.json();
-  })
-  .then(data => {
-    if (data.success) {
-      // Create HTML for the new comment. Adjust properties based on your response structure.
-      const newCommentHTML = `
+    function createCommentHTML(comment) {
+      return `
         <div class="flex gap-4">
           <div class="flex-shrink-0">
             <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
@@ -437,37 +445,89 @@ function postComment() {
           </div>
           <div class="flex-1 bg-gray-700 rounded-lg p-4">
             <div class="flex justify-between items-center mb-2">
-              <span class="font-medium">${data.username || 'You'}</span>
-              <span class="text-xs text-gray-400">${data.timestamp || 'Just now'}</span>
+              <span class="font-medium">${comment.username}</span>
+              <span class="text-xs text-gray-400">${comment.timestamp}</span>
             </div>
-            <p class="text-gray-300">${data.comment}</p>
+            <p class="text-gray-300">${comment.comment}</p>
           </div>
         </div>
       `;
-      
-      // Append the new comment to the discussion container
-      const discussionContainer = document.querySelector('.discussion-container');
-      if (discussionContainer) {
-        discussionContainer.innerHTML += newCommentHTML;
-      } else {
-        console.error('Discussion container not found');
-        showToast('Error displaying comment', 'error');
-      }
-      
-      // Clear the textarea
-      commentTextarea.value = '';
-    } else {
-      showToast('Error posting comment', 'error');
     }
-  })
-  .catch(() => {
-    showToast('Network error while posting comment', 'error');
-  })
-  .finally(() => {
-    postButton.disabled = false;
-    postButton.innerHTML = 'Post Comment';
-  });
-}
 
+    function postComment() {
+      const commentTextarea = document.getElementById('comment-text');
+      const commentText = commentTextarea.value.trim();
+
+      // If the textarea is empty, show an error toast and exit
+      if (!commentText) {
+        showToast('Please enter a comment.', 'error');
+        return;
+      }
+
+      const postButton = document.getElementById('post-comment-btn');
+      postButton.disabled = true;
+      postButton.innerHTML = 'Posting...';
+
+      // Send the comment to the backend
+      fetch(`/courses/${courseId}/lessons/${lessonId}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ comment: commentText })
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Network error');
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          // Create HTML for the new comment
+          const newCommentHTML = createCommentHTML({
+            username: data.username,
+            comment: data.comment,
+            timestamp: data.timestamp
+          });
+          
+          // Check if there's a "no comments" message
+          const noCommentsMsg = document.querySelector('#comments-container .text-center');
+          if (noCommentsMsg) {
+            document.getElementById('comments-container').innerHTML = ''; // Clear "no comments" message
+          }
+          
+          // Add the new comment to the top of the list
+          const commentsContainer = document.getElementById('comments-container');
+          commentsContainer.insertAdjacentHTML('afterbegin', newCommentHTML);
+          
+          // Clear the textarea
+          commentTextarea.value = '';
+          showToast('Comment posted successfully!');
+        } else {
+          showToast('Error posting comment', 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Comment posting error:', error);
+        showToast('Network error while posting comment', 'error');
+      })
+      .finally(() => {
+        postButton.disabled = false;
+        postButton.innerHTML = 'Post Comment';
+      });
+    }
+
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg text-white ${
+        type === 'error' ? 'bg-red-500' : 'bg-purple-500'
+      } shadow-lg z-50 transition-opacity duration-300`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.add('opacity-0');
+        setTimeout(() => { document.body.removeChild(toast); }, 300);
+      }, 3000);
+    }
   </script>
 </body>
+</html>
