@@ -97,9 +97,10 @@ const CourseController = {
       // Check if user is enrolled
       let isEnrolled = false;
       let progress = 0;
+      let user = null;
 
       if (req.session.user) {
-        const user = await User.findById(req.session.user.id);
+        user = await User.findById(req.session.user.id);
         // Check if user exists and has enrolledCourses array
         // Ensure comparison works between string courseId and ObjectId array
         if (
@@ -124,6 +125,7 @@ const CourseController = {
         instructorName,
         isEnrolled,
         progress,
+        user,
       });
     } catch (error) {
       console.error("Get Course Details error:", error);
@@ -168,7 +170,9 @@ const CourseController = {
       if (lessonId && course.modules) {
         for (const module of course.modules) {
           // Ensure lessons array exists and find the lesson by _id
-          const lesson = module.lessons?.find((l) => l._id.toString() === lessonId); // Changed l.id to l._id.toString()
+          const lesson = module.lessons?.find(
+            (l) => l._id.toString() === lessonId
+          ); // Changed l.id to l._id.toString()
           if (lesson) {
             currentLesson = lesson;
             currentModule = module;
