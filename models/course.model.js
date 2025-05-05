@@ -37,8 +37,10 @@ const CourseModel = {
       }
       if (!course) {
         console.log(`No course found with ID: ${id}`);
-        if (id === 'learn') {
-          console.log("Warning: 'learn' received as courseId - this likely indicates a URL parsing error");
+        if (id === "learn") {
+          console.log(
+            "Warning: 'learn' received as courseId - this likely indicates a URL parsing error"
+          );
         }
       }
       return course;
@@ -69,6 +71,7 @@ const CourseModel = {
       instructor: courseData.instructor,
       thumbnail: courseData.thumbnail || "/img/course-placeholder.jpg",
       rating: 0,
+      ratingCount: 0,
       students: 0, // Will be updated dynamically
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -255,20 +258,22 @@ const CourseModel = {
   // Get courses by language
   getCoursesByLanguage: async (language) => {
     const { courses } = getCollections();
-    
-    // Special case for English - also include courses with null/undefined language 
+
+    // Special case for English - also include courses with null/undefined language
     // since English is the default language
     if (language === "English") {
-      return await courses.find({
-        $or: [
-          { language: "English" },
-          { language: null },
-          { language: "" },
-          { language: { $exists: false } }
-        ]
-      }).toArray();
+      return await courses
+        .find({
+          $or: [
+            { language: "English" },
+            { language: null },
+            { language: "" },
+            { language: { $exists: false } },
+          ],
+        })
+        .toArray();
     }
-    
+
     // For other languages, use exact matching
     return await courses.find({ language }).toArray();
   },

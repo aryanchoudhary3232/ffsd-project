@@ -998,6 +998,72 @@ const AdminController = {
       res.redirect("/admin/users");
     }
   },
+
+  // View course ratings
+  getCourseRatings: async (req, res) => {
+    if (!req.session.user || req.session.user.role !== "admin") {
+      return res.redirect("/login");
+    }
+
+    try {
+      const courseId = req.params.id;
+
+      // Get course details
+      const course = await Course.getCourseById(courseId);
+
+      if (!course) {
+        req.flash("error_msg", "Course not found");
+        return res.redirect("/admin/courses");
+      }
+
+      // Get instructor info
+      let instructor = null;
+      if (course.instructorId) {
+        instructor = await User.findById(course.instructorId);
+      }
+
+      // Import the rating model
+      const RatingModel = require("../models/rating.model");
+
+      // Get all ratings for this course
+      const ratings = await RatingModel.getCourseRatings(courseId);
+
+      // Calculate rating statistics
+      const ratingStats = {
+        average: course.rating || 0,
+        total: ratings.length,
+        distribution: {
+          5: ratings.filter((r) => Math.floor(r.rating) === 5).length,
+          4: ratings.filter((r) => Math.floor(r.rating) === 4).length,
+          3: ratings.filter((r) => Math.floor(r.rating) === 3).length,
+          2: ratings.filter((r) => Math.floor(r.rating) === 2).length,
+          1: ratings.filter((r) => Math.floor(r.rating) === 1).length,
+        },
+      };
+
+      // Calculate percentages for each rating
+      ratingStats.percentages = {};
+      for (const stars in ratingStats.distribution) {
+        ratingStats.percentages[stars] =
+          ratings.length > 0
+            ? (ratingStats.distribution[stars] / ratings.length) * 100
+            : 0;
+      }
+
+      res.render("admin/course-ratings", {
+        course,
+        instructor: instructor ? instructor : { name: "Unknown Instructor" },
+        ratings,
+        ratingStats,
+        success_msg: req.flash("success_msg"),
+        error_msg: req.flash("error_msg"),
+      });
+    } catch (error) {
+      console.error("Admin Course Ratings error:", error);
+      req.flash("error_msg", "Failed to retrieve course ratings");
+      res.redirect("/admin/courses");
+    }
+  },
 };
 
 module.exports = AdminController;

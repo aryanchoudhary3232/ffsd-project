@@ -124,6 +124,9 @@ const CourseController = {
         instructorName,
         isEnrolled,
         progress,
+        user: req.session.user || null,
+        success_msg: req.flash("success_msg") || "",
+        error_msg: req.flash("error_msg") || "",
       });
     } catch (error) {
       console.error("Get Course Details error:", error);
@@ -168,7 +171,9 @@ const CourseController = {
       if (lessonId && course.modules) {
         for (const module of course.modules) {
           // Ensure lessons array exists and find the lesson by _id
-          const lesson = module.lessons?.find((l) => l._id.toString() === lessonId); // Changed l.id to l._id.toString()
+          const lesson = module.lessons?.find(
+            (l) => l._id.toString() === lessonId
+          ); // Changed l.id to l._id.toString()
           if (lesson) {
             currentLesson = lesson;
             currentModule = module;

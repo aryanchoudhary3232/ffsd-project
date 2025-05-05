@@ -54,7 +54,7 @@ const InstructorController = {
       let recentOrders = recentOrdersRaw
         .filter((order) => courseIds.some((id) => id.equals(order.courseId)))
         .slice(0, 5);
-      
+
       // Enhance orders with user and course information
       const enhancedOrdersPromises = recentOrders.map(async (order) => {
         let user = null;
@@ -66,17 +66,19 @@ const InstructorController = {
             console.error("Error finding user:", err);
           }
         }
-        
+
         let course = await Course.getCourseById(order.courseId);
-        
+
         return {
           ...order,
           // Use the username or email from the user model - these are the fields that actually exist
-          username: user ? (user.username || user.email || 'Unknown User') : 'Unknown User',
-          courseTitle: course ? course.title : 'Unknown Course'
+          username: user
+            ? user.username || user.email || "Unknown User"
+            : "Unknown User",
+          courseTitle: course ? course.title : "Unknown Course",
         };
       });
-      
+
       recentOrders = await Promise.all(enhancedOrdersPromises);
 
       res.render("instructor/dashboard", {
@@ -420,12 +422,10 @@ const InstructorController = {
       const course = await Course.getCourseById(courseId);
 
       if (!course || course.instructorId.toString() !== instructorId) {
-        return res
-          .status(403)
-          .json({
-            success: false,
-            message: "Course not found or permission denied",
-          });
+        return res.status(403).json({
+          success: false,
+          message: "Course not found or permission denied",
+        });
       }
 
       // Find the module in the course
@@ -481,12 +481,10 @@ const InstructorController = {
       const course = await Course.getCourseById(courseId);
 
       if (!course || course.instructorId.toString() !== instructorId) {
-        return res
-          .status(403)
-          .json({
-            success: false,
-            message: "Course not found or permission denied",
-          });
+        return res.status(403).json({
+          success: false,
+          message: "Course not found or permission denied",
+        });
       }
 
       // Find the module index in the modules array
@@ -904,6 +902,107 @@ const InstructorController = {
       res.redirect("/instructor/dashboard");
     }
   },
+
+  getCourseRatings: async (req, res) => {
+    if (!req.session.user || req.session.user.role !== "instructor") {
+      return res.redirect("/login");
+    }
+
+    try {
+      const courseId = req.params.id;
+      const instructorId = req.session.user.id;
+
+      // Get course details
+      const course = await Course.getCourseById(courseId);
+
+      // Verify course exists and belongs to this instructor
+      if (!course || course.instructorId.toString() !== instructorId) {
+        req.flash(
+          "error_msg",
+          "Course not found or you don't have permission to access it"
+        );
+        return res.redirect("/instructor/courses");
+      }
+
+      // Import the rating model
+      const RatingModel = require("../models/rating.model");
+
+      // Get all ratings for this course
+      const ratings = await RatingModel.getCourseRatings(courseId);
+
+      // Get rating statistics
+      const ratingStats = calculateRatingStats(ratings);
+
+      res.render("instructor/course-ratings", {
+        course,
+        ratings,
+        ratingStats,
+        success_msg: req.flash("success_msg"),
+        error_msg: req.flash("error_msg"),
+      });
+    } catch (error) {
+      console.error("Get Course Ratings error:", error);
+      req.flash("error_msg", "Failed to retrieve course ratings");
+      res.redirect("/instructor/courses");
+    }
+  },
 };
+
+// Helper function to calculate rating statistics
+function calculateRatingStats(ratings) {
+  if (!ratings || ratings.length === 0) {
+    return {
+      average: 0,
+      total: 0,
+      distribution: {
+        5: 0,
+        4: 0,
+        3: 0,
+        2: 0,
+        1: 0,
+      },
+      percentages: {
+        5: 0,
+        4: 0,
+        3: 0,
+        2: 0,
+        1: 0,
+      },
+    };
+  }
+
+  // Initialize counters for each star rating
+  const distribution = {
+    5: 0,
+    4: 0,
+    3: 0,
+    2: 0,
+    1: 0,
+  };
+
+  // Count ratings for each star level
+  ratings.forEach((rating) => {
+    if (rating.rating >= 1 && rating.rating <= 5) {
+      distribution[Math.floor(rating.rating)]++;
+    }
+  });
+
+  // Calculate average rating
+  const totalRating = ratings.reduce((sum, rating) => sum + rating.rating, 0);
+  const average = totalRating / ratings.length;
+
+  // Calculate percentages
+  const percentages = {};
+  for (const stars in distribution) {
+    percentages[stars] = (distribution[stars] / ratings.length) * 100;
+  }
+
+  return {
+    average: average.toFixed(1),
+    total: ratings.length,
+    distribution,
+    percentages,
+  };
+}
 
 module.exports = InstructorController;

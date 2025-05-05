@@ -185,10 +185,10 @@
                 <div class="p-4 flex items-center justify-between">
                   <div class="flex items-center">
                     <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center mr-3">
-                      <span class="text-gray-400 font-medium"><%= student.username.charAt(0) %></span>
+                      <span class="text-gray-400 font-medium"><%= (student.username || 'A').charAt(0) %></span>
                     </div>
                     <div>
-                      <h3 class="font-medium text-gray-100"><%= student.username %></h3>
+                      <h3 class="font-medium text-gray-100"><%= student.username || 'Anonymous' %></h3>
                       <p class="text-sm text-gray-400"><%= student.email %></p>
                     </div>
                   </div>
