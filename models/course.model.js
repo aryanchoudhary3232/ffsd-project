@@ -37,6 +37,9 @@ const CourseModel = {
       }
       if (!course) {
         console.log(`No course found with ID: ${id}`);
+        if (id === 'learn') {
+          console.log("Warning: 'learn' received as courseId - this likely indicates a URL parsing error");
+        }
       }
       return course;
     } catch (error) {

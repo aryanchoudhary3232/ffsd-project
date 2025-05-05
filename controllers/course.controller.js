@@ -167,8 +167,8 @@ const CourseController = {
 
       if (lessonId && course.modules) {
         for (const module of course.modules) {
-          // Ensure lessons array exists and find the lesson by id
-          const lesson = module.lessons?.find((l) => l.id === lessonId);
+          // Ensure lessons array exists and find the lesson by _id
+          const lesson = module.lessons?.find((l) => l._id.toString() === lessonId); // Changed l.id to l._id.toString()
           if (lesson) {
             currentLesson = lesson;
             currentModule = module;
@@ -200,7 +200,7 @@ const CourseController = {
         currentModule,
         currentLesson,
         progress: userProgress.progress,
-        completedLessons: completedLessons.map((id) => id),
+        completedLessons: completedLessons, // Pass the array directly
       });
     } catch (error) {
       console.error("Course Learning Page error:", error);
@@ -235,7 +235,7 @@ const CourseController = {
           if (
             module.lessons.some(
               (lesson) =>
-                lesson && lesson.id && lesson.id.toString() === lessonId
+                lesson && lesson._id && lesson._id.toString() === lessonId // Changed lesson.id to lesson._id
             )
           ) {
             lessonExists = true;
@@ -260,7 +260,7 @@ const CourseController = {
       // Now proceed with marking the lesson as complete, passing totalLessons
       const updatedProgress = await ProgressModel.markLessonAsComplete(
         userId,
-        course.id,
+        course._id, // Changed course.id to course._id
         lessonId,
         totalLessons
       );
