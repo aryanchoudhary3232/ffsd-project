@@ -191,6 +191,16 @@ const InstructorController = {
       const instructorId = req.session.user.id;
 
       try {
+        // Fetch instructor user data to get the name
+        const instructor = await User.findById(instructorId);
+        if (!instructor) {
+          req.flash("error_msg", "Instructor not found");
+          return res.redirect("/instructor/courses/new");
+        }
+
+        // Use instructor's name or username or email
+        const instructorName = instructor.username || instructor.name || instructor.email || "Instructor";
+
         const newCourseData = {
           title,
           description,
@@ -198,6 +208,7 @@ const InstructorController = {
           language: language || "English",
           price: Number.parseFloat(price) || 0,
           instructorId,
+          instructor: instructorName, // Set the instructor name explicitly
           thumbnail: req.file
             ? `/uploads/${req.file.filename}`
             : "/img/course-placeholder.jpg",
@@ -270,6 +281,7 @@ const InstructorController = {
 
       try {
         const course = await Course.getCourseById(courseId);
+        const instructor = await User.findById(instructorId);
 
         if (!course || course.instructorId.toString() !== instructorId) {
           req.flash(
@@ -279,6 +291,9 @@ const InstructorController = {
           return res.redirect("/instructor/courses");
         }
 
+        // Use instructor's name or username or email
+        const instructorName = instructor ? (instructor.username || instructor.name || instructor.email || "Instructor") : "Instructor";
+
         const updates = {
           title,
           description,
@@ -286,6 +301,7 @@ const InstructorController = {
           language: language || course.language || "English",
           price: Number.parseFloat(price) || 0,
           status: status || course.status,
+          instructor: instructorName, // Always update instructor name
           updatedAt: new Date(),
         };
 

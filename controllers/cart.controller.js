@@ -128,6 +128,7 @@ const CartController = {
         const orderPromises = [];
         const enrollPromises = [];
         const progressPromises = [];
+        const courseUpdatePromises = []; // New array for course updates
 
         for (const item of cartData.items) {
             const course = item.course;
@@ -150,13 +151,18 @@ const CartController = {
             );
 
             // 3. Create initial progress record
-             progressPromises.push(
+            progressPromises.push(
                 Progress.initializeProgress(userId, course._id)
+            );
+            
+            // 4. Update course with instructor info and increment student count
+            courseUpdatePromises.push(
+                Course.updateCourseEnrollment(course._id)
             );
         }
 
         // Execute all promises
-        await Promise.all([...enrollPromises, ...orderPromises, ...progressPromises]);
+        await Promise.all([...enrollPromises, ...orderPromises, ...progressPromises, ...courseUpdatePromises]);
 
         // Clear cart
         await CartModel.clearCart(userId);

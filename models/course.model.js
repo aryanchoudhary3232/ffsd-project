@@ -72,7 +72,6 @@ const CourseModel = {
       thumbnail: courseData.thumbnail || "/img/course-placeholder.jpg",
       rating: 0,
       ratingCount: 0,
-      students: 0, // Will be updated dynamically
       createdAt: new Date(),
       updatedAt: new Date(),
       modules: [], // Ensure modules array exists
@@ -103,16 +102,10 @@ const CourseModel = {
       throw new Error("Course not found");
     }
 
-    // Calculate student count
-    const enrolledStudents = await users.countDocuments({
-      enrolledCourses: id.toString(),
-    });
-
-    // Update course data
+    // Update course data - DO NOT calculate/save student count here
     const updatedCourse = {
       ...course,
       ...courseData,
-      students: enrolledStudents,
       updatedAt: new Date(),
     };
 
@@ -122,8 +115,10 @@ const CourseModel = {
     // Update in database
     await courses.updateOne({ _id: courseId }, { $set: updatedCourse });
 
-    // Return the updated course
-    return { _id: courseId, ...updatedCourse };
+    // Return the updated course (without the potentially stale student count)
+    // Fetch fresh data if needed after update, or rely on dynamic calculation elsewhere
+    const freshCourseData = await courses.findOne({ _id: courseId });
+    return freshCourseData;
   },
 
   // Delete course
@@ -305,6 +300,55 @@ const CourseModel = {
 
     await courses.updateOne({ _id: courseObjId }, { $set: { featured } });
 
+    return await courses.findOne({ _id: courseObjId });
+  },
+
+  // Update course enrollment - update student count and instructor info
+  updateCourseEnrollment: async (courseId) => {
+    const { courses, users } = getCollections();
+    
+    // Validate and convert to ObjectId
+    if (!courseId || !ObjectId.isValid(courseId)) {
+      throw new Error("Invalid course ID format");
+    }
+    const courseObjId = new ObjectId(courseId);
+    
+    // Get current course
+    const course = await courses.findOne({ _id: courseObjId });
+    if (!course) {
+      throw new Error("Course not found");
+    }
+    
+    // Calculate current student count by querying users collection
+    const studentCount = await users.countDocuments({
+      enrolledCourses: courseId.toString()
+    });
+    
+    // Update instructor info if it's missing
+    let instructorInfo = course.instructor;
+    if (!instructorInfo && course.instructorId) {
+      try {
+        const instructor = await users.findOne({ _id: new ObjectId(course.instructorId) });
+        if (instructor) {
+          instructorInfo = instructor.username || instructor.email || "Instructor";
+        }
+      } catch (error) {
+        console.error(`Error fetching instructor for course ${courseId}:`, error);
+      }
+    }
+    
+    // Update the course document
+    await courses.updateOne(
+      { _id: courseObjId },
+      { 
+        $set: { 
+          students: studentCount,
+          instructor: instructorInfo,
+          updatedAt: new Date()
+        } 
+      }
+    );
+    
     return await courses.findOne({ _id: courseObjId });
   },
 };
