@@ -1,6 +1,7 @@
 const CourseModel = require("../models/course.model");
 const User = require("../models/User");
 const ProgressModel = require("../models/progress.model");
+const CommentModel = require("../models/comment.model");
 
 // Course controller
 const CourseController = {
@@ -22,14 +23,16 @@ const CourseController = {
         courses = await CourseModel.getAllCourses();
       }
 
-      // Apply language filter if both category and language are provided
+      // Apply additional filters if both category and language are provided
       if (category && category !== "all" && language && language !== "all") {
-        courses = courses.filter((course) => course.language === language);
-      }
-
-      // Apply category filter if both language and category are provided
-      if (language && language !== "all" && category && category !== "all") {
+        courses = courses.filter(
+          (course) =>
+            course.category === category && course.language === language
+        );
+      } else if (category && category !== "all") {
         courses = courses.filter((course) => course.category === category);
+      } else if (language && language !== "all") {
+        courses = courses.filter((course) => course.language === language);
       }
 
       // Apply sorting
@@ -282,6 +285,118 @@ const CourseController = {
       });
     }
   },
+
+  // Add comment
+  addComment: async (req, res) => {
+    if (!req.session.user) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const { courseId, lessonId } = req.params;
+    const userId = req.session.user.id;
+    const { comment } = req.body;
+
+    try {
+      // Validate request
+      if (!comment || !comment.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: "Comment text is required",
+        });
+      }
+
+      // Validate that the course and lesson exist
+      const course = await CourseModel.getCourseById(courseId);
+      if (!course) {
+        return res.status(404).json({
+          success: false,
+          message: "Course not found",
+        });
+      }
+
+      // Verify the user is enrolled in the course
+      const user = await User.findById(userId);
+      if (
+        !user ||
+        !user.enrolledCourses.some((id) => id.toString() === courseId)
+      ) {
+        return res.status(403).json({
+          success: false,
+          message: "You must be enrolled in this course to comment",
+        });
+      }
+
+      // Create the comment
+      const newComment = await CommentModel.createComment({
+        courseId,
+        lessonId,
+        userId,
+        comment,
+      });
+
+      // Format date for display
+      const timestamp = "Just now";
+
+      // Return success response
+      res.json({
+        success: true,
+        comment: newComment.comment,
+        username: newComment.username,
+        timestamp,
+      });
+    } catch (error) {
+      console.error("Add Comment error:", error);
+      res.status(500).json({
+        success: false,
+        message: error.message || "Error posting comment",
+      });
+    }
+  },
+
+  // Get comments for a lesson
+  getComments: async (req, res) => {
+    const { courseId, lessonId } = req.params;
+
+    try {
+      const comments = await CommentModel.getCommentsByLesson(
+        courseId,
+        lessonId
+      );
+
+      // Format the comments for display
+      const formattedComments = comments.map((comment) => ({
+        id: comment._id,
+        username: comment.username,
+        comment: comment.comment,
+        timestamp: formatTimestamp(comment.createdAt),
+      }));
+
+      res.json({
+        success: true,
+        comments: formattedComments,
+      });
+    } catch (error) {
+      console.error("Get Comments error:", error);
+      res.status(500).json({
+        success: false,
+        message: error.message || "Error fetching comments",
+      });
+    }
+  },
 };
+
+// Helper function to format timestamps
+function formatTimestamp(date) {
+  const now = new Date();
+  const diff = Math.floor((now - date) / 1000); // Difference in seconds
+
+  if (diff < 60) return "Just now";
+  if (diff < 3600) return Math.floor(diff / 60) + " minutes ago";
+  if (diff < 86400) return Math.floor(diff / 3600) + " hours ago";
+  if (diff < 2592000) return Math.floor(diff / 86400) + " days ago";
+
+  // Format date for older comments
+  return date.toLocaleDateString();
+}
 
 module.exports = CourseController;
