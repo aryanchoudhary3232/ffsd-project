@@ -23,7 +23,7 @@
     "method-override": "latest",
     "mongoose": "^8.13.2",
     "multer": "latest",
-    "nodemon": "^3.1.9",
+    "nodemon": "^3.1.10",
     "path": "latest",
     "sqlite3": "^5.1.7",
     "tailwind-merge": "^2.5.5",

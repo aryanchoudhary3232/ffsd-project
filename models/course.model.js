@@ -60,6 +60,7 @@ const CourseModel = {
       title: courseData.title,
       description: courseData.description,
       category: courseData.category,
+      language: courseData.language || "English",
       price: Number.parseFloat(courseData.price),
       instructorId: String(courseData.instructorId),
       instructor: courseData.instructor,
@@ -239,6 +240,34 @@ const CourseModel = {
     const { courses } = getCollections();
     const result = await courses.distinct("category");
     return result;
+  },
+
+  // Get all languages
+  getAllLanguages: async () => {
+    const { courses } = getCollections();
+    const result = await courses.distinct("language");
+    return result;
+  },
+
+  // Get courses by language
+  getCoursesByLanguage: async (language) => {
+    const { courses } = getCollections();
+    
+    // Special case for English - also include courses with null/undefined language 
+    // since English is the default language
+    if (language === "English") {
+      return await courses.find({
+        $or: [
+          { language: "English" },
+          { language: null },
+          { language: "" },
+          { language: { $exists: false } }
+        ]
+      }).toArray();
+    }
+    
+    // For other languages, use exact matching
+    return await courses.find({ language }).toArray();
   },
 
   // Get course count

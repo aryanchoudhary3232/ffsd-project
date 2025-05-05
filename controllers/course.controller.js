@@ -7,7 +7,7 @@ const CommentModel = require("../models/comment.model");
 const CourseController = {
   // Get all courses
   getAllCourses: async (req, res) => {
-    const { search, category, sort } = req.query;
+    const { search, category, language, sort } = req.query;
 
     try {
       let courses;
@@ -17,8 +17,22 @@ const CourseController = {
         courses = await CourseModel.searchCourses(search);
       } else if (category && category !== "all") {
         courses = await CourseModel.getCoursesByCategory(category);
+      } else if (language && language !== "all") {
+        courses = await CourseModel.getCoursesByLanguage(language);
       } else {
         courses = await CourseModel.getAllCourses();
+      }
+
+      // Apply additional filters if both category and language are provided
+      if (category && category !== "all" && language && language !== "all") {
+        courses = courses.filter(
+          (course) =>
+            course.category === category && course.language === language
+        );
+      } else if (category && category !== "all") {
+        courses = courses.filter((course) => course.category === category);
+      } else if (language && language !== "all") {
+        courses = courses.filter((course) => course.language === language);
       }
 
       // Apply sorting
@@ -47,12 +61,15 @@ const CourseController = {
       }
 
       const categories = await CourseModel.getAllCategories();
+      const languages = await CourseModel.getAllLanguages();
 
       res.render("courses/index", {
         courses,
         categories,
+        languages,
         search: search || "",
         category: category || "all",
+        language: language || "all",
         sort: sort || "newest",
       });
     } catch (error) {
@@ -269,7 +286,7 @@ const CourseController = {
     }
   },
 
-  // Add this new method for handling comments
+  // Add comment
   addComment: async (req, res) => {
     if (!req.session.user) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
