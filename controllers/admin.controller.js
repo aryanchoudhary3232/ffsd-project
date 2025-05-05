@@ -167,7 +167,6 @@ const AdminController = {
   },
 
   updateUser: async (req, res) => {
-    // Add async
     if (!req.session.user || req.session.user.role !== "admin") {
       return res.redirect("/login");
     }
@@ -176,14 +175,13 @@ const AdminController = {
     const { name, email, role } = req.body;
 
     try {
-      // Add try-catch
-      const user = await User.findById(userId); // Find user first
+      const user = await User.findById(userId);
       if (!user) {
         req.flash("error_msg", "User not found");
         return res.redirect("/admin/users");
       }
 
-      // Prevent changing own role or another admin's role (example)
+      // Prevent changing own role or another admin's role
       if (
         user.role === "admin" &&
         (role !== "admin" || user._id.equals(req.session.user.id))
@@ -191,30 +189,21 @@ const AdminController = {
         if (user._id.equals(req.session.user.id) && role !== "admin") {
           req.flash("error_msg", "Cannot change your own role.");
         } else if (role !== "admin") {
-          // Add check to ensure there's at least one admin left if needed
           const adminCount = await User.countDocuments({ role: "admin" });
           if (adminCount <= 1) {
             req.flash("error_msg", "Cannot remove the last admin.");
             return res.redirect("/admin/users");
           }
           req.flash("error_msg", "Cannot change the role of an admin user.");
-        } else {
-          // Allow updating other fields for self or other admins
         }
-        // If only role change is disallowed for admins, adjust logic:
-        // if (user.role === "admin" && role !== "admin") { ... }
-
-        // For now, let's just update non-role fields if it's an admin
         if (user.role === "admin" && role !== "admin") {
           req.flash("error_msg", "Admin role cannot be changed.");
-          // Only update name and email if they changed
           await User.findByIdAndUpdate(userId, { name, email });
           req.flash("success_msg", "Admin user info (excluding role) updated.");
           return res.redirect("/admin/users");
         }
       }
 
-      // Update user
       await User.findByIdAndUpdate(
         userId,
         { name, email, role },
@@ -230,7 +219,6 @@ const AdminController = {
   },
 
   deleteUser: async (req, res) => {
-    // Add async
     if (!req.session.user || req.session.user.role !== "admin") {
       return res.redirect("/login");
     }
@@ -238,21 +226,18 @@ const AdminController = {
     const userId = req.params.id;
 
     try {
-      // Add try-catch
-      const user = await User.findById(userId); // Find user first
+      const user = await User.findById(userId);
 
       if (!user) {
         req.flash("error_msg", "User not found");
         return res.redirect("/admin/users");
       }
 
-      // Prevent deleting self or other admins
       if (user._id.equals(req.session.user.id)) {
         req.flash("error_msg", "Cannot delete yourself.");
         return res.redirect("/admin/users");
       }
       if (user.role === "admin") {
-        // Ensure not deleting the last admin
         const adminCount = await User.countDocuments({ role: "admin" });
         if (adminCount <= 1) {
           req.flash("error_msg", "Cannot delete the last admin user.");
@@ -262,9 +247,7 @@ const AdminController = {
         return res.redirect("/admin/users");
       }
 
-      // Delete user
       await User.findByIdAndDelete(userId);
-      // Optional: Clean up related data (e.g., progress, orders?) - depends on requirements
 
       req.flash("success_msg", "User deleted successfully");
       res.redirect("/admin/users");
@@ -276,7 +259,6 @@ const AdminController = {
   },
 
   getCourses: async (req, res) => {
-    // Add async
     if (!req.session.user || req.session.user.role !== "admin") {
       return res.redirect("/login");
     }
@@ -363,8 +345,7 @@ const AdminController = {
           courses.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       }
 
-      // Since getAllCourses doesn't support population, we need to fetch instructor data separately
-      // Enhance with student count (consider aggregation for performance)
+      // Enhance courses with instructor data and student count
       const enhancedCoursesPromises = courses.map(async (course) => {
         let instructor = null;
         let instructorName = "Unknown Instructor";
@@ -453,7 +434,6 @@ const AdminController = {
   },
 
   getCourseDetails: async (req, res) => {
-    // Add async
     if (!req.session.user || req.session.user.role !== "admin") {
       return res.redirect("/login");
     }
@@ -476,7 +456,6 @@ const AdminController = {
       }
 
       // Ensure instructor is never undefined, provide default values if instructor not found
-      // Make sure username is always a string to prevent TypeError with .charAt(0)
       const instructorName =
         instructor?.name ||
         instructor?.username ||
@@ -496,7 +475,6 @@ const AdminController = {
       );
 
       // Process student data to ensure all properties exist and are valid
-      // This prevents TypeError when accessing student.name.charAt(0) in the template
       enrolledStudents = enrolledStudents.map((student) => {
         const studentObj = student.toObject ? student.toObject() : student;
         return {
@@ -510,7 +488,7 @@ const AdminController = {
       res.render("admin/course-details", {
         course: {
           ...course,
-          instructor: instructor.name,
+          instructor: instructor.username,
           students: enrolledStudents.length,
           rating: course.rating || "N/A",
         },
@@ -559,11 +537,9 @@ const AdminController = {
       return res.redirect("/login");
     }
 
-    // Assuming Multer middleware runs before this to handle req.file
     const { title, description, category, price, instructorId } = req.body;
 
     try {
-      // Basic validation
       if (!title || !description || !category) {
         req.flash("error_msg", "Please fill in all required fields");
         return res.redirect("/admin/courses/new");
@@ -579,7 +555,7 @@ const AdminController = {
         description,
         category,
         price: parseFloat(price) || 0,
-        instructorId: instructorId || req.session.user.id, // Default to current user if no instructor selected
+        instructorId: instructorId || req.session.user.id,
         instructor: instructor ? instructor.name : "Unknown Instructor",
         thumbnail: req.file
           ? `/uploads/${req.file.filename}`
@@ -603,7 +579,6 @@ const AdminController = {
     }
 
     const courseId = req.params.id;
-    // Assuming Multer middleware runs before this to handle req.file
     const {
       title,
       description,
@@ -614,10 +589,9 @@ const AdminController = {
       instructorId,
     } = req.body;
 
-    // Validate courseId
     if (!AdminController.isValidObjectId(courseId)) {
       req.flash("error_msg", "Invalid Course ID format.");
-      return res.redirect("/admin/courses"); // Redirect to courses list or appropriate page
+      return res.redirect("/admin/courses");
     }
 
     try {
@@ -627,10 +601,8 @@ const AdminController = {
         return res.redirect("/admin/courses");
       }
 
-      // Get instructor name if instructorId is provided
       let instructorName = course.instructor;
       if (instructorId && instructorId !== course.instructorId) {
-        // Add validation for ObjectId
         if (AdminController.isValidObjectId(instructorId)) {
           const instructor = await User.findById(instructorId);
           instructorName = instructor ? instructor.name : "Unknown Instructor";
@@ -646,7 +618,7 @@ const AdminController = {
         category,
         price: parseFloat(price) || 0,
         status: status || "draft",
-        featured: featured === "on", // Checkbox value
+        featured: featured === "on",
         instructorId: instructorId || course.instructorId,
         instructor: instructorName,
       };
@@ -681,14 +653,12 @@ const AdminController = {
           .json({ success: false, message: "Course not found" });
       }
 
-      // Create updated course data
       const courseData = {
         ...course,
         status: status,
         updatedAt: new Date(),
       };
 
-      // Update the course
       await Course.updateCourse(courseId, courseData);
 
       return res.json({ success: true, message: "Course status updated" });
@@ -710,7 +680,6 @@ const AdminController = {
     const { featured } = req.body;
 
     try {
-      // Get the course with the custom method
       const course = await Course.getCourseById(courseId);
       if (!course) {
         return res
@@ -718,7 +687,6 @@ const AdminController = {
           .json({ success: false, message: "Course not found" });
       }
 
-      // Use the markAsFeatured method from your custom Course model
       await Course.markAsFeatured(
         courseId,
         featured === "true" || featured === true
@@ -745,19 +713,12 @@ const AdminController = {
     const courseId = req.params.id;
 
     try {
-      // Use the deleteCourse method from your custom Course model
       const deleted = await Course.deleteCourse(courseId);
 
       if (!deleted) {
         req.flash("error_msg", "Course not found or could not be deleted");
         return res.redirect("/admin/courses");
       }
-
-      // Optional: Clean up related data
-      // - Remove from user enrolledCourses arrays
-      // - Delete related Progress records
-      // - Delete related Orders (or mark as cancelled?)
-      // - Delete thumbnail file from server
 
       req.flash("success_msg", "Course deleted successfully");
       res.redirect("/admin/courses");
@@ -773,20 +734,16 @@ const AdminController = {
       return res.redirect("/login");
     }
     try {
-      // Use the custom getAllOrders method
       const orders = await Order.getAllOrders();
 
-      // Since we don't have populate for the custom model, we need to fetch user and course details separately
       const enhancedOrdersPromises = orders.map(async (order) => {
         let user = null;
         let course = null;
 
-        // Validate userId is a valid ObjectId before querying
         if (order.userId && AdminController.isValidObjectId(order.userId)) {
           user = await User.findById(order.userId);
         }
 
-        // Get course data using our custom model method
         if (order.courseId) {
           course = await Course.getCourseById(order.courseId);
         }
@@ -800,7 +757,6 @@ const AdminController = {
 
       const enhancedOrders = await Promise.all(enhancedOrdersPromises);
 
-      // Sort by creation date (most recent first)
       enhancedOrders.sort(
         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
       );
@@ -822,7 +778,6 @@ const AdminController = {
     const { status } = req.body;
 
     try {
-      // Use the custom updateOrderStatus method from your Order model
       await Order.updateOrderStatus(orderId, status);
 
       return res.json({ success: true, message: "Order status updated" });
@@ -840,7 +795,6 @@ const AdminController = {
       return res.redirect("/login");
     }
     try {
-      // Use the custom Order model methods
       const totalRevenue = await Order.getTotalRevenue();
       const monthlyRevenueData = await Order.getRevenueByMonth();
 
@@ -863,13 +817,11 @@ const AdminController = {
     try {
       const userId = req.params.id;
 
-      // Validate userId format
       if (!AdminController.isValidObjectId(userId)) {
         req.flash("error_msg", "Invalid User ID format.");
         return res.redirect("/admin/users");
       }
 
-      // Get user details
       const user = await User.findById(userId);
 
       if (!user) {
@@ -877,15 +829,12 @@ const AdminController = {
         return res.redirect("/admin/users");
       }
 
-      // Get number of admins to check if we can delete an admin
       const adminCount = await User.countDocuments({ role: "admin" });
 
-      // Initialize arrays for courses and orders
       let enrolledCourses = [];
       let instructorCourses = [];
       let orders = [];
 
-      // If user is a student, get enrolled courses
       if (
         user.role === "student" &&
         user.enrolledCourses &&
@@ -896,16 +845,12 @@ const AdminController = {
             return null;
           }
 
-          // Get course details
           const course = await Course.getCourseById(courseId.toString());
           if (!course) return null;
 
-          // Get progress if available (assuming you have a progress model)
           let progress = 0;
           try {
-            // This is a placeholder - you'd need to implement actual progress tracking
-            // You might have a separate progress collection or track it in the user document
-            progress = Math.floor(Math.random() * 100); // Just for demonstration
+            progress = Math.floor(Math.random() * 100);
           } catch (err) {
             console.error("Could not get progress:", err);
           }
@@ -917,17 +862,14 @@ const AdminController = {
           };
         });
 
-        // Filter out null results (courses that weren't found)
         enrolledCourses = (await Promise.all(coursesPromises)).filter(
           (course) => course !== null
         );
       }
 
-      // If user is an instructor, get created courses
       if (user.role === "instructor") {
         let courses = await Course.getAllCourses();
 
-        // Filter courses by instructor
         instructorCourses = courses
           .filter(
             (course) =>
@@ -938,12 +880,11 @@ const AdminController = {
             return {
               ...course,
               id: course._id,
-              students: 0, // This would need to be calculated from enrolled students
+              students: 0,
               rating: course.rating || "N/A",
             };
           });
 
-        // Get student count for each course
         for (let i = 0; i < instructorCourses.length; i++) {
           try {
             const studentCount = await User.countDocuments({
@@ -956,7 +897,6 @@ const AdminController = {
         }
       }
 
-      // Get order history
       orders = await Order.getAllOrders();
       orders = orders
         .filter(
@@ -976,10 +916,8 @@ const AdminController = {
           };
         });
 
-      // Resolve promises for orders
       orders = await Promise.all(orders);
 
-      // Render user details view with all the collected data
       res.render("admin/user-details", {
         user: {
           ...(user.toObject ? user.toObject() : user),
@@ -999,7 +937,6 @@ const AdminController = {
     }
   },
 
-  // View course ratings
   getCourseRatings: async (req, res) => {
     if (!req.session.user || req.session.user.role !== "admin") {
       return res.redirect("/login");
@@ -1008,7 +945,6 @@ const AdminController = {
     try {
       const courseId = req.params.id;
 
-      // Get course details
       const course = await Course.getCourseById(courseId);
 
       if (!course) {
@@ -1016,19 +952,15 @@ const AdminController = {
         return res.redirect("/admin/courses");
       }
 
-      // Get instructor info
       let instructor = null;
       if (course.instructorId) {
         instructor = await User.findById(course.instructorId);
       }
 
-      // Import the rating model
       const RatingModel = require("../models/rating.model");
 
-      // Get all ratings for this course
       const ratings = await RatingModel.getCourseRatings(courseId);
 
-      // Calculate rating statistics
       const ratingStats = {
         average: course.rating || 0,
         total: ratings.length,
@@ -1041,7 +973,6 @@ const AdminController = {
         },
       };
 
-      // Calculate percentages for each rating
       ratingStats.percentages = {};
       for (const stars in ratingStats.distribution) {
         ratingStats.percentages[stars] =

@@ -172,7 +172,7 @@
               <div class="divide-y">
                 <% course.modules.forEach(function(module, moduleIndex) { %>
                   <div class="p-4">
-                    <div class="flex justify-between items-center cursor-pointer" onclick="toggleModule(<%= moduleIndex %>)">
+                    <div class="flex justify-between items-center cursor-pointer" onclick="toggleModule('<%= moduleIndex %>')">
                       <h3 class="font-semibold"><%= module.title %></h3>
                       <div class="flex items-center">
                         <span class="text-sm text-gray-600 mr-2"><%= module.lessons.length %> lessons</span>
@@ -286,11 +286,18 @@
                   <span><%= progress %>%</span>
                 </div>
                 <div class="w-full bg-gray-200 rounded-full h-2.5">
-                  <div class="bg-primary h-2.5 rounded-full" style="width: <%= progress %>%"></div>
+                  <div class="bg-primary h-2.5 rounded-full" style="width: '<%= progress %>%'"></div>
                 </div>
               </div>
               <a href="/courses/<%= course._id %>/learn" class="block w-full text-center bg-primary text-white py-3 px-4 rounded-md hover:bg-primary-dark transition-colors mb-3">
                 <i class="fas fa-play-circle mr-2"></i> Start Learning
+              </a>
+            <% } else if (user && user.id && course.instructorId && user.id.toString() === course.instructorId.toString()) { %>
+              <a href="/instructor/courses/<%= course._id %>/edit" class="block w-full text-center bg-primary text-white py-3 px-4 rounded-md hover:bg-primary-dark transition-colors mb-3">
+                <i class="fas fa-edit mr-2"></i> Edit Course
+              </a>
+              <a href="/instructor/courses" class="block w-full text-center bg-white border border-primary text-primary py-3 px-4 rounded-md hover:bg-gray-50 transition-colors mb-3">
+                <i class="fas fa-list mr-2"></i> Manage Courses
               </a>
             <% } else if (user) { %>
               <form action="/cart/add" method="POST">
