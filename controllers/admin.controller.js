@@ -280,7 +280,12 @@ const AdminController = {
       return res.redirect("/login");
     }
 
-    const { search = "", category = "all", sort = "newest" } = req.query;
+    const {
+      search = "",
+      category = "all",
+      language = "all",
+      sort = "newest",
+    } = req.query;
     let query = {};
     let sortOption = { createdAt: -1 };
 
@@ -293,6 +298,9 @@ const AdminController = {
     }
     if (category !== "all") {
       query.category = category;
+    }
+    if (language !== "all") {
+      query.language = language;
     }
 
     // Build sort option
@@ -339,13 +347,32 @@ const AdminController = {
       });
       const enhancedCourses = await Promise.all(enhancedCoursesPromises);
 
+      // Apply language filter in JavaScript if we're not doing it in the database query
+      let filteredCourses = enhancedCourses;
+      if (language !== "all") {
+        filteredCourses = enhancedCourses.filter(
+          (course) => course.language === language
+        );
+      }
+
       const categories = await Course.getAllCategories();
 
+      // Get all unique languages from courses
+      const languages = [
+        ...new Set(
+          enhancedCourses
+            .map((course) => course.language)
+            .filter((lang) => lang) // Remove undefined or empty languages
+        ),
+      ];
+
       res.render("admin/courses", {
-        courses: enhancedCourses,
+        courses: filteredCourses,
         categories,
+        languages,
         search,
         category,
+        language,
         sort,
       });
     } catch (error) {

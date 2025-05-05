@@ -76,54 +76,32 @@
             class="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary"
           >
             <option value="all" <%= language === 'all' ? 'selected' : '' %>>All Languages</option>
-            <% if(languages.includes('English')) { %>
-              <option value="English" <%= language === 'English' ? 'selected' : '' %>>English</option>
-            <% } %>
-            <% if(languages.includes('Hindi')) { %>
+            <!-- Indian Regional Languages -->
+            <optgroup label="Indian Regional Languages">
               <option value="Hindi" <%= language === 'Hindi' ? 'selected' : '' %>>Hindi</option>
-            <% } %>
-            <% if(languages.includes('Marathi')) { %>
-              <option value="Marathi" <%= language === 'Marathi' ? 'selected' : '' %>>Marathi</option>
-            <% } %>
-            <% if(languages.includes('Telugu')) { %>
-              <option value="Telugu" <%= language === 'Telugu' ? 'selected' : '' %>>Telugu</option>
-            <% } %>
-            <% if(languages.includes('Malayalam')) { %>
-              <option value="Malayalam" <%= language === 'Malayalam' ? 'selected' : '' %>>Malayalam</option>
-            <% } %>
-            <% if(languages.includes('Kannada')) { %>
-              <option value="Kannada" <%= language === 'Kannada' ? 'selected' : '' %>>Kannada</option>
-            <% } %>
-            <% if(languages.includes('Marwadi')) { %>
-              <option value="Marwadi" <%= language === 'Marwadi' ? 'selected' : '' %>>Marwadi</option>
-            <% } %>
-            <% if(languages.includes('Haryanvi')) { %>
-              <option value="Haryanvi" <%= language === 'Haryanvi' ? 'selected' : '' %>>Haryanvi</option>
-            <% } %>
-            <% if(languages.includes('Tamil')) { %>
               <option value="Tamil" <%= language === 'Tamil' ? 'selected' : '' %>>Tamil</option>
-            <% } %>
-            <% if(languages.includes('Bengali')) { %>
-              <option value="Bengali" <%= language === 'Bengali' ? 'selected' : '' %>>Bengali</option>
-            <% } %>
-            <% if(languages.includes('Gujarati')) { %>
-              <option value="Gujarati" <%= language === 'Gujarati' ? 'selected' : '' %>>Gujarati</option>
-            <% } %>
-            <% if(languages.includes('Punjabi')) { %>
-              <option value="Punjabi" <%= language === 'Punjabi' ? 'selected' : '' %>>Punjabi</option>
-            <% } %>
-            <% if(languages.includes('Odia')) { %>
-              <option value="Odia" <%= language === 'Odia' ? 'selected' : '' %>>Odia</option>
-            <% } %>
-            <% if(languages.includes('Bhojpuri')) { %>
+              <option value="Telugu" <%= language === 'Telugu' ? 'selected' : '' %>>Telugu</option>
+              <option value="Kannada" <%= language === 'Kannada' ? 'selected' : '' %>>Kannada</option>
+              <option value="Marathi" <%= language === 'Marathi' ? 'selected' : '' %>>Marathi</option>
               <option value="Bhojpuri" <%= language === 'Bhojpuri' ? 'selected' : '' %>>Bhojpuri</option>
-            <% } %>
-            <% languages.filter(lang => 
-              !['English', 'Hindi', 'Marathi', 'Telugu', 'Malayalam', 'Kannada', 'Marwadi', 
-                'Haryanvi', 'Tamil', 'Bengali', 'Gujarati', 'Punjabi', 'Odia', 'Bhojpuri'].includes(lang)
-            ).forEach(function(lang) { %>
-              <option value="<%= lang %>" <%= language === lang ? 'selected' : '' %>><%= lang %></option>
-            <% }); %>
+              <option value="Malayalam" <%= language === 'Malayalam' ? 'selected' : '' %>>Malayalam</option>
+              <option value="Bengali" <%= language === 'Bengali' ? 'selected' : '' %>>Bengali</option>
+              <option value="Gujarati" <%= language === 'Gujarati' ? 'selected' : '' %>>Gujarati</option>
+              <option value="Punjabi" <%= language === 'Punjabi' ? 'selected' : '' %>>Punjabi</option>
+              <option value="Odia" <%= language === 'Odia' ? 'selected' : '' %>>Odia</option>
+              <option value="Haryanvi" <%= language === 'Haryanvi' ? 'selected' : '' %>>Haryanvi</option>
+              <option value="Marwadi" <%= language === 'Marwadi' ? 'selected' : '' %>>Marwadi</option>
+            </optgroup>
+            <!-- Other Languages -->
+            <optgroup label="Other Languages">
+              <option value="English" <%= language === 'English' ? 'selected' : '' %>>English</option>
+              <% languages.filter(lang => 
+                !['English', 'Hindi', 'Tamil', 'Telugu', 'Kannada', 'Marathi', 'Bhojpuri', 
+                'Malayalam', 'Bengali', 'Gujarati', 'Punjabi', 'Odia', 'Haryanvi', 'Marwadi'].includes(lang)
+              ).forEach(function(lang) { %>
+                <option value="<%= lang %>" <%= language === lang ? 'selected' : '' %>><%= lang %></option>
+              <% }); %>
+            </optgroup>
           </select>
           <select
             id="sort-filter"
