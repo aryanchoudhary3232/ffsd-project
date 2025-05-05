@@ -1,4 +1,4 @@
-<%- include('../partials/head', { title: isEdit ? 'Edit Course - LearnHub' : 'Add New Course - LearnHub' }) %>
+<%- include('../partials/head', { title: isEdit ? 'Edit Course - SeekoBharat' : 'Add New Course - SeekoBharat' }) %>
 <body class="bg-black text-white">
   <%- include('../partials/navbar') %>
   <div class="container mx-auto px-4 py-8">
@@ -17,10 +17,12 @@
     <% } %>
 
     <form 
+      id="courseForm"
       action="<%= isEdit ? `/instructor/courses/${course._id}` : '/instructor/courses/new' %>" 
       method="POST" 
       enctype="multipart/form-data" 
       class="bg-gray-800 p-6 rounded-lg"
+      novalidate
     >
       <% if (isEdit) { %>
         <input type="hidden" name="_method" value="PUT">
@@ -35,8 +37,11 @@
             name="title" 
             value="<%= isEdit ? course.title : '' %>" 
             required
+            minlength="5"
+            maxlength="100"
             class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           >
+          <div class="error-message text-red-500 text-sm mt-1 hidden" id="title-error"></div>
         </div>
 
         <!-- Category -->
@@ -58,6 +63,7 @@
               <% }) %>
             <% } %>
           </datalist>
+          <div class="error-message text-red-500 text-sm mt-1 hidden" id="category-error"></div>
         </div>
 
         <!-- Price -->
@@ -68,10 +74,13 @@
             id="price" 
             name="price" 
             step="0.01" 
+            min="0"
+            max="9999.99"
             value="<%= isEdit ? course.price : '' %>" 
             required
             class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           >
+          <div class="error-message text-red-500 text-sm mt-1 hidden" id="price-error"></div>
         </div>
 
         <!-- Language (Updated to Dropdown) -->
@@ -83,6 +92,7 @@
             required
             class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           >
+            <option value="">-- Select a language --</option>
             <option value="English" <%= isEdit && course.language === 'English' ? 'selected' : !isEdit ? 'selected' : '' %>>English</option>
             <option value="Hindi" <%= isEdit && course.language === 'Hindi' ? 'selected' : '' %>>Hindi</option>
             <option value="Marathi" <%= isEdit && course.language === 'Marathi' ? 'selected' : '' %>>Marathi</option>
@@ -98,6 +108,7 @@
             <option value="Odia" <%= isEdit && course.language === 'Odia' ? 'selected' : '' %>>Odia</option>
             <option value="Bhojpuri" <%= isEdit && course.language === 'Bhojpuri' ? 'selected' : '' %>>Bhojpuri</option>
           </select>
+          <div class="error-message text-red-500 text-sm mt-1 hidden" id="language-error"></div>
         </div>
 
         <!-- Thumbnail -->
@@ -108,10 +119,13 @@
             id="thumbnail" 
             name="thumbnail" 
             accept="image/*"
+            <%= isEdit ? '' : 'required' %>
             class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           >
+          <div class="error-message text-red-500 text-sm mt-1 hidden" id="thumbnail-error"></div>
           <% if (isEdit && course.thumbnail) { %>
             <img src="<%= course.thumbnail %>" alt="Current Thumbnail" class="mt-2 w-32 h-32 object-cover rounded-md">
+            <p class="text-xs text-gray-400 mt-1">Current thumbnail will be kept if no new file is selected</p>
           <% } %>
         </div>
 
@@ -121,10 +135,14 @@
           <textarea 
             id="description" 
             name="description" 
-            rows="4" 
+            rows="4"
+            minlength="20" 
+            maxlength="1000"
             required
             class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           ><%= isEdit ? course.description : '' %></textarea>
+          <div class="error-message text-red-500 text-sm mt-1 hidden" id="description-error"></div>
+          <div class="text-xs text-gray-400 mt-1"><span id="description-count">0</span>/1000 characters</div>
         </div>
       </div>
 
@@ -138,5 +156,209 @@
   </div>
   <%- include('../partials/footer') %>
   <%- include('../partials/scripts') %>
+  
+  <!-- Form validation script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.getElementById('courseForm');
+      const titleInput = document.getElementById('title');
+      const categoryInput = document.getElementById('category');
+      const priceInput = document.getElementById('price');
+      const languageSelect = document.getElementById('language');
+      const thumbnailInput = document.getElementById('thumbnail');
+      const descriptionInput = document.getElementById('description');
+      const descriptionCount = document.getElementById('description-count');
+      
+      // Update character count for description
+      function updateCharCount() {
+        const currentLength = descriptionInput.value.length;
+        descriptionCount.textContent = currentLength;
+        if (currentLength > 1000) {
+          descriptionCount.classList.add('text-red-500');
+        } else {
+          descriptionCount.classList.remove('text-red-500');
+        }
+      }
+      
+      // Initial character count
+      updateCharCount();
+      
+      // Update character count on input
+      descriptionInput.addEventListener('input', updateCharCount);
+      
+      // Validate file type and size
+      function validateFile(file) {
+        if (!file) return true;
+        
+        // Check file type
+        const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+          return "Please select a valid image file (JPEG, PNG, GIF, or WEBP)";
+        }
+        
+        // Check file size (max 5MB)
+        const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+        if (file.size > maxSize) {
+          return "Image size must be less than 5MB";
+        }
+        
+        return true;
+      }
+      
+      // Show error message
+      function showError(element, message) {
+        const errorElement = document.getElementById(`${element.id}-error`);
+        errorElement.textContent = message;
+        errorElement.classList.remove('hidden');
+        element.classList.add('border-red-500');
+      }
+      
+      // Clear error message
+      function clearError(element) {
+        const errorElement = document.getElementById(`${element.id}-error`);
+        errorElement.textContent = '';
+        errorElement.classList.add('hidden');
+        element.classList.remove('border-red-500');
+      }
+      
+      // Form submission handler
+      form.addEventListener('submit', function(event) {
+        let isValid = true;
+        
+        // Clear all previous errors
+        document.querySelectorAll('.error-message').forEach(el => {
+          el.textContent = '';
+          el.classList.add('hidden');
+        });
+        
+        // Title validation
+        if (!titleInput.value.trim()) {
+          showError(titleInput, 'Course title is required');
+          isValid = false;
+        } else if (titleInput.value.length < 5) {
+          showError(titleInput, 'Course title must be at least 5 characters');
+          isValid = false;
+        } else if (titleInput.value.length > 100) {
+          showError(titleInput, 'Course title must be less than 100 characters');
+          isValid = false;
+        } else {
+          clearError(titleInput);
+        }
+        
+        // Category validation
+        if (!categoryInput.value.trim()) {
+          showError(categoryInput, 'Category is required');
+          isValid = false;
+        } else {
+          clearError(categoryInput);
+        }
+        
+        // Price validation
+        if (!priceInput.value.trim()) {
+          showError(priceInput, 'Price is required');
+          isValid = false;
+        } else if (isNaN(priceInput.value) || Number(priceInput.value) < 0) {
+          showError(priceInput, 'Price must be a positive number');
+          isValid = false;
+        } else if (Number(priceInput.value) > 9999.99) {
+          showError(priceInput, 'Price cannot exceed $9,999.99');
+          isValid = false;
+        } else {
+          clearError(priceInput);
+        }
+        
+        // Language validation
+        if (!languageSelect.value) {
+          showError(languageSelect, 'Please select a language');
+          isValid = false;
+        } else {
+          clearError(languageSelect);
+        }
+        
+        // Thumbnail validation
+        // Use a boolean variable that is set once based on the EJS template context
+        const isEditMode = Boolean("<%= isEdit %>".trim() === "true");
+        if (!isEditMode && !thumbnailInput.files[0]) {
+          showError(thumbnailInput, 'Thumbnail image is required');
+          isValid = false;
+        } else if (thumbnailInput.files[0]) {
+          const fileValidation = validateFile(thumbnailInput.files[0]);
+          if (fileValidation !== true) {
+            showError(thumbnailInput, fileValidation);
+            isValid = false;
+          } else {
+            clearError(thumbnailInput);
+          }
+        } else {
+          clearError(thumbnailInput);
+        }
+        
+        // Description validation
+        if (!descriptionInput.value.trim()) {
+          showError(descriptionInput, 'Description is required');
+          isValid = false;
+        } else if (descriptionInput.value.length < 20) {
+          showError(descriptionInput, 'Description must be at least 20 characters');
+          isValid = false;
+        } else if (descriptionInput.value.length > 1000) {
+          showError(descriptionInput, 'Description must be less than 1000 characters');
+          isValid = false;
+        } else {
+          clearError(descriptionInput);
+        }
+        
+        if (!isValid) {
+          event.preventDefault();
+          // Scroll to the first error
+          const firstError = document.querySelector('.error-message:not(.hidden)');
+          if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      });
+      
+      // Real-time validation on input
+      titleInput.addEventListener('input', function() {
+        if (this.value.trim() && this.value.length >= 5 && this.value.length <= 100) {
+          clearError(this);
+        }
+      });
+      
+      categoryInput.addEventListener('input', function() {
+        if (this.value.trim()) {
+          clearError(this);
+        }
+      });
+      
+      priceInput.addEventListener('input', function() {
+        if (this.value.trim() && !isNaN(this.value) && Number(this.value) >= 0 && Number(this.value) <= 9999.99) {
+          clearError(this);
+        }
+      });
+      
+      languageSelect.addEventListener('change', function() {
+        if (this.value) {
+          clearError(this);
+        }
+      });
+      
+      thumbnailInput.addEventListener('change', function() {
+        if (this.files[0]) {
+          const fileValidation = validateFile(this.files[0]);
+          if (fileValidation === true) {
+            clearError(this);
+          } else {
+            showError(this, fileValidation);
+          }
+        }
+      });
+      
+      descriptionInput.addEventListener('input', function() {
+        if (this.value.trim() && this.value.length >= 20 && this.value.length <= 1000) {
+          clearError(this);
+        }
+      });
+    });
+  </script>
 </body>
 </html>
