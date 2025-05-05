@@ -39,7 +39,7 @@
                     <div class="bg-blue-500 h-2.5 rounded-full" style="width: <%= course.progress ? course.progress : 0 %>%"></div>
                   </div>
                 </div>
-                <a href="/courses/<%= course.id %>/learn" class="block w-full text-center bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700">Continue Learning</a>
+                <a href="/courses/<%= course._id %>/learn" class="block w-full text-center bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700">Continue Learning</a>
               </div>
             </div>
           <% }); %>
@@ -68,7 +68,7 @@
                     <div class="bg-blue-500 h-2.5 rounded-full" style="width: <%= course.progress %>%"></div>
                   </div>
                 </div>
-                <a href="/courses/<%= course.id %>/learn" class="block w-full text-center bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+                <a href="/courses/<%= course._id %>/learn" class="block w-full text-center bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700">
                   <% if (course.progress === 0) { %>
                     Start Course
                   <% } else if (course.progress === 100) { %>

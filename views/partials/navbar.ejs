@@ -1,8 +1,8 @@
 <nav class="bg-gray-900 shadow-md text-white">
   <div class="container mx-auto px-4">
     <div class="flex justify-between items-center py-4">
-      <a href="/" class="text-2xl font-bold text-primary">SeekoBharat</a>
-      <div class="hidden md:flex space-x-4  text-white">
+      <a href="/" class="text-2xl font-bold text-primary">SeekhoBharat</a>
+      <div class="hidden md:flex space-x-4 text-white">
         <a href="/courses" class="nav-link">Courses</a>
         <% if (user) { %>
         <a href="/dashboard" class="nav-link text-white">Dashboard</a>
@@ -28,25 +28,41 @@
     </div>
   </div>
   <div id="mobile-menu" class="hidden md:hidden">
-    <a href="/courses" class="block py-2 px-4 text-sm hover:bg-gray-600 text-white"
+    <a
+      href="/courses"
+      class="block py-2 px-4 text-sm hover:bg-gray-600 text-white"
       >Courses</a
     >
     <% if (user) { %>
-    <a href="/dashboard" class="block py-2 px-4 text-sm hover:bg-gray-600 text-white"
+    <a
+      href="/dashboard"
+      class="block py-2 px-4 text-sm hover:bg-gray-600 text-white"
       >Dashboard</a
     >
-    <a href="/user/profile" class="block py-2 px-4 text-sm hover:bg-gray-600 text-white"
+    <a
+      href="/user/profile"
+      class="block py-2 px-4 text-sm hover:bg-gray-600 text-white"
       >Profile</a
     >
     <% if (user.role === 'student'){ %>
-    <a href="/cart" class="block py-2 px-4 text-sm hover:bg-gray-600 text-white">Cart</a>
+    <a href="/cart" class="block py-2 px-4 text-sm hover:bg-gray-600 text-white"
+      >Cart</a
+    >
     <% } else { %> <% } %>
-    <a href="/logout" class="block py-2 px-4 text-sm hover:bg-gray-600 text-white"
+    <a
+      href="/logout"
+      class="block py-2 px-4 text-sm hover:bg-gray-600 text-white"
       >Logout</a
     >
     <% } else { %>
-    <a href="/login" class="block py-2 px-4 text-sm hover:bg-gray-100 text-white">Login</a>
-    <a href="/register" class="block py-2 px-4 text-sm hover:bg-gray-100 text-white"
+    <a
+      href="/login"
+      class="block py-2 px-4 text-sm hover:bg-gray-100 text-white"
+      >Login</a
+    >
+    <a
+      href="/register"
+      class="block py-2 px-4 text-sm hover:bg-gray-100 text-white"
       >Register</a
     >
     <% } %>
@@ -54,21 +70,13 @@
 </nav>
 
 <script>
-
   document.addEventListener("DOMContentLoaded", function () {
-
     const menuButton = document.getElementById("mobile-menu-button");
 
     const mobileMenu = document.getElementById("mobile-menu");
 
-
-
     menuButton.addEventListener("click", function () {
-
       mobileMenu.classList.toggle("hidden");
-
     });
-
   });
-
 </script>
