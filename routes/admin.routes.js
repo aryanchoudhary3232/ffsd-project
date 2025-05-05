@@ -22,6 +22,15 @@ router.get(
   AdminController.getAdminDashboard
 );
 router.get("/users", isAuthenticated, isAdmin, AdminController.getUsers);
+
+// Add new route for user details
+router.get(
+  "/users/:id",
+  isAuthenticated,
+  isAdmin,
+  AdminController.getUserDetails
+);
+
 router.get(
   "/users/:id/edit",
   isAuthenticated,
