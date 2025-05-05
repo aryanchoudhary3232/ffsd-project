@@ -342,7 +342,7 @@ const AdminController = {
         return {
           ...course,
           students: studentCount,
-          instructor: instructor ? instructor.name : "Unknown Instructor",
+          instructor: instructor ? instructor.username : "Unknown Instructor",
         };
       });
       const enhancedCourses = await Promise.all(enhancedCoursesPromises);
@@ -456,7 +456,7 @@ const AdminController = {
       res.render("admin/course-details", {
         course: {
           ...course,
-          instructor: instructor.name,
+          instructor: instructor.username,
           students: enrolledStudents.length,
           rating: course.rating || "N/A",
         },
