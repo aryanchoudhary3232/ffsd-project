@@ -130,7 +130,8 @@ const AdminController = {
         const userObj = user.toObject ? user.toObject() : user;
         return {
           ...userObj,
-          username: userObj.username || userObj.name || userObj.email || "Unknown User", // Ensure username is always a string
+          username:
+            userObj.username || userObj.name || userObj.email || "Unknown User", // Ensure username is always a string
           email: userObj.email || "N/A",
         };
       });
@@ -293,7 +294,8 @@ const AdminController = {
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: "i" } },
-        // Add description/instructor search if needed (instructor requires population first or separate query)
+        { description: { $regex: search, $options: "i" } },
+        { instructor: { $regex: search, $options: "i" } },
       ];
     }
     if (category !== "all") {
@@ -323,26 +325,72 @@ const AdminController = {
     }
 
     try {
-      // Add try-catch
-      let courses = await Course.getAllCourses();
+      // Get courses with search and filter criteria
+      let courses;
+      if (search) {
+        courses = await Course.searchCourses(search);
+      } else {
+        courses = await Course.getAllCourses();
+      }
+
+      // Apply filters manually since the Course model methods don't support all the filtering options
+      if (category !== "all") {
+        courses = courses.filter((course) => course.category === category);
+      }
+
+      if (language !== "all") {
+        courses = courses.filter((course) => course.language === language);
+      }
+
+      // Apply sorting
+      switch (sort) {
+        case "oldest":
+          courses.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+          break;
+        case "title-asc":
+          courses.sort((a, b) => a.title.localeCompare(b.title));
+          break;
+        case "title-desc":
+          courses.sort((a, b) => b.title.localeCompare(a.title));
+          break;
+        case "price-low":
+          courses.sort((a, b) => a.price - b.price);
+          break;
+        case "price-high":
+          courses.sort((a, b) => b.price - a.price);
+          break;
+        default:
+          courses.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      }
 
       // Since getAllCourses doesn't support population, we need to fetch instructor data separately
       // Enhance with student count (consider aggregation for performance)
       const enhancedCoursesPromises = courses.map(async (course) => {
         let instructor = null;
+        let instructorName = "Unknown Instructor";
+
         if (
           course.instructorId &&
           AdminController.isValidObjectId(course.instructorId)
         ) {
           instructor = await User.findById(course.instructorId);
+          if (instructor) {
+            instructorName =
+              instructor.name ||
+              instructor.username ||
+              instructor.email ||
+              "Unknown Instructor";
+          }
         }
+
         const studentCount = await User.countDocuments({
           enrolledCourses: course._id,
         });
+
         return {
           ...course,
           students: studentCount,
-          instructor: instructor ? instructor.name : "Unknown Instructor",
+          instructor: instructorName,
         };
       });
       const enhancedCourses = await Promise.all(enhancedCoursesPromises);
@@ -429,8 +477,14 @@ const AdminController = {
 
       // Ensure instructor is never undefined, provide default values if instructor not found
       // Make sure username is always a string to prevent TypeError with .charAt(0)
+      const instructorName =
+        instructor?.name ||
+        instructor?.username ||
+        course.instructor ||
+        "Unknown Instructor";
       instructor = {
-        name: instructor?.username || course.instructor || "Unknown Instructor",
+        name: instructorName,
+        username: instructorName, // Adding username property to prevent TypeError
         email: instructor?.email || "N/A",
         id: instructor?._id || null,
       };
