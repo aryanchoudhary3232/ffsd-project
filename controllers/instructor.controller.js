@@ -2,6 +2,7 @@ const Course = require("../models/course.model"); // Assuming Mongoose Course mo
 const User = require("../models/User"); // Assuming Mongoose User model
 const Order = require("../models/order.model"); // Assuming Mongoose Order model
 const Progress = require("../models/progress.model"); // Assuming Mongoose Progress model
+const AdminController = require("./admin.controller"); // Import AdminController for validating ObjectId
 const path = require("path");
 const multer = require("multer");
 const fs = require("fs");
@@ -50,9 +51,33 @@ const InstructorController = {
       );
 
       const recentOrdersRaw = await Order.getRecentOrders(20);
-      const recentOrders = recentOrdersRaw
+      let recentOrders = recentOrdersRaw
         .filter((order) => courseIds.some((id) => id.equals(order.courseId)))
         .slice(0, 5);
+      
+      // Enhance orders with user and course information
+      const enhancedOrdersPromises = recentOrders.map(async (order) => {
+        let user = null;
+        if (order.userId) {
+          // Use direct MongoDB ObjectId comparison instead of string conversion
+          try {
+            user = await User.findById(order.userId);
+          } catch (err) {
+            console.error("Error finding user:", err);
+          }
+        }
+        
+        let course = await Course.getCourseById(order.courseId);
+        
+        return {
+          ...order,
+          // Use the username or email from the user model - these are the fields that actually exist
+          username: user ? (user.username || user.email || 'Unknown User') : 'Unknown User',
+          courseTitle: course ? course.title : 'Unknown Course'
+        };
+      });
+      
+      recentOrders = await Promise.all(enhancedOrdersPromises);
 
       res.render("instructor/dashboard", {
         courses: instructorCourses,

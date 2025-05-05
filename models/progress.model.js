@@ -88,26 +88,29 @@ const ProgressModel = {
       const result = await progress.insertOne(initialProgress);
       return await progress.findOne({_id: result.insertedId}); // Return the newly created doc
     } else {
-      // Add lesson to completedLessons if not already present ($addToSet)
-      const updateResult = await progress.updateOne(
-        { _id: progressDoc._id, completedLessons: { $ne: lessonId } }, // Condition to only update if lessonId not present
-        { $push: { completedLessons: lessonId } }
-      );
-
-      // If the lesson was added, recalculate progress
-      if (updateResult.modifiedCount > 0) {
-        const updatedCompletedLessons = [...progressDoc.completedLessons, lessonId];
-        const newProgress = totalLessons > 0 ? Math.round((updatedCompletedLessons.length / totalLessons) * 100) : 0;
+      // Check if the lesson is already in the completedLessons array
+      const lessonAlreadyCompleted = progressDoc.completedLessons && 
+                                    progressDoc.completedLessons.includes(lessonId);
+      
+      if (!lessonAlreadyCompleted) {
+        // Add lesson to completedLessons if not already present
+        const updatedCompletedLessons = [...(progressDoc.completedLessons || []), lessonId];
+        const newProgress = totalLessons > 0 ? 
+                           Math.round((updatedCompletedLessons.length / totalLessons) * 100) : 0;
 
         await progress.updateOne(
           { _id: progressDoc._id },
-          { $set: { progress: newProgress } }
+          { 
+            $set: { progress: newProgress },
+            $push: { completedLessons: lessonId }
+          }
         );
+        
         // Fetch and return the updated document
-         return await progress.findOne({ _id: progressDoc._id });
+        return await progress.findOne({ _id: progressDoc._id });
       } else {
-         // Lesson was already completed or document not found (shouldn't happen due to findOne above)
-         return progressDoc; // Return existing document
+        // Lesson was already completed
+        return progressDoc; // Return existing document
       }
     }
   },

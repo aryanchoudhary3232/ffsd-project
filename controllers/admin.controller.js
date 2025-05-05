@@ -125,12 +125,12 @@ const AdminController = {
       let users = await User.find();
 
       // Process user data to ensure all have valid properties
-      // This prevents TypeError when accessing user.name.charAt(0) in the template
+      // This prevents TypeError when accessing user.username.charAt(0) in the template
       users = users.map((user) => {
         const userObj = user.toObject ? user.toObject() : user;
         return {
           ...userObj,
-          name: userObj.name || "Unknown User", // Ensure name is always a string
+          username: userObj.username || userObj.name || userObj.email || "Unknown User", // Ensure username is always a string
           email: userObj.email || "N/A",
         };
       });

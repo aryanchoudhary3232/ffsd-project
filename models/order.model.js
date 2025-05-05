@@ -185,7 +185,7 @@ const OrderModel = {
                 amount: 1,
                 status: 1,
                 createdAt: 1,
-                userName: { $arrayElemAt: ["$userDetails.name", 0] }, // Get name from the looked-up user
+                userName: { $arrayElemAt: ["$userDetails.username", 0] }, // Get name from the looked-up user
                 userEmail: { $arrayElemAt: ["$userDetails.email", 0] }, // Example: get email too
                 courseTitle: { $arrayElemAt: ["$courseDetails.title", 0] }, // Get title from the looked-up course
                 // courseTitles: "$courseDetailsList.title" // Example if multiple courses looked up

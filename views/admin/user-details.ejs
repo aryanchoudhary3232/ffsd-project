@@ -1,4 +1,4 @@
-<%- include('../partials/head', { title: (user && user.name ? user.name : 'User') + ' - User Details - LearnHub' }) %>
+<%- include('../partials/head', { title: (user && user.username ? user.username : 'User') + ' - User Details - LearnHub' }) %>
 <body class="bg-black text-white">
   <%- include('../partials/navbar') %>
   <% var instructorCourses = typeof instructorCourses !== 'undefined' ? instructorCourses : []; %>
@@ -31,12 +31,12 @@
           <div class="flex flex-col items-center">
             <div class="w-32 h-32 rounded-full bg-gray-700 flex items-center justify-center mb-4">
               <% if (user && user.avatar) { %>
-                <img src="<%= user.avatar %>" alt="<%= user.name || 'User' %>" class="w-32 h-32 rounded-full object-cover">
+                <img src="<%= user.avatar %>" alt="<%= user.username || 'User' %>" class="w-32 h-32 rounded-full object-cover">
               <% } else { %>
-                <span class="text-gray-400 text-4xl font-medium"><%= user && user.name ? user.name.charAt(0) : 'U' %></span>
+                <span class="text-gray-400 text-4xl font-medium"><%= user && user.username ? user.username.charAt(0) : 'U' %></span>
               <% } %>
             </div>
-            <h2 class="text-xl font-bold text-gray-100"><%= user && user.name ? user.name : 'Unknown User' %></h2>
+            <h2 class="text-xl font-bold text-gray-100"><%= user && user.username ? user.username : 'Unknown User' %></h2>
             <p class="text-gray-400 mb-2"><%= user && user.email ? user.email : 'No email' %></p>
             <span class="px-3 py-1 rounded-full text-sm font-medium 
               <% if (user && user.role === 'admin') { %>
@@ -89,7 +89,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h3 class="text-sm font-medium text-gray-400 mb-1">Full Name</h3>
-                <p class="text-gray-100"><%= user && user.name ? user.name : 'Unknown User' %></p>
+                <p class="text-gray-100"><%= user && user.username ? user.username : 'Unknown User' %></p>
               </div>
               <div>
                 <h3 class="text-sm font-medium text-gray-400 mb-1">Email</h3>
