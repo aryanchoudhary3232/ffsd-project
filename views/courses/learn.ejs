@@ -296,16 +296,21 @@
       completeBtn.disabled = true;
       completeBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
       
-      // Use consistent ID format and validate both IDs exist
-      const courseId = '<%= course._id || course.id %>';
-      const lessonId = '<%= currentLesson.id || currentLesson._id %>';
+      // Get course ID and lesson ID from the current page
+      const urlParts = window.location.pathname.split('/');
+      const courseId = urlParts[2]; // /courses/{courseId}/learn
       
-      console.log('Course ID:', courseId);
-      console.log('Lesson ID:', lessonId);
+      // Get lesson ID from URL query parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      let lessonId = urlParams.get('lesson');
+      
+      // If not in query params, fallback to the EJS variable
+      if (!lessonId) {
+        lessonId = '<%= currentLesson._id || currentLesson.id %>';
+      }
       
       // Validate that we have both IDs before making the request
       if (!courseId || !lessonId) {
-        console.error('Missing required IDs:', { courseId, lessonId });
         completeBtn.innerHTML = '<i class="fas fa-times-circle mr-2"></i> Error';
         completeBtn.disabled = false;
         showToast('Error: Missing course or lesson information.', 'error');
@@ -315,13 +320,13 @@
       fetch(`/courses/${courseId}/lessons/${lessonId}/complete`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
-        body: JSON.stringify({}) // Empty body
+        credentials: 'same-origin'
       })
       .then(response => {
         if (!response.ok) {
-          console.error('Server response:', response.status, response.statusText);
           throw new Error(`Network response was not ok: ${response.status}`);
         }
         return response.json();
@@ -331,12 +336,16 @@
           completeBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Completed';
           completeBtn.classList.remove('bg-purple-500', 'hover:bg-purple-600');
           completeBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+          
+          // Update progress indicators
           document.querySelectorAll('.bg-purple-500.h-2\\.5.rounded-full').forEach(bar => {
             bar.style.width = `${data.progress}%`;
           });
           document.querySelectorAll('.text-sm.font-medium').forEach(text => {
             text.textContent = `${data.progress}%`;
           });
+          
+          // Refresh the page to update UI elements
           setTimeout(() => { window.location.reload(); }, 1500);
         } else {
           completeBtn.innerHTML = '<i class="fas fa-times-circle mr-2"></i> Error';
@@ -396,7 +405,16 @@
     function loadComments() {
       const commentsContainer = document.getElementById('comments-container');
       
-      fetch('/courses/<%= course._id %>/lessons/<%= currentLesson.id %>/comments')
+      // Get course and lesson IDs consistently
+      const courseId = '<%= course._id || course.id %>'.trim();
+      const lessonId = '<%= currentLesson._id || currentLesson.id %>'.trim();
+      
+      if (!courseId || !lessonId) {
+        commentsContainer.innerHTML = '<p class="text-center text-red-400">Missing course or lesson information</p>';
+        return;
+      }
+
+      fetch(`/courses/${courseId}/lessons/${lessonId}/comments`)
         .then(response => {
           if (!response.ok) throw new Error('Network error');
           return response.json();
@@ -450,12 +468,21 @@
         return;
       }
 
+      // Get course and lesson IDs consistently
+      const courseId = '<%= course._id || course.id %>'.trim();
+      const lessonId = '<%= currentLesson._id || currentLesson.id %>'.trim();
+      
+      if (!courseId || !lessonId) {
+        showToast('Error: Missing course or lesson information.', 'error');
+        return;
+      }
+
       const postButton = document.getElementById('post-comment-btn');
       postButton.disabled = true;
       postButton.innerHTML = 'Posting...';
 
-      // Send the comment to the backend
-      fetch('/courses/<%= course._id %>/lessons/<%= currentLesson.id %>/comments', {
+      // Send the comment to the backend with properly formatted IDs
+      fetch(`/courses/${courseId}/lessons/${lessonId}/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

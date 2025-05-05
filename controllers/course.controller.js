@@ -305,6 +305,14 @@ const CourseController = {
         });
       }
 
+      // Check if lessonId is missing or empty
+      if (!lessonId || lessonId.trim() === "") {
+        return res.status(400).json({
+          success: false,
+          message: "Lesson ID is missing",
+        });
+      }
+
       // Validate that the course and lesson exist
       const course = await CourseModel.getCourseById(courseId);
       if (!course) {
