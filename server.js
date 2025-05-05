@@ -1,15 +1,25 @@
 const express = require("express");
 const path = require("path");
 // const fs = require("fs"); // Removed fs
-const mongoose = require("mongoose"); // Added mongoose
+const { mongoose } = require("./config/database"); // Import mongoose from database
 const session = require("express-session");
 const multer = require("multer");
 // const bcrypt = require("bcryptjs"); // Keep if needed elsewhere, otherwise remove
 const methodOverride = require("method-override");
 const flash = require("connect-flash");
 
-// Import database connection
-require("./config/database"); // Import database connection instead of connecting here
+// Import and initialize indexes after connection is established
+const { initializeIndexes } = require("./scripts/init-indexes");
+
+// Wait for MongoDB connection before initializing indexes
+mongoose.connection.once("open", async () => {
+  try {
+    await initializeIndexes();
+    console.log("Database indexes initialized successfully");
+  } catch (err) {
+    console.error("Error initializing indexes:", err);
+  }
+});
 
 // Import routes
 const authRoutes = require("./routes/auth.routes");
@@ -123,7 +133,8 @@ app.get("/contact-us", (req, res) => {
 });
 
 // Contact form submission handler
-app.post("/contact-us/submit", async (req, res) => { // Make async for DB operations
+app.post("/contact-us/submit", async (req, res) => {
+  // Make async for DB operations
   // Extract form data
   const { name, email, subject, message } = req.body;
 
@@ -151,14 +162,20 @@ app.post("/contact-us/submit", async (req, res) => { // Make async for DB operat
     // await newContactMessage.save();
 
     // Flash success messages
-    req.flash("success_msg", "Thank you for your message. We'll be in touch soon!");
+    req.flash(
+      "success_msg",
+      "Thank you for your message. We'll be in touch soon!"
+    );
     // Optionally add email confirmation message if you implement sending emails
     // req.flash("success_msg", "A confirmation email has been sent to your email address.");
 
     res.redirect("/contact-us");
   } catch (error) {
     console.error("Error handling contact form:", error);
-    req.flash("error_msg", "There was a problem submitting your message. Please try again later.");
+    req.flash(
+      "error_msg",
+      "There was a problem submitting your message. Please try again later."
+    );
     res.redirect("/contact-us");
   }
 });
