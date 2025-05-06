@@ -3,6 +3,7 @@ const { getDb } = require("../config/database");
 const Course = require("./course.model");
 const User = require("./User");
 
+
 // Helper function to get collections
 const getCollections = () => {
   const db = getDb();
