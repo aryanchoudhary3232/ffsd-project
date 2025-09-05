@@ -496,8 +496,8 @@ const AdminController = {
         instructor: instructor, // Pass the full instructor object as before
         enrolledStudents, // Pass the enrolled students array as before
         // Add success/error messages if needed (optional, based on your flash setup)
-        success_msg: req.flash('success_msg'),
-        error_msg: req.flash('error_msg')
+        success_msg: req.flash("success_msg"),
+        error_msg: req.flash("error_msg"),
       });
     } catch (error) {
       console.error("Admin Get Course Details error:", error);
@@ -554,7 +554,9 @@ const AdminController = {
         instructor = await User.findById(instructorId);
       }
       // Use instructor's name or username, provide clearer fallbacks
-      const instructorName = instructor ? (instructor.name || instructor.username || "Instructor Name Missing") : "Unknown Instructor";
+      const instructorName = instructor
+        ? instructor.name || instructor.username || "Instructor Name Missing"
+        : "Unknown Instructor";
 
       const courseData = {
         title,
@@ -568,13 +570,13 @@ const AdminController = {
           : "/img/placeholder.svg",
         // Add language if it's part of the form
         language: req.body.language || null, // Assuming language might be in req.body
-        status: 'draft', // Default status
+        status: "draft", // Default status
         featured: false, // Default featured
         createdAt: new Date(),
         updatedAt: new Date(),
         modules: [], // Initialize modules
         rating: 0, // Initialize rating
-        students: 0 // Initialize students count (though calculated dynamically elsewhere)
+        students: 0, // Initialize students count (though calculated dynamically elsewhere)
       };
 
       const newCourse = await Course.createCourse(courseData);
@@ -624,11 +626,17 @@ const AdminController = {
         if (AdminController.isValidObjectId(instructorId)) {
           const instructor = await User.findById(instructorId);
           if (instructor) {
-            instructorName = instructor.name || instructor.username || "Instructor Name Missing"; // Get name from fetched user
+            instructorName =
+              instructor.name ||
+              instructor.username ||
+              "Instructor Name Missing"; // Get name from fetched user
             finalInstructorId = instructor._id; // Update the ID to be saved
           } else {
             // Instructor ID provided but not found
-            req.flash("error_msg", "Selected instructor not found. Keeping original instructor.");
+            req.flash(
+              "error_msg",
+              "Selected instructor not found. Keeping original instructor."
+            );
             // Keep original instructorName and finalInstructorId by not changing them here
           }
         } else {
@@ -636,11 +644,10 @@ const AdminController = {
           return res.redirect(`/admin/courses/${courseId}/edit`);
         }
       } else if (!instructorId && course.instructorId) {
-          // If instructorId is cleared in the form, remove instructor info
-          instructorName = "Unknown Instructor";
-          finalInstructorId = null;
+        // If instructorId is cleared in the form, remove instructor info
+        instructorName = "Unknown Instructor";
+        finalInstructorId = null;
       }
-
 
       const courseData = {
         title,
@@ -652,7 +659,7 @@ const AdminController = {
         instructorId: finalInstructorId, // Use the determined ID (could be null)
         instructor: instructorName, // Use the determined name
         language: req.body.language || course.language, // Update language if provided
-        updatedAt: new Date() // Update the timestamp
+        updatedAt: new Date(), // Update the timestamp
       };
 
       if (req.file) {
@@ -1025,6 +1032,251 @@ const AdminController = {
       console.error("Admin Course Ratings error:", error);
       req.flash("error_msg", "Failed to retrieve course ratings");
       res.redirect("/admin/courses");
+    }
+  },
+
+  // API Methods for SPA
+  getStats: async (req, res) => {
+    try {
+      const [
+        totalUsers,
+        totalCourses,
+        totalStudents,
+        totalInstructors,
+        allOrders,
+      ] = await Promise.all([
+        User.countDocuments(),
+        Course.getCourseCount(),
+        User.countDocuments({ role: "student" }),
+        User.countDocuments({ role: "instructor" }),
+        Order.getAllOrders(),
+      ]);
+
+      const completedOrders = allOrders.filter(
+        (order) => order.status === "completed"
+      );
+      const totalRevenue = completedOrders.reduce(
+        (sum, order) => sum + order.amount,
+        0
+      );
+
+      // Get active students (students with recent activity)
+      const recentDate = new Date();
+      recentDate.setDate(recentDate.getDate() - 30); // Last 30 days
+      const activeStudents = await User.countDocuments({
+        role: "student",
+        joinDate: { $gte: recentDate },
+      });
+
+      res.json({
+        success: true,
+        stats: {
+          users: totalUsers,
+          courses: totalCourses,
+          revenue: totalRevenue.toFixed(2),
+          activeStudents: activeStudents,
+          instructors: totalInstructors,
+        },
+      });
+    } catch (error) {
+      console.error("Get admin stats error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching admin statistics",
+      });
+    }
+  },
+
+  getUsers: async (req, res) => {
+    try {
+      const users = await User.find().sort({ joinDate: -1 });
+
+      res.json({
+        success: true,
+        users: users,
+      });
+    } catch (error) {
+      console.error("Get admin users error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching users",
+      });
+    }
+  },
+
+  getCourses: async (req, res) => {
+    try {
+      const courses = await Course.getAllCourses();
+
+      // Add instructor names and status
+      const coursesWithDetails = await Promise.all(
+        courses.map(async (course) => {
+          let instructorName = "Unknown";
+          if (
+            course.instructorId &&
+            AdminController.isValidObjectId(course.instructorId)
+          ) {
+            const instructor = await User.findById(course.instructorId);
+            instructorName = instructor ? instructor.username : "Unknown";
+          }
+
+          return {
+            ...course,
+            instructorName: instructorName,
+            status: course.status || "active",
+            enrolledStudents: course.enrolledStudents || 0,
+          };
+        })
+      );
+
+      res.json({
+        success: true,
+        courses: coursesWithDetails,
+      });
+    } catch (error) {
+      console.error("Get admin courses error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching courses",
+      });
+    }
+  },
+
+  getAnalytics: async (req, res) => {
+    try {
+      // Calculate user growth (last 30 days vs previous 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const sixtyDaysAgo = new Date();
+      sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+
+      const [recentUsers, previousUsers, allOrders, allCourses] =
+        await Promise.all([
+          User.countDocuments({ joinDate: { $gte: thirtyDaysAgo } }),
+          User.countDocuments({
+            joinDate: {
+              $gte: sixtyDaysAgo,
+              $lt: thirtyDaysAgo,
+            },
+          }),
+          Order.getAllOrders(),
+          Course.getAllCourses(),
+        ]);
+
+      // Calculate growth percentages
+      const userGrowth =
+        previousUsers > 0
+          ? (((recentUsers - previousUsers) / previousUsers) * 100).toFixed(1)
+          : "100";
+
+      // Revenue calculations
+      const recentOrders = allOrders.filter(
+        (order) =>
+          new Date(order.createdAt) >= thirtyDaysAgo &&
+          order.status === "completed"
+      );
+      const previousOrders = allOrders.filter(
+        (order) =>
+          new Date(order.createdAt) >= sixtyDaysAgo &&
+          new Date(order.createdAt) < thirtyDaysAgo &&
+          order.status === "completed"
+      );
+
+      const recentRevenue = recentOrders.reduce(
+        (sum, order) => sum + order.amount,
+        0
+      );
+      const previousRevenue = previousOrders.reduce(
+        (sum, order) => sum + order.amount,
+        0
+      );
+
+      const revenueGrowth =
+        previousRevenue > 0
+          ? (
+              ((recentRevenue - previousRevenue) / previousRevenue) *
+              100
+            ).toFixed(1)
+          : "100";
+
+      // Popular courses (by enrollment)
+      const popularCourses = allCourses
+        .sort((a, b) => (b.enrolledStudents || 0) - (a.enrolledStudents || 0))
+        .slice(0, 5)
+        .map((course) => ({
+          title: course.title,
+          enrollments: course.enrolledStudents || 0,
+        }));
+
+      // Active users
+      const activeUsers = await User.countDocuments({
+        joinDate: { $gte: thirtyDaysAgo },
+      });
+
+      // Course completion rate (mock calculation)
+      const completionRate = 75; // This would require more complex calculation
+
+      res.json({
+        success: true,
+        analytics: {
+          userGrowth: userGrowth,
+          revenueGrowth: revenueGrowth,
+          popularCourses: popularCourses,
+          activeUsers: activeUsers,
+          completionRate: completionRate,
+        },
+      });
+    } catch (error) {
+      console.error("Get admin analytics error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching analytics",
+      });
+    }
+  },
+
+  createUser: async (req, res) => {
+    try {
+      const { username, email, password, role } = req.body;
+
+      // Validation
+      if (!username || !email || !password || !role) {
+        return res.status(400).json({
+          success: false,
+          message: "All fields are required",
+        });
+      }
+
+      // Check if user already exists
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: "User with this email already exists",
+        });
+      }
+
+      // Create new user
+      const newUser = new User({
+        username,
+        email,
+        password,
+        role,
+      });
+
+      await newUser.save();
+
+      res.status(201).json({
+        success: true,
+        message: "User created successfully",
+      });
+    } catch (error) {
+      console.error("Create user error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error creating user",
+      });
     }
   },
 };

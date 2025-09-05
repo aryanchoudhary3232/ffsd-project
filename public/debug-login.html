@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Debug Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+        background: #f5f5f5;
+      }
+      .container {
+        max-width: 400px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .form-group {
+        margin: 20px 0;
+      }
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+      }
+      input {
+        padding: 12px;
+        width: 100%;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      button {
+        padding: 12px 24px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+        font-size: 16px;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      .error {
+        color: #dc3545;
+        margin-top: 5px;
+        font-size: 14px;
+      }
+      .success {
+        color: #28a745;
+        margin-top: 5px;
+        font-size: 14px;
+      }
+      .result {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 4px;
+      }
+      .loading {
+        opacity: 0.6;
+        pointer-events: none;
+      }
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+      .test-accounts {
+        background: #e9ecef;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+      }
+      .test-accounts h3 {
+        margin-top: 0;
+      }
+      .test-accounts p {
+        margin: 5px 0;
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔐 Login Debug Test</h1>
+
+      <div class="test-accounts">
+        <h3>Test Accounts:</h3>
+        <p><strong>Student:</strong> test@example.com / password123</p>
+        <p><strong>Admin:</strong> admin@seekobharat.com / admin123</p>
+        <p><strong>Instructor:</strong> john@seekobharat.com / instructor123</p>
+      </div>
+
+      <form id="debug-login-form">
+        <div class="form-group">
+          <label for="email">Email:</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value="test@example.com"
+            required
+          />
+          <div id="email-error" class="error"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            value="password123"
+            required
+          />
+          <div id="password-error" class="error"></div>
+        </div>
+
+        <div id="general-error" class="error"></div>
+        <div id="success-message" class="success"></div>
+
+        <button type="submit" id="submit-btn">🚀 Test Login</button>
+      </form>
+
+      <div id="result"></div>
+    </div>
+
+    <script>
+      console.log("🔧 Login Debug Test - Starting...");
+
+      document
+        .getElementById("debug-login-form")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+          console.log("📝 Form submitted");
+
+          // Clear previous messages
+          document.getElementById("email-error").textContent = "";
+          document.getElementById("password-error").textContent = "";
+          document.getElementById("general-error").textContent = "";
+          document.getElementById("success-message").textContent = "";
+          document.getElementById("result").innerHTML = "";
+
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+          const submitBtn = document.getElementById("submit-btn");
+          const resultDiv = document.getElementById("result");
+
+          console.log("📧 Email:", email);
+          console.log("🔒 Password length:", password.length);
+
+          // Validation
+          if (!email) {
+            document.getElementById("email-error").textContent =
+              "Email is required";
+            return;
+          }
+          if (!password) {
+            document.getElementById("password-error").textContent =
+              "Password is required";
+            return;
+          }
+
+          // Show loading state
+          submitBtn.textContent = "⏳ Logging in...";
+          submitBtn.disabled = true;
+          document.body.classList.add("loading");
+
+          try {
+            console.log("🌐 Making API request...");
+            const response = await fetch("/api/auth/login", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ email, password }),
+            });
+
+            console.log("📊 Response status:", response.status);
+            console.log(
+              "📋 Response headers:",
+              Object.fromEntries(response.headers.entries())
+            );
+
+            const result = await response.json();
+            console.log("📦 Response data:", result);
+
+            if (result.success) {
+              document.getElementById(
+                "success-message"
+              ).textContent = `✅ Login successful! Welcome ${result.user.name} (${result.user.role})`;
+
+              resultDiv.innerHTML = `
+                        <div style="background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 4px;">
+                            <h3>✅ SUCCESS!</h3>
+                            <p><strong>User:</strong> ${result.user.name}</p>
+                            <p><strong>Email:</strong> ${result.user.email}</p>
+                            <p><strong>Role:</strong> ${result.user.role}</p>
+                            <p><strong>User ID:</strong> ${result.user.id}</p>
+                        </div>
+                    `;
+
+              // Simulate redirect message
+              setTimeout(() => {
+                const redirectTarget =
+                  result.user.role === "admin"
+                    ? "Admin Dashboard"
+                    : result.user.role === "instructor"
+                    ? "Teacher Dashboard"
+                    : "Student Dashboard";
+                resultDiv.innerHTML += `
+                            <div style="background: #cce7ff; border: 1px solid #99d5ff; padding: 15px; border-radius: 4px; margin-top: 10px;">
+                                <p>🔄 Would redirect to: <strong>${redirectTarget}</strong></p>
+                            </div>
+                        `;
+              }, 2000);
+            } else {
+              document.getElementById("general-error").textContent =
+                result.message;
+
+              resultDiv.innerHTML = `
+                        <div style="background: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 4px;">
+                            <h3>❌ FAILED</h3>
+                            <p><strong>Error:</strong> ${result.message}</p>
+                        </div>
+                    `;
+            }
+          } catch (error) {
+            console.error("💥 Network/Parse error:", error);
+            document.getElementById("general-error").textContent =
+              "Network error: " + error.message;
+
+            resultDiv.innerHTML = `
+                    <div style="background: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 4px;">
+                        <h3>💥 NETWORK ERROR</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `;
+          } finally {
+            // Reset button
+            submitBtn.textContent = "🚀 Test Login";
+            submitBtn.disabled = false;
+            document.body.classList.remove("loading");
+          }
+        });
+
+      // Quick fill buttons
+      function fillCredentials(email, password) {
+        document.getElementById("email").value = email;
+        document.getElementById("password").value = password;
+      }
+
+      // Add quick fill buttons
+      setTimeout(() => {
+        const container = document.querySelector(".container");
+        container.innerHTML += `
+                <div style="margin-top: 20px; text-align: center;">
+                    <h3>Quick Fill:</h3>
+                    <button type="button" onclick="fillCredentials('test@example.com', 'password123')" 
+                            style="margin: 5px; padding: 8px 12px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        👤 Student
+                    </button>
+                    <button type="button" onclick="fillCredentials('admin@seekobharat.com', 'admin123')" 
+                            style="margin: 5px; padding: 8px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        👑 Admin
+                    </button>
+                    <button type="button" onclick="fillCredentials('john@seekobharat.com', 'instructor123')" 
+                            style="margin: 5px; padding: 8px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        🎓 Instructor
+                    </button>
+                </div>
+            `;
+      }, 100);
+
+      console.log("✅ Debug test ready!");
+    </script>
+  </body>
+</html>

@@ -389,6 +389,254 @@ const CourseController = {
       });
     }
   },
+
+  // API Methods for SPA
+  apiGetAllCourses: async (req, res) => {
+    try {
+      const courses = await CourseModel.getAllCourses();
+      res.json({
+        success: true,
+        courses: courses,
+      });
+    } catch (error) {
+      console.error("API Get All Courses error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching courses",
+      });
+    }
+  },
+
+  apiGetFeaturedCourses: async (req, res) => {
+    try {
+      const courses = await CourseModel.getFeaturedCourses();
+      res.json({
+        success: true,
+        courses: courses,
+      });
+    } catch (error) {
+      console.error("API Get Featured Courses error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching featured courses",
+      });
+    }
+  },
+
+  apiSearchCourses: async (req, res) => {
+    try {
+      const { q } = req.query;
+      const courses = q
+        ? await CourseModel.searchCourses(q)
+        : await CourseModel.getAllCourses();
+      res.json({
+        success: true,
+        courses: courses,
+      });
+    } catch (error) {
+      console.error("API Search Courses error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error searching courses",
+      });
+    }
+  },
+
+  apiGetCourseById: async (req, res) => {
+    try {
+      const courseId = req.params.id;
+      const course = await CourseModel.getCourseById(courseId);
+
+      if (!course) {
+        return res.status(404).json({
+          success: false,
+          message: "Course not found",
+        });
+      }
+
+      res.json({
+        success: true,
+        course: course,
+      });
+    } catch (error) {
+      console.error("API Get Course By ID error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching course",
+      });
+    }
+  },
+
+  apiCreateCourse: async (req, res) => {
+    try {
+      const {
+        title,
+        description,
+        price,
+        category,
+        difficulty,
+        duration,
+        instructorId,
+      } = req.body;
+
+      // Validation
+      if (
+        !title ||
+        !description ||
+        !price ||
+        !category ||
+        !difficulty ||
+        !duration ||
+        !instructorId
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "All fields are required",
+        });
+      }
+
+      // Create course data
+      const courseData = {
+        title,
+        description,
+        price: parseFloat(price),
+        category,
+        difficulty,
+        duration: parseInt(duration),
+        instructorId,
+        createdAt: new Date(),
+        status: "active",
+      };
+
+      const courseId = await CourseModel.createCourse(courseData);
+
+      if (courseId) {
+        res.status(201).json({
+          success: true,
+          message: "Course created successfully",
+          courseId: courseId,
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: "Failed to create course",
+        });
+      }
+    } catch (error) {
+      console.error("API Create Course error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error creating course",
+      });
+    }
+  },
+
+  apiUpdateCourse: async (req, res) => {
+    try {
+      const courseId = req.params.id;
+      const {
+        title,
+        description,
+        price,
+        category,
+        difficulty,
+        duration,
+        instructorId,
+      } = req.body;
+
+      // Validation
+      if (
+        !title ||
+        !description ||
+        !price ||
+        !category ||
+        !difficulty ||
+        !duration ||
+        !instructorId
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "All fields are required",
+        });
+      }
+
+      // Check if course exists
+      const existingCourse = await CourseModel.getCourseById(courseId);
+      if (!existingCourse) {
+        return res.status(404).json({
+          success: false,
+          message: "Course not found",
+        });
+      }
+
+      // Update course
+      const updateData = {
+        title,
+        description,
+        price: parseFloat(price),
+        category,
+        difficulty,
+        duration: parseInt(duration),
+        instructorId,
+      };
+
+      const success = await CourseModel.updateCourse(courseId, updateData);
+
+      if (success) {
+        res.json({
+          success: true,
+          message: "Course updated successfully",
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: "Failed to update course",
+        });
+      }
+    } catch (error) {
+      console.error("API Update Course error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error updating course",
+      });
+    }
+  },
+
+  apiDeleteCourse: async (req, res) => {
+    try {
+      const courseId = req.params.id;
+
+      // Check if course exists
+      const existingCourse = await CourseModel.getCourseById(courseId);
+      if (!existingCourse) {
+        return res.status(404).json({
+          success: false,
+          message: "Course not found",
+        });
+      }
+
+      // Delete course
+      const success = await CourseModel.deleteCourse(courseId);
+
+      if (success) {
+        res.json({
+          success: true,
+          message: "Course deleted successfully",
+        });
+      } else {
+        res.status(500).json({
+          success: false,
+          message: "Failed to delete course",
+        });
+      }
+    } catch (error) {
+      console.error("API Delete Course error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error deleting course",
+      });
+    }
+  },
 };
 
 // Helper function to format timestamps
