@@ -106,6 +106,7 @@ function isAdmin(req, res, next) {
 // Routes
 app.use("/api", apiRoutes); // API routes for SPA
 app.use("/", authRoutes);
+app.use("/login", authRoutes);
 app.use("/courses", courseRoutes);
 app.use("/user", userRoutes);
 app.use("/admin", adminRoutes);
