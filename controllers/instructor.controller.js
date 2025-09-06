@@ -199,7 +199,11 @@ const InstructorController = {
         }
 
         // Use instructor's name or username or email
-        const instructorName = instructor.username || instructor.name || instructor.email || "Instructor";
+        const instructorName =
+          instructor.username ||
+          instructor.name ||
+          instructor.email ||
+          "Instructor";
 
         const newCourseData = {
           title,
@@ -292,7 +296,12 @@ const InstructorController = {
         }
 
         // Use instructor's name or username or email
-        const instructorName = instructor ? (instructor.username || instructor.name || instructor.email || "Instructor") : "Instructor";
+        const instructorName = instructor
+          ? instructor.username ||
+            instructor.name ||
+            instructor.email ||
+            "Instructor"
+          : "Instructor";
 
         const updates = {
           title,
@@ -1020,5 +1029,149 @@ function calculateRatingStats(ratings) {
     percentages,
   };
 }
+
+// API Methods for SPA
+const getStats = async (req, res) => {
+  try {
+    const instructorId = req.session.user.id;
+
+    // Get instructor's courses
+    const courses = await Course.getCoursesByInstructor(instructorId);
+    const coursesCount = courses.length;
+
+    // Calculate total students across all courses
+    let totalStudents = 0;
+    let totalRevenue = 0;
+    let totalRatings = 0;
+    let ratingCount = 0;
+
+    for (const course of courses) {
+      totalStudents += course.enrolledStudents || 0;
+      totalRevenue += (course.enrolledStudents || 0) * course.price;
+
+      if (course.rating) {
+        totalRatings += course.rating;
+        ratingCount++;
+      }
+    }
+
+    const avgRating =
+      ratingCount > 0 ? (totalRatings / ratingCount).toFixed(1) : "0.0";
+
+    res.json({
+      success: true,
+      stats: {
+        courses: coursesCount,
+        students: totalStudents,
+        revenue: totalRevenue.toFixed(2),
+        rating: avgRating,
+      },
+    });
+  } catch (error) {
+    console.error("Get instructor stats error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching instructor statistics",
+    });
+  }
+};
+
+const getCourses = async (req, res) => {
+  try {
+    const instructorId = req.session.user.id;
+
+    const courses = await Course.getCoursesByInstructor(instructorId);
+
+    res.json({
+      success: true,
+      courses: courses,
+    });
+  } catch (error) {
+    console.error("Get instructor courses error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching instructor courses",
+    });
+  }
+};
+
+const getStudents = async (req, res) => {
+  try {
+    const instructorId = req.session.user.id;
+
+    // Get instructor's courses
+    const courses = await Course.getCoursesByInstructor(instructorId);
+    const students = [];
+
+    for (const course of courses) {
+      // Get all users enrolled in this course
+      const enrolledUsers = await User.find({
+        enrolledCourses: course._id,
+      });
+
+      for (const user of enrolledUsers) {
+        const progress = await Progress.getProgress(user._id, course._id);
+        students.push({
+          name: user.username,
+          email: user.email,
+          courseTitle: course.title,
+          progress: progress ? progress.progress : 0,
+          enrolledDate: user.joinDate,
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      students: students,
+    });
+  } catch (error) {
+    console.error("Get instructor students error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching instructor students",
+    });
+  }
+};
+
+const getAnalytics = async (req, res) => {
+  try {
+    const instructorId = req.session.user.id;
+
+    // Get instructor's courses
+    const courses = await Course.getCoursesByInstructor(instructorId);
+
+    const coursePerformance = courses.map((course) => ({
+      title: course.title,
+      students: course.enrolledStudents || 0,
+      revenue: (course.enrolledStudents || 0) * course.price,
+    }));
+
+    const totalRevenue = coursePerformance.reduce(
+      (sum, course) => sum + course.revenue,
+      0
+    );
+
+    res.json({
+      success: true,
+      analytics: {
+        coursePerformance: coursePerformance,
+        totalRevenue: totalRevenue.toFixed(2),
+      },
+    });
+  } catch (error) {
+    console.error("Get instructor analytics error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching instructor analytics",
+    });
+  }
+};
+
+// Add API methods to the controller
+InstructorController.getStats = getStats;
+InstructorController.getCourses = getCourses;
+InstructorController.getStudents = getStudents;
+InstructorController.getAnalytics = getAnalytics;
 
 module.exports = InstructorController;
