@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "nodemon server.js",
+    "seed": "node seed.js",
+    "seed:clear": "node seed.js --clear"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

@@ -110,3 +110,5 @@ CourseSchema.pre('save', function(next) {
 });
 
 const Course = mongoose.model('Course', CourseSchema);
+
+module.exports = Course;

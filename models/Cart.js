@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const CartItemSchema = new Schema({
@@ -53,3 +54,5 @@ CartSchema.pre('save', function(next) {
 });
 
 const Cart = mongoose.model('Cart', CartSchema);
+
+module.exports = Cart;

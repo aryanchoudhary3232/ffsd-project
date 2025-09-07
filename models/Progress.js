@@ -44,3 +44,5 @@ ProgressSchema.pre('save', function(next) {
 });
 
 const Progress = mongoose.model('Progress', ProgressSchema);
+
+module.exports = Progress;
