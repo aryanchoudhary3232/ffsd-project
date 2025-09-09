@@ -1,46 +1,38 @@
 {
-  "name": "seekho-bharat",
+  "name": "seekho-bharat-ffsd",
   "version": "0.1.0",
   "private": true,
+  "description": "Full Stack Development (FFSD) E-Learning Platform with DOM manipulation, AJAX, and form validation",
   "scripts": {
     "start": "nodemon server.js",
     "seed": "node seed.js",
     "seed:clear": "node seed.js --clear"
   },
   "dependencies": {
-    "@hookform/resolvers": "^3.9.1",
-    "autoprefixer": "^10.4.20",
     "bcrypt": "^5.1.1",
     "bcryptjs": "latest",
     "body-parser": "latest",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
     "connect-flash": "latest",
-    "date-fns": "4.1.0",
     "ejs": "^3.1.10",
     "express": "latest",
     "express-session": "^1.18.1",
-    "fs": "latest",
-    "gsap": "latest",
     "method-override": "latest",
     "mongoose": "^8.13.2",
     "multer": "latest",
-    "nodemon": "^3.1.10",
-    "path": "latest",
-    "sqlite3": "^5.1.7",
-    "tailwind-merge": "^2.5.5",
-    "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.24.1"
+    "nodemon": "^3.1.10"
   },
-  "devDependencies": {
-    "@types/node": "^22",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.17",
-    "typescript": "^5"
-  },
-  "main": "server.js",
-  "keywords": [],
+  "keywords": [
+    "ffsd",
+    "full-stack",
+    "dom-manipulation",
+    "ajax",
+    "form-validation",
+    "spa",
+    "nodejs",
+    "express",
+    "mongodb"
+  ],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "main": "server.js"
 }

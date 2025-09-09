@@ -28,6 +28,7 @@ const userRoutes = require("./routes/user.routes");
 const adminRoutes = require("./routes/admin.routes");
 const instructorRoutes = require("./routes/instructor.routes");
 const cartRoutes = require("./routes/cart.routes");
+const apiRoutes = require("./routes/api.routes"); // Add API routes
 
 // Initialize express app
 const app = express();
@@ -103,6 +104,7 @@ function isAdmin(req, res, next) {
 }
 
 // Routes
+app.use("/api", apiRoutes); // API routes for SPA
 app.use("/", authRoutes);
 app.use("/courses", courseRoutes);
 app.use("/user", userRoutes);
@@ -110,8 +112,18 @@ app.use("/admin", adminRoutes);
 app.use("/instructor", instructorRoutes);
 app.use("/cart", cartRoutes);
 
-// Home page
-app.get("/", async (req, res) => {
+// Home page - serve SPA
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// SPA route - catch all other routes and serve the SPA
+app.get("/spa", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// Legacy EJS home page (keep for compatibility)
+app.get("/legacy", async (req, res) => {
   try {
     const CourseModel = require("./models/course.model");
     const featuredCourses = await CourseModel.getFeaturedCourses();
