@@ -5,8 +5,8 @@
   "description": "Full Stack Development (FFSD) E-Learning Platform with DOM manipulation, AJAX, and form validation",
   "scripts": {
     "start": "nodemon server.js",
-    "dev": "nodemon server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "seed": "node seed.js",
+    "seed:clear": "node seed.js --clear"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

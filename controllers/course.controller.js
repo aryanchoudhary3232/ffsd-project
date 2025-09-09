@@ -156,7 +156,9 @@ const CourseController = {
       }
 
       // Check if enrolled
-      if (!user.enrolledCourses.includes(courseId)) {
+      if (!user.enrolledCourses || !user.enrolledCourses.some(
+        (enrolledCourseId) => enrolledCourseId.toString() === courseId
+      )) {
         req.flash("error_msg", "You are not enrolled in this course");
         return res.redirect(`/courses/${courseId}`);
       }
@@ -171,9 +173,12 @@ const CourseController = {
 
       if (lessonId && course.modules) {
         for (const module of course.modules) {
-          // Ensure lessons array exists and find the lesson by _id
+          // Ensure lessons array exists and find the lesson by _id or id
           const lesson = module.lessons?.find(
-            (l) => l._id.toString() === lessonId
+            (l) => {
+              const lessonIdToCheck = l._id || l.id;
+              return lessonIdToCheck && lessonIdToCheck.toString() === lessonId;
+            }
           );
           if (lesson) {
             currentLesson = lesson;
@@ -217,20 +222,51 @@ const CourseController = {
 
   // Mark lesson as complete
   markLessonAsComplete: async (req, res) => {
+    console.log('markLessonAsComplete called with:', req.params);
+    
     if (!req.session.user) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
     const { courseId, lessonId } = req.params;
     const userId = req.session.user.id;
+    
+    console.log('User ID:', userId);
+    console.log('Course ID:', courseId);
+    console.log('Lesson ID:', lessonId);
 
     try {
       // First verify the course exists
       const course = await CourseModel.getCourseById(courseId);
       if (!course) {
+        console.log('Course not found:', courseId);
         return res.status(404).json({
           success: false,
           message: "Course not found",
+        });
+      }
+
+      console.log('Course found:', course.title);
+      
+      // Verify the user is enrolled in this course
+      const user = await User.findById(userId);
+      if (!user) {
+        console.log('User not found:', userId);
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+      
+      const isEnrolled = user.enrolledCourses && user.enrolledCourses.some(
+        (enrolledCourseId) => enrolledCourseId.toString() === courseId.toString()
+      );
+      
+      if (!isEnrolled) {
+        console.log('User not enrolled in course');
+        return res.status(403).json({
+          success: false,
+          message: "You are not enrolled in this course",
         });
       }
 
@@ -240,8 +276,12 @@ const CourseController = {
         if (Array.isArray(module.lessons)) {
           if (
             module.lessons.some(
-              (lesson) =>
-                lesson && lesson._id && lesson._id.toString() === lessonId
+              (lesson) => {
+                if (!lesson) return false;
+                // Check both _id and id fields to handle legacy data
+                const lessonIdToCheck = lesson._id || lesson.id;
+                return lessonIdToCheck && lessonIdToCheck.toString() === lessonId;
+              }
             )
           ) {
             lessonExists = true;
@@ -251,17 +291,22 @@ const CourseController = {
       }
 
       if (!lessonExists) {
+        console.log('Lesson not found in course:', lessonId);
         return res.status(404).json({
           success: false,
           message: "Lesson not found in this course",
         });
       }
 
+      console.log('Lesson exists, proceeding to mark as complete');
+
       // Calculate total lessons from the fetched course
       const totalLessons = course.modules.reduce(
         (total, module) => total + (module.lessons?.length || 0),
         0
       );
+
+      console.log('Total lessons in course:', totalLessons);
 
       // Now proceed with marking the lesson as complete, passing totalLessons
       const updatedProgress = await ProgressModel.markLessonAsComplete(
@@ -272,11 +317,14 @@ const CourseController = {
       );
 
       if (!updatedProgress) {
+        console.log('Failed to update progress');
         return res.status(500).json({
           success: false,
           message: "Could not update progress",
         });
       }
+
+      console.log('Progress updated successfully:', updatedProgress);
 
       res.json({
         success: true,

@@ -1,0 +1,291 @@
+[
+  {
+    "id": "1",
+    "name": "Admin User",
+    "email": "admin@seekhobharat.com",
+    "password": "123456",
+    "role": "admin",
+    "joinDate": "2023-01-01",
+    "enrolledCourses": [
+      "2",
+      "1742757772637",
+      "1742757216231",
+      "3"
+    ],
+    "completedCourses": []
+  },
+  {
+    "id": "2",
+    "name": "Jane",
+    "email": "jane@example.com",
+    "password": "123456",
+    "role": "instructor",
+    "joinDate": "2023-01-15",
+    "enrolledCourses": [
+      "4",
+      "1",
+      "1743013827800",
+      "1742791944339"
+    ],
+    "completedCourses": []
+  },
+  {
+    "id": "3",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "password": "123456",
+    "role": "student",
+    "joinDate": "2023-02-01",
+    "enrolledCourses": [
+      "1",
+      "2",
+      "4",
+      "3",
+      "1742791944339"
+    ],
+    "completedCourses": []
+  },
+  {
+    "id": "4",
+    "name": "Michael Wilson",
+    "email": "michael@example.com",
+    "password": "123456",
+    "role": "instructor",
+    "joinDate": "2023-02-15",
+    "enrolledCourses": [
+      "1742791944339"
+    ],
+    "completedCourses": []
+  },
+  {
+    "id": "5",
+    "name": "Sarah Johnson",
+    "email": "sarah@example.com",
+    "password": "123456",
+    "role": "student",
+    "joinDate": "2023-03-01",
+    "enrolledCourses": [
+      "1",
+      "4"
+    ],
+    "completedCourses": []
+  },
+  {
+    "id": "1742016238405",
+    "name": "Shreyaan",
+    "email": "16shreyaan09@gmail.com",
+    "password": "123456",
+    "role": "instructor",
+    "joinDate": "2025-03-15",
+    "enrolledCourses": [],
+    "completedCourses": []
+  },
+  {
+    "id": "1742016472032",
+    "name": "Shreyaan",
+    "email": "123@gmail.com",
+    "password": "123456",
+    "role": "instructor",
+    "joinDate": "2025-03-15",
+    "enrolledCourses": [],
+    "completedCourses": []
+  },
+  {
+    "id": "1742892188159",
+    "name": "tester",
+    "email": "test@email.com",
+    "password": "123456",
+    "role": "student",
+    "joinDate": "2025-03-25",
+    "enrolledCourses": [
+      "3",
+      "1",
+      "2"
+    ],
+    "completedCourses": []
+  },
+  {
+    "id": "1742896508686",
+    "name": "sarah here",
+    "email": "sarah1@example.com",
+    "password": "123456",
+    "role": "student",
+    "joinDate": "2025-03-25",
+    "enrolledCourses": [],
+    "completedCourses": []
+  },
+  {
+    "id": "1742896718754",
+    "name": "sarah2",
+    "email": "sarah2@example.com",
+    "password": "123456",
+    "role": "student",
+    "joinDate": "2025-03-25",
+    "enrolledCourses": [],
+    "completedCourses": []
+  },
+  {
+    "id": "1742896865238",
+    "name": "sarah3",
+    "email": "sarah3@example.com",
+    "password": "123456",
+    "role": "student",
+    "joinDate": "2025-03-25",
+    "enrolledCourses": [],
+    "completedCourses": []
+  },
+  {
+    "id": "1742897396192",
+    "name": "sarah5",
+    "email": "sarah5@example.com",
+    "password": "123456",
+    "role": "student",
+    "joinDate": "2025-03-25",
+    "enrolledCourses": [],
+    "completedCourses": []
+  },
+  {
+    "id": "1742897412920",
+    "name": "sarah6",
+    "email": "sarah6@example.com",
+    "password": "123456",
+    "role": "student",
+    "joinDate": "2025-03-25",
+    "enrolledCourses": [],
+    "completedCourses": []
+  },
+  {
+    "id": "1742927895805",
+    "name": "sarah7",
+    "email": "sarah7@example.com",
+    "password": "123456",
+    "role": "student",
+    "joinDate": "2025-03-25",
+    "enrolledCourses": [
+      "1742791944339"
+    ],
+    "completedCourses": []
+  },
+  {
+    "id": "1743012921322",
+    "name": "janus",
+    "email": "janus@gmail.com",
+    "password": "123456",
+    "role": "student",
+    "joinDate": "2025-03-26",
+    "enrolledCourses": [
+      "4",
+      "1742791944339",
+      "2"
+    ],
+    "completedCourses": []
+  },
+  {
+    "id": "1743013290791",
+    "name": "asada",
+    "email": "asdasd@gmail.com",
+    "password": "123456",
+    "role": "student",
+    "joinDate": "2025-03-26",
+    "enrolledCourses": [
+      "4"
+    ],
+    "completedCourses": []
+  },
+  {
+    "id": "1742922014299",
+    "name": "snickerdoodle",
+    "email": "student@gmail.com",
+    "password": "123456",
+    "role": "student",
+    "joinDate": "2025-03-25",
+    "enrolledCourses": [
+      "3",
+      "4",
+      "2"
+    ],
+    "completedCourses": []
+  },
+  {
+    "id": "1743008553287",
+    "name": "student1",
+    "email": "rr@g.com",
+    "password": "123456",
+    "role": "student",
+    "joinDate": "2025-03-26",
+    "enrolledCourses": [
+      "4"
+    ],
+    "completedCourses": []
+  },
+  {
+    "id": "1743009397679",
+    "name": "snickerdoodlewtrd",
+    "email": "snickerdoodle@gmail",
+    "password": "123456",
+    "role": "student",
+    "joinDate": "2025-03-26",
+    "enrolledCourses": [],
+    "completedCourses": []
+  },
+  {
+    "id": "1743009444381",
+    "name": "trial",
+    "email": "trial@gmail",
+    "password": "123456",
+    "role": "student",
+    "joinDate": "2025-03-26",
+    "enrolledCourses": [],
+    "completedCourses": []
+  },
+  {
+    "id": "1743011974691",
+    "name": "Sudhan P",
+    "email": "sudhanp2004@gmail.com",
+    "password": "123456",
+    "role": "student",
+    "joinDate": "2025-03-26",
+    "enrolledCourses": [],
+    "completedCourses": []
+  },
+  {
+    "id": "1743023262257",
+    "name": "asdhqeqwe",
+    "email": "asdasdas@asjdasda.asdad",
+    "password": "123456",
+    "role": "student",
+    "joinDate": "2025-03-26",
+    "enrolledCourses": [],
+    "completedCourses": []
+  },
+  {
+    "id": "1743050583735",
+    "name": "saraheigh",
+    "email": "sarah8@example.com",
+    "password": "123456",
+    "role": "student",
+    "joinDate": "2025-03-27",
+    "enrolledCourses": [],
+    "completedCourses": []
+  },
+  {
+    "id": "1743065261157",
+    "name": "testboy",
+    "email": "test@gmail.com",
+    "password": "123456",
+    "role": "student",
+    "joinDate": "2025-03-27",
+    "enrolledCourses": [],
+    "completedCourses": []
+  },
+  {
+    "id": "1743065376410",
+    "name": "testboy",
+    "email": "test1@gmail.com",
+    "password": "123456",
+    "role": "student",
+    "joinDate": "2025-03-27",
+    "enrolledCourses": [],
+    "completedCourses": []
+  }
+]

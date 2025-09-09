@@ -32,7 +32,13 @@ const CartController = {
   // Add to cart
   addToCart: async (req, res) => {
     if (!req.session.user) {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
+      // Check if it's an AJAX request
+      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        return res.status(401).json({ success: false, message: "Unauthorized" });
+      } else {
+        req.flash("error_msg", "Please login to add items to cart");
+        return res.redirect("/login");
+      }
     }
 
     const { courseId } = req.body;
@@ -41,22 +47,52 @@ const CartController = {
     try {
         // Use CartModel.addToCart method instead
         const result = await CartModel.addToCart(userId, courseId);
-        res.json(result);
+        
+        // Check if it's an AJAX request
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+          res.json(result);
+        } else {
+          // Regular form submission - redirect to cart with success message
+          req.flash("success_msg", "Course added to cart successfully!");
+          res.redirect("/cart");
+        }
     } catch (error) {
       console.error("Add to Cart error:", error);
-      // Check if the error is the "Already enrolled" error
-      if (error.message === "Already enrolled in this course") {
-          return res.status(400).json({ success: false, message: "You are already enrolled in this course." });
+      
+      // Check if it's an AJAX request
+      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        // Check if the error is the "Already enrolled" error
+        if (error.message === "Already enrolled in this course") {
+            return res.status(400).json({ success: false, message: "You are already enrolled in this course." });
+        } else if (error.message === "Course already in cart") {
+            return res.status(400).json({ success: false, message: "This course is already in your cart." });
+        }
+        // Handle other errors
+        res.status(500).json({ success: false, message: error.message || "Error adding to cart" });
+      } else {
+        // Regular form submission - redirect with error message
+        if (error.message === "Already enrolled in this course") {
+          req.flash("error_msg", "You are already enrolled in this course.");
+        } else if (error.message === "Course already in cart") {
+          req.flash("error_msg", "This course is already in your cart.");
+        } else {
+          req.flash("error_msg", "Error adding course to cart. Please try again.");
+        }
+        res.redirect("back"); // Go back to the previous page
       }
-      // Handle other errors
-      res.status(500).json({ success: false, message: error.message || "Error adding to cart" });
     }
   },
 
   // Remove from cart
   removeFromCart: async (req, res) => {
     if (!req.session.user) {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
+      // Check if it's an AJAX request
+      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        return res.status(401).json({ success: false, message: "Unauthorized" });
+      } else {
+        req.flash("error_msg", "Please login to remove items from cart");
+        return res.redirect("/login");
+      }
     }
 
     const { courseId } = req.body;
@@ -66,14 +102,28 @@ const CartController = {
         // Use CartModel.removeFromCart method
         const result = await CartModel.removeFromCart(userId, courseId);
         
-        // Get updated cart count
-        const cart = await CartModel.getCartWithCourses(userId);
-        const cartCount = cart.items.length;
-
-        res.json({ success: true, cartCount });
+        // Check if it's an AJAX request
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+          // Get updated cart count
+          const cart = await CartModel.getCartWithCourses(userId);
+          const cartCount = cart.items.length;
+          res.json({ success: true, cartCount });
+        } else {
+          // Regular form submission - redirect to cart with success message
+          req.flash("success_msg", "Course removed from cart successfully!");
+          res.redirect("/cart");
+        }
     } catch (error) {
       console.error("Remove From Cart error:", error);
-      res.status(500).json({ success: false, message: error.message || "Error removing from cart" });
+      
+      // Check if it's an AJAX request
+      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        res.status(500).json({ success: false, message: error.message || "Error removing from cart" });
+      } else {
+        // Regular form submission - redirect with error message
+        req.flash("error_msg", "Error removing course from cart. Please try again.");
+        res.redirect("/cart");
+      }
     }
   },
 

@@ -70,3 +70,5 @@ OrderSchema.pre('save', function(next) {
 });
 
 const Order = mongoose.model('Order', OrderSchema);
+
+module.exports = Order;

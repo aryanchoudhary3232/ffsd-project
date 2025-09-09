@@ -1,0 +1,107 @@
+[
+  {
+    "id": "1",
+    "userId": "3",
+    "courseId": "1",
+    "amount": 89.99,
+    "paymentMethod": "credit_card",
+    "status": "completed",
+    "createdAt": "2023-02-05"
+  },
+  {
+    "id": "2",
+    "userId": "3",
+    "courseId": "2",
+    "amount": 69.99,
+    "paymentMethod": "paypal",
+    "status": "completed",
+    "createdAt": "2023-03-10"
+  },
+  {
+    "id": "3",
+    "userId": "5",
+    "courseId": "1",
+    "amount": 89.99,
+    "paymentMethod": "credit_card",
+    "status": "completed",
+    "createdAt": "2023-03-15"
+  },
+  {
+    "id": "1741890969986",
+    "userId": "3",
+    "courseId": "4",
+    "amount": 74.99,
+    "paymentMethod": "credit_card",
+    "status": "completed",
+    "createdAt": "2025-03-13T18:36:09.986Z"
+  },
+  {
+    "id": "1741890969990",
+    "userId": "3",
+    "courseId": "3",
+    "amount": 79.99,
+    "paymentMethod": "credit_card",
+    "status": "completed",
+    "createdAt": "2025-03-13T18:36:09.990Z"
+  },
+  {
+    "id": "1742890331439",
+    "userId": "3",
+    "courseId": "1742791944339",
+    "amount": 400,
+    "paymentMethod": "credit_card",
+    "status": "completed",
+    "createdAt": "2025-03-25T08:12:11.439Z"
+  },
+  {
+    "id": "1742892540798",
+    "userId": "1742892188159",
+    "courseId": "1",
+    "amount": 89.99,
+    "paymentMethod": "credit_card",
+    "status": "completed",
+    "createdAt": "2025-03-25T08:49:00.798Z"
+  },
+  {
+    "id": "1742892603365",
+    "userId": "1742892188159",
+    "courseId": "2",
+    "amount": 69.99,
+    "paymentMethod": "credit_card",
+    "status": "completed",
+    "createdAt": "2025-03-25T08:50:03.365Z"
+  },
+  {
+    "id": "1743012929746",
+    "userId": "1743012921322",
+    "courseId": "4",
+    "amount": 74.99,
+    "paymentMethod": "credit_card",
+    "status": "completed",
+    "createdAt": "2025-03-26T18:15:29.746Z"
+  },
+  {
+    "id": "1743013109464",
+    "userId": "1743012921322",
+    "courseId": "2",
+    "amount": 69.99,
+    "paymentMethod": "credit_card",
+    "status": "completed",
+    "createdAt": "2025-03-26T18:18:29.464Z"
+  },
+  {
+    "id": "1743005510522",
+    "userId": "1742922014299",
+    "courseId": "4",
+    "amount": 74.99,
+    "paymentMethod": "paypal",
+    "status": "completed",
+    "createdAt": "2025-03-26T16:11:50.522Z"
+  },
+  {
+    "id": "1743064605199",
+    "userId": "1742927895805",
+    "courseId": "1742791944339",
+    "amount": 45.99
+  }
+]

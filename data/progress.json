@@ -1,0 +1,239 @@
+[
+  {
+    "userId": "3",
+    "courseId": "1",
+    "progress": 72,
+    "completedLessons": [
+      "l1",
+      "l2",
+      "l3",
+      "l4",
+      "l5",
+      "l6",
+      "l7",
+      "l8",
+      "l9",
+      "l10",
+      "l14",
+      "l15",
+      "l13"
+    ]
+  },
+  {
+    "userId": "3",
+    "courseId": "2",
+    "progress": 44,
+    "completedLessons": [
+      "l1",
+      "l2",
+      "l3",
+      "l4"
+    ]
+  },
+  {
+    "userId": "5",
+    "courseId": "1",
+    "progress": 28,
+    "completedLessons": [
+      "l1",
+      "l2",
+      "l3",
+      "l4",
+      "l5"
+    ]
+  },
+  {
+    "userId": "3",
+    "courseId": "4",
+    "progress": 22,
+    "completedLessons": [
+      "l1",
+      "l2"
+    ]
+  },
+  {
+    "userId": "1",
+    "courseId": "2",
+    "progress": 0,
+    "completedLessons": []
+  },
+  {
+    "userId": "3",
+    "courseId": "3",
+    "progress": 0,
+    "completedLessons": []
+  },
+  {
+    "userId": "2",
+    "courseId": "4",
+    "progress": 0,
+    "completedLessons": []
+  },
+  {
+    "userId": "5",
+    "courseId": "4",
+    "progress": 0,
+    "completedLessons": []
+  },
+  {
+    "userId": "3",
+    "courseId": "4",
+    "progress": 0,
+    "completedLessons": []
+  },
+  {
+    "userId": "1",
+    "courseId": "3",
+    "progress": 0,
+    "completedLessons": []
+  },
+  {
+    "userId": "2",
+    "courseId": "1",
+    "progress": 0,
+    "completedLessons": []
+  },
+  {
+    "userId": "3",
+    "courseId": "1742791944339",
+    "progress": 100,
+    "completedLessons": [
+      "1743055507288",
+      "1743055904561"
+    ]
+  },
+  {
+    "userId": "3",
+    "courseId": "3",
+    "progress": 0,
+    "completedLessons": []
+  },
+  {
+    "userId": "1742892188159",
+    "courseId": "3",
+    "progress": 0,
+    "completedLessons": []
+  },
+  {
+    "userId": "1742892188159",
+    "courseId": "1",
+    "progress": 0,
+    "completedLessons": []
+  },
+  {
+    "userId": "1742892188159",
+    "courseId": "2",
+    "progress": 0,
+    "completedLessons": []
+  },
+  {
+    "userId": "1743012921322",
+    "courseId": "4",
+    "progress": 22,
+    "completedLessons": [
+      "l1",
+      "l2"
+    ]
+  },
+  {
+    "userId": "1743012921322",
+    "courseId": "1742791944339",
+    "progress": 0,
+    "completedLessons": []
+  },
+  {
+    "userId": "1743012921322",
+    "courseId": "2",
+    "progress": 0,
+    "completedLessons": []
+  },
+  {
+    "userId": "1743013290791",
+    "courseId": "4",
+    "progress": 22,
+    "completedLessons": [
+      "l1",
+      "l2"
+    ]
+  },
+  {
+    "userId": "2",
+    "courseId": "1743013827800",
+    "progress": 0,
+    "completedLessons": []
+  },
+  {
+    "userId": "1742922014299",
+    "courseId": "3",
+    "progress": 100,
+    "completedLessons": [
+      "l3",
+      "l4",
+      "l1",
+      "l5",
+      "l6",
+      "l7",
+      "l9",
+      "l2",
+      "l8"
+    ]
+  },
+  {
+    "userId": "1742922014299",
+    "courseId": "4",
+    "progress": 22,
+    "completedLessons": [
+      "l1",
+      "l2"
+    ]
+  },
+  {
+    "userId": "1742922014299",
+    "courseId": "2",
+    "progress": 22,
+    "completedLessons": [
+      "l1",
+      "l2"
+    ]
+  },
+  {
+    "userId": "1743008553287",
+    "courseId": "4",
+    "progress": 22,
+    "completedLessons": [
+      "l1",
+      "l2"
+    ]
+  },
+  {
+    "userId": "4",
+    "courseId": "1742791944339",
+    "progress": 150,
+    "completedLessons": [
+      "1743055320322",
+      "1743055507288",
+      "1743055904561"
+    ]
+  },
+  {
+    "userId": "1742927895805",
+    "courseId": "1742791944339",
+    "progress": 100,
+    "completedLessons": [
+      "1743055507288",
+      "1743055904561"
+    ]
+  },
+  {
+    "userId": "3",
+    "courseId": "1742791944339",
+    "progress": 0,
+    "completedLessons": []
+  },
+  {
+    "userId": "2",
+    "courseId": "1742791944339",
+    "progress": 0,
+    "completedLessons": []
+  }
+]
