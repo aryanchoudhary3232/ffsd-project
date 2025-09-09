@@ -46,7 +46,7 @@
               <% 
                 const totalLessons = module.lessons.length;
                 const completedModuleLessons = module.lessons.filter(lesson => 
-                  completedLessons.includes(lesson._id)
+                  completedLessons.includes(lesson._id || lesson.id)
                 ).length;
                 const isModuleCompleted = totalLessons === completedModuleLessons && totalLessons > 0;
               %>
@@ -63,10 +63,10 @@
             <div class="space-y-2 pl-2">
               <% module.lessons.forEach(function(lesson) { %>
               <a 
-                href="/courses/<%= course._id %>/learn?lesson=<%= lesson._id %>" 
-                class="flex items-center p-2 rounded-md <%= currentLesson._id === lesson._id ? 'bg-purple-700 text-purple-200' : 'hover:bg-gray-700' %>"
+                href="/courses/<%= course._id %>/learn?lesson=<%= lesson._id || lesson.id %>" 
+                class="flex items-center p-2 rounded-md <%= (currentLesson._id || currentLesson.id) === (lesson._id || lesson.id) ? 'bg-purple-700 text-purple-200' : 'hover:bg-gray-700' %>"
               >
-                <% if (completedLessons.includes(lesson._id)) { %>
+                <% if (completedLessons.includes(lesson._id || lesson.id)) { %>
                 <i class="fas fa-check-circle text-green-400 mr-2"></i>
                 <% } else if (lesson.type === 'video') { %>
                 <i class="fas fa-play-circle text-gray-400 mr-2"></i>
@@ -163,7 +163,7 @@
             <div class="p-6">
               <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold"><%= currentLesson.title %></h2>
-                <% if (completedLessons.includes(currentLesson._id)) { %>
+                <% if (completedLessons.includes(currentLesson._id || currentLesson.id)) { %>
                 <span class="inline-flex items-center text-green-400">
                   <i class="fas fa-check-circle mr-1"></i> Completed
                 </span>
@@ -196,7 +196,8 @@
                   allLessons.push(lesson);
                 });
               });
-              const currentIndex = allLessons.findIndex(l => l._id === currentLesson._id);
+              const currentLessonId = currentLesson._id || currentLesson.id;
+              const currentIndex = allLessons.findIndex(l => (l._id || l.id) === currentLessonId);
               if (currentIndex > 0) {
                 prevLesson = allLessons[currentIndex - 1];
               }
@@ -206,7 +207,7 @@
             %>
             <% if (prevLesson) { %>
             <a 
-              href="/courses/<%= course._id %>/learn?lesson=<%= prevLesson._id %>" 
+              href="/courses/<%= course._id %>/learn?lesson=<%= prevLesson._id || prevLesson.id %>" 
               class="inline-flex items-center bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors"
             >
               <i class="fas fa-arrow-left mr-2"></i> Previous Lesson
@@ -215,7 +216,7 @@
             <div></div>
             <% } %>
             <div class="flex flex-wrap gap-2">
-              <% if (!completedLessons.includes(currentLesson._id)) { %>
+              <% if (!completedLessons.includes(currentLesson._id || currentLesson.id)) { %>
               <button 
                 id="complete-lesson-btn"
                 class="inline-flex items-center bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-colors"
@@ -226,7 +227,7 @@
               <% } %>
               <% if (nextLesson) { %>
               <a 
-                href="/courses/<%= course._id %>/learn?lesson=<%= nextLesson._id %>" 
+                href="/courses/<%= course._id %>/learn?lesson=<%= nextLesson._id || nextLesson.id %>" 
                 class="inline-flex items-center bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-colors"
               >
                 Next Lesson <i class="fas fa-arrow-right ml-2"></i>
@@ -279,13 +280,27 @@
   <script>
     // Determine the correct lesson ID (prefer _id, fallback to id)
     const lessonIdentifier = '<%= typeof currentLesson._id !== "undefined" ? currentLesson._id : currentLesson.id %>';
-    // Clean the identifier if it's an ObjectId string representation like {"$oid":"..."} or just a plain string ID
-    const lessonId = String(lessonIdentifier).replace(/\{\\"\\$oid\\":\\"(.+)\\"\\}/, '$1').replace(/[^a-f0-9]/gi, '');
+    // Clean the identifier if it's an ObjectId string representation like {"$oid":"..."} 
+    let lessonId = String(lessonIdentifier);
+    if (lessonId.includes('"$oid"')) {
+      const match = lessonId.match(/\{\\"\\$oid\\":\\"(.+)\\"\}/);
+      if (match) {
+        lessonId = match[1];
+      }
+    }
+    console.log('Lesson ID:', lessonId);
 
     // Determine the correct course ID (should always be _id)
     const courseIdentifier = '<%= course._id %>';
     // Clean the identifier if it's an ObjectId string representation
-    const courseId = String(courseIdentifier).replace(/\{\\"\\$oid\\":\\"(.+)\\"\\}/, '$1').replace(/[^a-f0-9]/gi, '');
+    let courseId = String(courseIdentifier);
+    if (courseId.includes('"$oid"')) {
+      const match = courseId.match(/\{\\"\\$oid\\":\\"(.+)\\"\}/);
+      if (match) {
+        courseId = match[1];
+      }
+    }
+    console.log('Course ID:', courseId);
 
     $(document).ready(function() {
       // Sidebar toggle functionality
@@ -367,7 +382,27 @@
             $completeBtn.addClass('bg-green-500 hover:bg-green-600');
             $('.bg-purple-500.h-2\\.5.rounded-full').css('width', `${data.progress}%`);
             $('.text-sm.font-medium').text(`${data.progress}%`);
-            setTimeout(() => { window.location.reload(); }, 1500);
+            
+            showToast('Lesson marked as complete!', 'success');
+            
+            // Check if there's a next lesson button and ask user if they want to continue
+            const $nextLessonBtn = $('a[href*="/learn?lesson="]').filter(function() {
+              return $(this).text().includes('Next Lesson');
+            });
+            
+            if ($nextLessonBtn.length > 0) {
+              // Show option to continue to next lesson
+              setTimeout(() => {
+                if (confirm('Great job! Would you like to continue to the next lesson?')) {
+                  window.location.href = $nextLessonBtn.attr('href');
+                } else {
+                  window.location.reload();
+                }
+              }, 1000);
+            } else {
+              // No next lesson, just reload
+              setTimeout(() => { window.location.reload(); }, 1500);
+            }
           } else {
             $completeBtn.html('<i class="fas fa-times-circle mr-2"></i> Error');
             $completeBtn.prop('disabled', false);
@@ -389,10 +424,14 @@
     }
 
     function showToast(message, type = 'info') {
+      const toastColors = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        info: 'bg-purple-500'
+      };
+      
       const toast = $('<div>')
-        .addClass(`fixed bottom-4 right-4 px-4 py-2 rounded-lg text-white ${
-          type === 'error' ? 'bg-red-500' : 'bg-purple-500'
-        } shadow-lg z-50 transition-opacity duration-300`)
+        .addClass(`fixed bottom-4 right-4 px-4 py-2 rounded-lg text-white ${toastColors[type] || toastColors.info} shadow-lg z-50 transition-opacity duration-300`)
         .text(message);
       
       $('body').append(toast);
