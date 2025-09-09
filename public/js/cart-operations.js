@@ -1,54 +1,53 @@
-document.addEventListener('DOMContentLoaded', function() {
+$(document).ready(function() {
   // Handle all forms that add to cart (regardless of class name)
-  const allForms = document.querySelectorAll('form');
+  const allForms = $('form');
   
-  allForms.forEach(form => {
+  allForms.each(function() {
+    const form = $(this);
+    const formAction = form.attr('action');
+    
     // Check if the form action contains '/cart/add'
-    if (form.action && form.action.includes('/cart/add')) {
-      form.addEventListener('submit', function(e) {
+    if (formAction && formAction.includes('/cart/add')) {
+      form.on('submit', function(e) {
         e.preventDefault();
         
-        fetch(form.action, {
+        $.ajax({
+          url: formAction,
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
+          data: form.serialize(),
+          dataType: 'json',
+          success: function(data) {
+            if(data.success) {
+              // Redirect to cart page after adding
+              window.location.href = '/cart';
+            }
           },
-          body: new URLSearchParams(new FormData(form))
-        })
-        .then(response => response.json())
-        .then(data => {
-          if(data.success) {
-            // Redirect to cart page after adding
-            window.location.href = '/cart';
+          error: function(xhr, status, error) {
+            console.error('Error:', error);
           }
-        })
-        .catch(error => {
-          console.error('Error:', error);
         });
       });
     }
     
     // Check if the form action contains '/cart/remove'
-    if (form.action && form.action.includes('/cart/remove')) {
-      form.addEventListener('submit', function(e) {
+    if (formAction && formAction.includes('/cart/remove')) {
+      form.on('submit', function(e) {
         e.preventDefault();
         
-        fetch(form.action, {
+        $.ajax({
+          url: formAction,
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
+          data: form.serialize(),
+          dataType: 'json',
+          success: function(data) {
+            if(data.success) {
+              // Redirect to cart page after removing
+              window.location.href = '/cart';
+            }
           },
-          body: new URLSearchParams(new FormData(form))
-        })
-        .then(response => response.json())
-        .then(data => {
-          if(data.success) {
-            // Redirect to cart page after removing
-            window.location.href = '/cart';
+          error: function(xhr, status, error) {
+            console.error('Error:', error);
           }
-        })
-        .catch(error => {
-          console.error('Error:', error);
         });
       });
     }
