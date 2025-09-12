@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sikho Bharat - LMS</title>
+    <link rel="stylesheet" href="../css/home.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header Section -->
+      <header>
+        <div class="logo">📘 Sikho Bharat</div>
+        <nav>
+          <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Courses</a></li>
+            <li><a href="#">Languages</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="./login.html">Login</a></li>
+          </ul>
+        </nav>
+      </header>
+
+      <!-- Hero Section -->
+      <section class="hero">
+        <div class="hero-text">
+          <h1>Learn in Your <span>Mother Tongue</span></h1>
+          <p>
+            Access quality courses in Hindi, English, Telugu, Rajasthani, Tamil,
+            Haryanvi and more.
+          </p>
+          <button class="btn">Get Started</button>
+        </div>
+      </section>
+
+      <!-- Languages Section -->
+      <section class="languages">
+        <h2>Available Languages</h2>
+        <div class="lang-grid">
+          <div class="lang-card">🇮🇳 Hindi</div>
+          <div class="lang-card">🌍 English</div>
+          <div class="lang-card">🇮🇳 Telugu</div>
+          <div class="lang-card">🇮🇳 Rajasthani</div>
+          <div class="lang-card">🇮🇳 Tamil</div>
+          <div class="lang-card">🇮🇳 Haryanvi</div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer>
+        <p>© 2025 Sikho Bharat. All Rights Reserved.</p>
+      </footer>
+
+      <div class="register_message_container"></div>
+    </div>
+
+    <script>
+      const register_message = localStorage.getItem("register_message");
+      const register_message_container = document.querySelector(
+        ".register_message_container"
+      );
+
+      if (register_message) {
+        register_message_container.innerHTML = register_message;
+
+        localStorage.removeItem("register_message");
+
+        setTimeout(() => {
+          register_message_container.style.display = "none";
+          register_message_container.style.border = "none";
+        }, 3000);
+      } else {
+        register_message_container.style.border = "none";
+      }
+    </script>
+  </body>
+</html>

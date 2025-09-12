@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../css/login.css" />
+    <title>Login</title>
+  </head>
+  <body>
+    <div class="auth-page">
+      <div class="loginform">
+        <div class="container" id="container">
+          <div class="form-container sign-up">
+            <form id="signup_form">
+              <h1 style="color: black">Create Account</h1>
+              <div class="social-icons">
+                <a href="#" class="icons"><i class="bx bxl-google"></i></a>
+                <a href="#" class="icons"><i class="bx bxl-facebook"></i></a>
+                <a href="#" class="icons"><i class="bx bxl-github"></i></a>
+                <a href="#" class="icons"><i class="bx bxl-linkedin"></i></a>
+              </div>
+              <input type="text" id="signup_name" placeholder="Name" required />
+              <input
+                type="email"
+                id="signup_email"
+                placeholder="Enter E-mail"
+                required
+              />
+              <input
+                type="password"
+                id="signup_password"
+                placeholder="Enter Password"
+                required
+              />
+
+              <button type="submit">Sign Up</button>
+            </form>
+          </div>
+
+          <div class="form-container sign-in">
+            <form id="login_form">
+              <h1 style="color: black">Sign In</h1>
+              <div class="social-icons">
+                <a href="#" class="icons"><i class="bx bxl-google"></i></a>
+                <a href="#" class="icons"><i class="bx bxl-facebook"></i></a>
+                <a href="#" class="icons"><i class="bx bxl-github"></i></a>
+                <a href="#" class="icons"><i class="bx bxl-linkedin"></i></a>
+              </div>
+              <input
+                type="email"
+                id="login_email"
+                placeholder="Enter E-mail"
+                required
+              />
+              <input
+                type="password"
+                id="login_password"
+                placeholder="Enter Password"
+              />
+              <a href="#" title="We got you covered">Forget Password?</a>
+              <button type="submit">Sign In</button>
+            </form>
+          </div>
+
+          <div class="toggle-container">
+            <div class="toggle">
+              <div class="toggle-panel toggle-left">
+                <h1>Welcome To <br />SeekoBharat</h1>
+                <p>Sign in With ID & Password</p>
+                <button id="login">Sign In</button>
+              </div>
+              <div class="toggle-panel toggle-right">
+                <h1>Hii Scholars!</h1>
+                <p>Join SeekoBharat to Improve Your knowledge</p>
+                <button id="register">Sign Up</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const container = document.getElementById("container");
+      const registerBtn = document.getElementById("register");
+      const loginBtn = document.getElementById("login");
+      registerBtn.addEventListener("click", () => {
+        container.classList.add("active");
+      });
+      loginBtn.addEventListener("click", () => {
+        container.classList.remove("active");
+      });
+
+      const signup_form = document.querySelector("#signup_form");
+      signup_form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const name = document.querySelector("#signup_name").value;
+        const email = document.querySelector("#signup_email").value;
+        const password = document.querySelector("#signup_password").value;
+
+        try {
+          const response = await fetch("http://localhost:3000/auth/register", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ name, email, password }),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            localStorage.setItem("register_message", result.message);
+            window.location.href = "/frontend_lms/pages/home.html";
+          }
+        } catch (error) {
+          console.log("error coming---", error);
+        }
+      });
+
+      const login_form = document.querySelector("#login_form");
+      login_form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const email = document.querySelector("#login_email").value;
+        const password = document.querySelector("#login_password").value;
+
+        try {
+          const response = await fetch("http://localhost:3000/auth/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
+          });
+
+          console.log("response", await response.json());
+        } catch (error) {
+          console.log("error coming---", error);
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,117 @@
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.container {
+  position: relative;
+}
+
+/* Header */
+header {
+  background: #2337AD; /* Updated Purple */
+  color: white;
+  padding: 15px 50px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header .logo {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+nav ul {
+  display: flex;
+  gap: 4rem;
+  list-style: none;
+}
+
+nav ul li a {
+  color: white;
+  text-decoration: none;
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+nav ul li a:hover {
+  color: #ffd700; /* Gold accent */
+}
+
+.hero {
+  height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+
+  background: #2337AD; /* 👈 pura blue shade */
+  color: white;
+}
+
+
+
+
+/* Languages Section */
+.languages {
+  padding: 50px;
+  text-align: center;
+}
+
+.languages h2 {
+  font-size: 2rem;
+  margin-bottom: 30px;
+  color: #2337AD;
+}
+
+.lang-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+}
+
+.lang-card {
+  background: #fff;
+  border: 2px solid #2337AD;
+  padding: 20px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: bold;
+  transition: 0.3s;
+  cursor: pointer;
+  color: #2337AD;
+}
+
+.lang-card:hover {
+  background: #2337AD;
+  color: white;
+  transform: scale(1.05);
+}
+
+/* Footer */
+footer {
+  background: #2337AD;
+  color: white;
+  text-align: center;
+  padding: 15px;
+  margin-top: 40px;
+}
+
+/* register_message_show */
+.register_message_container {
+  position: absolute;
+  top: 62px;
+  right: 42px;
+  border: 1px ;
+  color: #ff0000;
+  border: 1px solid gray;
+  border-radius: 12px;
+  padding: 14px 4px;
+}
+
+
