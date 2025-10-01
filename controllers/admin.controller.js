@@ -1104,7 +1104,7 @@ const AdminController = {
     }
   },
 
-  getCourses: async (req, res) => {
+  getCoursesAPI: async (req, res) => {
     try {
       const courses = await Course.getAllCourses();
 
