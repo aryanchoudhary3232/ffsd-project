@@ -136,10 +136,32 @@ const AdminController = {
         };
       });
 
-      res.render("admin/users", { users });
+      // Check if the request is asking for JSON (API call) or HTML (page view)
+      if (req.headers.accept && req.headers.accept.includes('application/json')) {
+        // Return JSON for API calls
+        return res.json({
+          success: true,
+          users: users,
+        });
+      }
+
+      // Render EJS page for browser visits
+      res.render("admin/users", {
+        users: users,
+        success_msg: req.flash("success_msg"),
+        error_msg: req.flash("error_msg"),
+      });
     } catch (error) {
-      console.error("Get Users error:", error);
-      req.flash("error_msg", "Could not load users.");
+      console.error("Get users error:", error);
+      
+      if (req.headers.accept && req.headers.accept.includes('application/json')) {
+        return res.status(500).json({
+          success: false,
+          message: "Error fetching users",
+        });
+      }
+      
+      req.flash("error_msg", "Error fetching users");
       res.redirect("/admin/dashboard");
     }
   },
@@ -1083,23 +1105,6 @@ const AdminController = {
       res.status(500).json({
         success: false,
         message: "Error fetching admin statistics",
-      });
-    }
-  },
-
-  getUsers: async (req, res) => {
-    try {
-      const users = await User.find().sort({ joinDate: -1 });
-
-      res.json({
-        success: true,
-        users: users,
-      });
-    } catch (error) {
-      console.error("Get admin users error:", error);
-      res.status(500).json({
-        success: false,
-        message: "Error fetching users",
       });
     }
   },
