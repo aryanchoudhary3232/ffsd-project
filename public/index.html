@@ -9,12 +9,19 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/css/styles.css" />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
       /* Ensure body is always visible */
       body {
         visibility: visible !important;
         opacity: 1 !important;
         display: block !important;
+        font-family: 'Inter', sans-serif;
       }
       
       .hidden {
@@ -44,13 +51,17 @@
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 1;
+        line-clamp: 1;
       }
       .line-clamp-3 {
         overflow: hidden;
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 3;
+        line-clamp: 3;
       }
+      
+      /* Custom animations */
       @keyframes pulse {
         0%, 100% {
           opacity: 1;
@@ -59,53 +70,192 @@
           opacity: .5;
         }
       }
+      @keyframes bounceIn {
+        0% {
+          opacity: 0;
+          transform: scale(0.3);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.05);
+        }
+        70% {
+          transform: scale(0.9);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
       .animate-pulse {
         animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      .animate-bounce-in {
+        animation: bounceIn 0.6s ease-out;
+      }
+      .animate-slide-up {
+        animation: slideInUp 0.8s ease-out;
+      }
+      
+      /* Gradient text effects */
+      .gradient-text {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+      }
+      
+      /* Smooth page transitions */
+      .page {
+        transition: all 0.3s ease-in-out;
+      }
+      
+      /* Enhanced hover effects */
+      .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      }
+      
+      /* Glassmorphism effect */
+      .glass {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
       }
     </style>
   </head>
   <body class="bg-gray-100">
     <!-- Navigation -->
-    <nav id="navbar" class="bg-black text-white p-4">
-      <div class="container mx-auto flex justify-between items-center">
-        <div class="text-xl font-bold">SeekoBharat</div>
-        <div id="nav-links" class="space-x-4">
-          <a href="#" onclick="showPage('home')" class="hover:text-gray-300"
-            >Home</a
-          >
-          <a href="#" onclick="showPage('courses')" class="hover:text-gray-300"
-            >Courses</a
-          >
-          <a href="#" onclick="showPage('about')" class="hover:text-gray-300"
-            >About</a
-          >
-          <a href="#" onclick="showPage('contact')" class="hover:text-gray-300"
-            >Contact</a
-          >
-          <div id="auth-links">
-            <a href="#" onclick="showPage('login')" class="hover:text-gray-300"
-              >Login</a
-            >
-            <a
-              href="#"
-              onclick="showPage('register')"
-              class="hover:text-gray-300"
-              >Register</a
-            >
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 backdrop-blur-md bg-opacity-95 shadow-lg">
+      <div class="container mx-auto px-4 py-3">
+        <div class="flex justify-between items-center">
+          <!-- Logo -->
+          <div class="text-2xl font-bold text-white">
+            <i class="fas fa-graduation-cap mr-2"></i>
+            SeekoBharat
           </div>
-          <div id="user-links" class="hidden">
-            <a
-              href="#"
-              onclick="showPage('dashboard')"
-              class="hover:text-gray-300"
-              >Dashboard</a
-            >
-            <a href="#" onclick="showPage('cart')" class="hover:text-gray-300"
-              >Cart</a
-            >
-            <a href="#" onclick="logout()" class="hover:text-gray-300"
-              >Logout</a
-            >
+
+          <!-- Desktop Navigation -->
+          <div id="nav-links" class="flex items-center space-x-8">
+            <a href="#" onclick="showPage('home')" class="nav-link text-white hover:text-yellow-300 transition-all duration-300 flex items-center space-x-2">
+              <i class="fas fa-home"></i>
+              <span>Home</span>
+            </a>
+            <a href="#" onclick="showPage('courses')" class="nav-link text-white hover:text-yellow-300 transition-all duration-300 flex items-center space-x-2">
+              <i class="fas fa-book"></i>
+              <span>Courses</span>
+            </a>
+            <a href="#" onclick="showPage('about')" class="nav-link text-white hover:text-yellow-300 transition-all duration-300 flex items-center space-x-2">
+              <i class="fas fa-info-circle"></i>
+              <span>About</span>
+            </a>
+            <a href="#" onclick="showPage('contact')" class="nav-link text-white hover:text-yellow-300 transition-all duration-300 flex items-center space-x-2">
+              <i class="fas fa-envelope"></i>
+              <span>Contact</span>
+            </a>
+
+            <!-- Auth Links -->
+            <div id="auth-links" class="flex items-center space-x-4">
+              <a href="#" onclick="showPage('login')" class="bg-white text-indigo-600 px-4 py-2 rounded-full font-medium hover:bg-gray-100 transition-all duration-300 shadow-md">
+                <i class="fas fa-sign-in-alt mr-1"></i>Login
+              </a>
+              <a href="#" onclick="showPage('register')" class="bg-yellow-400 text-indigo-900 px-4 py-2 rounded-full font-medium hover:bg-yellow-300 transition-all duration-300 shadow-md">
+                <i class="fas fa-user-plus mr-1"></i>Register
+              </a>
+            </div>
+
+            <!-- User Links -->
+            <div id="user-links" class="hidden flex items-center space-x-4">
+              <a href="#" onclick="showPage('dashboard')" class="nav-link text-white hover:text-yellow-300 transition-all duration-300 flex items-center space-x-2">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+              </a>
+              <a href="#" onclick="showPage('cart')" class="nav-link text-white hover:text-yellow-300 transition-all duration-300 flex items-center space-x-2">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Cart</span>
+              </a>
+              <a href="#" onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-full font-medium hover:bg-red-600 transition-all duration-300 shadow-md">
+                <i class="fas fa-sign-out-alt mr-1"></i>Logout
+              </a>
+            </div>
+          </div>
+
+          <!-- Mobile Menu Button -->
+          <button onclick="toggleMobileMenu()" class="lg:hidden mobile-menu-button text-white hover:text-yellow-300 transition-colors duration-300" aria-expanded="false">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden mt-4 pb-4 border-t border-white border-opacity-20">
+          <div class="flex flex-col space-y-3 pt-4">
+            <a href="#" onclick="showPage('home')" class="mobile-nav-link text-white hover:text-yellow-300 transition-all duration-300 flex items-center space-x-3 py-2">
+              <i class="fas fa-home"></i>
+              <span>Home</span>
+            </a>
+            <a href="#" onclick="showPage('courses')" class="mobile-nav-link text-white hover:text-yellow-300 transition-all duration-300 flex items-center space-x-3 py-2">
+              <i class="fas fa-book"></i>
+              <span>Courses</span>
+            </a>
+            <a href="#" onclick="showPage('about')" class="mobile-nav-link text-white hover:text-yellow-300 transition-all duration-300 flex items-center space-x-3 py-2">
+              <i class="fas fa-info-circle"></i>
+              <span>About</span>
+            </a>
+            <a href="#" onclick="showPage('contact')" class="mobile-nav-link text-white hover:text-yellow-300 transition-all duration-300 flex items-center space-x-3 py-2">
+              <i class="fas fa-envelope"></i>
+              <span>Contact</span>
+            </a>
+
+            <!-- Mobile Auth Links -->
+            <div id="mobile-auth-links" class="flex flex-col space-y-2 pt-2 border-t border-white border-opacity-20">
+              <a href="#" onclick="showPage('login')" class="bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-all duration-300 text-center">
+                <i class="fas fa-sign-in-alt mr-1"></i>Login
+              </a>
+              <a href="#" onclick="showPage('register')" class="bg-yellow-400 text-indigo-900 px-4 py-2 rounded-lg font-medium hover:bg-yellow-300 transition-all duration-300 text-center">
+                <i class="fas fa-user-plus mr-1"></i>Register
+              </a>
+            </div>
+
+            <!-- Mobile User Links -->
+            <div id="mobile-user-links" class="hidden flex flex-col space-y-2 pt-2 border-t border-white border-opacity-20">
+              <a href="#" onclick="showPage('dashboard')" class="mobile-nav-link text-white hover:text-yellow-300 transition-all duration-300 flex items-center space-x-3 py-2">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+              </a>
+              <a href="#" onclick="showPage('cart')" class="mobile-nav-link text-white hover:text-yellow-300 transition-all duration-300 flex items-center space-x-3 py-2">
+                <i class="fas fa-shopping-cart"></i>
+                <span>Cart</span>
+              </a>
+              <a href="#" onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-600 transition-all duration-300 text-center">
+                <i class="fas fa-sign-out-alt mr-1"></i>Logout
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -115,150 +265,241 @@
     <div id="main-content">
       <!-- Home Page -->
       <div id="home-page" class="page">
-        <section class="hero bg-black text-white py-16">
-          <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row items-center">
-              <div class="md:w-1/2 mb-8 md:mb-0">
-                <h1 class="text-4xl md:text-5xl font-bold mb-4">
-                  Expand Your Knowledge with SeekoBharat
+        <section class="hero bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 text-white py-20 relative overflow-hidden">
+          <!-- Animated background elements -->
+          <div class="absolute inset-0 opacity-10">
+            <div class="absolute -top-40 -right-40 w-80 h-80 bg-yellow-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+            <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+            <div class="absolute top-40 left-1/2 w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
+          </div>
+          
+          <div class="container mx-auto px-4 relative z-10">
+            <div class="flex flex-col md:flex-row items-center min-h-[600px]">
+              <div class="md:w-1/2 mb-8 md:mb-0 space-y-6">
+                <div class="inline-block px-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-black rounded-full text-sm font-semibold mb-4">
+                  🚀 Transform Your Career Today
+                </div>
+                <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+                  Expand Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-pink-400">Knowledge</span> with <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-400">SeekoBharat</span>
                 </h1>
-                <p class="text-xl mb-6">
+                <p class="text-xl md:text-2xl mb-8 text-gray-200 leading-relaxed">
                   Learn from industry experts and advance your career with our
-                  comprehensive courses.
+                  comprehensive courses designed for real-world success.
                 </p>
-                <div class="flex flex-wrap gap-4">
+                <div class="flex flex-col sm:flex-row gap-4">
                   <button
                     onclick="showPage('courses')"
-                    class="bg-white text-black px-6 py-2 rounded hover:bg-gray-200"
+                    class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-xl"
                   >
-                    Browse Courses
+                    <i class="fas fa-play mr-2"></i>Browse Courses
                   </button>
                   <button
                     onclick="showPage('register')"
-                    class="border border-white text-white px-6 py-2 rounded hover:bg-white hover:text-black"
+                    class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white hover:text-indigo-900 transform hover:scale-105 transition-all duration-300 shadow-xl"
                   >
-                    Sign Up for Free
+                    <i class="fas fa-user-plus mr-2"></i>Sign Up for Free
                   </button>
                 </div>
+                <div class="flex items-center space-x-6 mt-8 text-sm">
+                  <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                    <span>1000+ Happy Students</span>
+                  </div>
+                  <div class="flex items-center">
+                    <i class="fas fa-star text-yellow-400 mr-2"></i>
+                    <span>4.9/5 Rating</span>
+                  </div>
+                </div>
               </div>
-              <div class="md:w-1/2">
-                <img
-                  src="/img/hero-image.svg"
-                  alt="Learning Illustration"
-                  class="w-full max-w-lg mx-auto"
-                />
+              <div class="md:w-1/2 relative">
+                <div class="relative">
+                  <img
+                    src="/img/hero-image.svg"
+                    alt="Learning Illustration"
+                    class="w-full max-w-lg mx-auto transform hover:scale-105 transition-transform duration-500"
+                  />
+                  <div class="absolute -top-4 -right-4 bg-yellow-400 text-black px-4 py-2 rounded-lg font-bold animate-bounce">
+                    New!
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
         <!-- Stats Section -->
-        <section class="py-16 bg-gray-100">
-          <div class="container mx-auto px-4">
+        <section class="py-20 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 relative">
+          <div class="absolute inset-0 bg-white opacity-80"></div>
+          <div class="container mx-auto px-4 relative z-10">
+            <div class="text-center mb-12">
+              <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+                Trusted by Thousands Worldwide
+              </h2>
+              <p class="text-gray-600 text-lg">Join our growing community of learners and achievers</p>
+            </div>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-              <div>
-                <div class="text-4xl font-bold text-blue-600 mb-2" id="total-courses">500+</div>
-                <div class="text-gray-700">Courses Available</div>
+              <div class="group hover:transform hover:scale-105 transition-all duration-300">
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-shadow duration-300 border-l-4 border-blue-500">
+                  <div class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-blue-700 mb-3" id="total-courses">500+</div>
+                  <div class="text-gray-700 font-semibold text-lg">Courses Available</div>
+                  <div class="text-gray-500 text-sm mt-2">Expert-curated content</div>
+                </div>
               </div>
-              <div>
-                <div class="text-4xl font-bold text-green-600 mb-2" id="total-students">10,000+</div>
-                <div class="text-gray-700">Students Enrolled</div>
+              <div class="group hover:transform hover:scale-105 transition-all duration-300">
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-shadow duration-300 border-l-4 border-green-500">
+                  <div class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-green-700 mb-3" id="total-students">10,000+</div>
+                  <div class="text-gray-700 font-semibold text-lg">Students Enrolled</div>
+                  <div class="text-gray-500 text-sm mt-2">Active learners community</div>
+                </div>
               </div>
-              <div>
-                <div class="text-4xl font-bold text-purple-600 mb-2" id="total-instructors">200+</div>
-                <div class="text-gray-700">Expert Instructors</div>
+              <div class="group hover:transform hover:scale-105 transition-all duration-300">
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-shadow duration-300 border-l-4 border-purple-500">
+                  <div class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-purple-700 mb-3" id="total-instructors">200+</div>
+                  <div class="text-gray-700 font-semibold text-lg">Expert Instructors</div>
+                  <div class="text-gray-500 text-sm mt-2">Industry professionals</div>
+                </div>
               </div>
-              <div>
-                <div class="text-4xl font-bold text-orange-600 mb-2" id="completion-rate">95%</div>
-                <div class="text-gray-700">Completion Rate</div>
+              <div class="group hover:transform hover:scale-105 transition-all duration-300">
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-shadow duration-300 border-l-4 border-orange-500">
+                  <div class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-700 mb-3" id="completion-rate">95%</div>
+                  <div class="text-gray-700 font-semibold text-lg">Completion Rate</div>
+                  <div class="text-gray-500 text-sm mt-2">Student success rate</div>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
         <!-- How It Works Section -->
-        <section class="py-16">
+        <section class="py-20 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
           <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center mb-12">How It Works</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div class="text-center">
-                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="text-center mb-16">
+              <h2 class="text-4xl md:text-5xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">How It Works</h2>
+              <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                Start your learning journey in just three simple steps
+              </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+              <div class="text-center group">
+                <div class="bg-gradient-to-br from-blue-500 to-blue-700 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-2xl">
+                  <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                   </svg>
                 </div>
-                <h3 class="text-xl font-semibold mb-2">1. Browse Courses</h3>
-                <p class="text-gray-600">Explore our vast library of courses across various technologies and skill levels.</p>
+                <h3 class="text-2xl font-bold mb-4 text-blue-400">1. Discover</h3>
+                <p class="text-gray-300 leading-relaxed">
+                  Browse through our extensive catalog of courses and find the perfect match for your learning goals and skill level.
+                </p>
               </div>
-              <div class="text-center">
-                <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              
+              <div class="text-center group">
+                <div class="bg-gradient-to-br from-purple-500 to-purple-700 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-2xl">
+                  <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                   </svg>
                 </div>
-                <h3 class="text-xl font-semibold mb-2">2. Learn & Practice</h3>
-                <p class="text-gray-600">Follow structured lessons, complete assignments, and practice with real-world projects.</p>
+                <h3 class="text-2xl font-bold mb-4 text-purple-400">2. Learn</h3>
+                <p class="text-gray-300 leading-relaxed">
+                  Engage with interactive content, watch expert-led videos, and complete hands-on projects at your own pace.
+                </p>
               </div>
-              <div class="text-center">
-                <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+              
+              <div class="text-center group">
+                <div class="bg-gradient-to-br from-green-500 to-green-700 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300 shadow-2xl">
+                  <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                 </div>
-                <h3 class="text-xl font-semibold mb-2">3. Get Certified</h3>
-                <p class="text-gray-600">Complete courses and receive certificates to showcase your new skills to employers.</p>
+                <h3 class="text-2xl font-bold mb-4 text-green-400">3. Succeed</h3>
+                <p class="text-gray-300 leading-relaxed">
+                  Apply your new skills in real-world projects, earn certificates, and advance your career with confidence.
+                </p>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- Categories Section -->
-        <section class="py-16 bg-gray-50">
+        <!-- Course Categories Section -->
+        <section class="py-20 bg-white">
           <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center mb-12">Popular Categories</h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-              <div class="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition duration-300 cursor-pointer" onclick="searchCoursesByCategory('web-development')">
-                <div class="text-3xl mb-3">🌐</div>
-                <h3 class="font-semibold">Web Development</h3>
+            <div class="text-center mb-16">
+              <h2 class="text-4xl font-bold text-gray-800 mb-6">Popular Categories</h2>
+              <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Explore our most sought-after course categories designed for today's digital world
+              </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div class="bg-gradient-to-br from-blue-50 to-indigo-100 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group hover:transform hover:scale-105" onclick="searchCoursesByCategory('web-development')">
+                <div class="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">�</div>
+                <h3 class="text-xl font-bold text-gray-800 mb-3">Web Development</h3>
+                <p class="text-gray-600">Build modern websites and web applications</p>
               </div>
-              <div class="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition duration-300 cursor-pointer" onclick="searchCoursesByCategory('mobile-development')">
-                <div class="text-3xl mb-3">📱</div>
-                <h3 class="font-semibold">Mobile Development</h3>
+              
+              <div class="bg-gradient-to-br from-green-50 to-emerald-100 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group hover:transform hover:scale-105" onclick="searchCoursesByCategory('mobile-development')">
+                <div class="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">📱</div>
+                <h3 class="text-xl font-bold text-gray-800 mb-3">Mobile Development</h3>
+                <p class="text-gray-600">Create amazing mobile apps for iOS and Android</p>
               </div>
-              <div class="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition duration-300 cursor-pointer" onclick="searchCoursesByCategory('data-science')">
-                <div class="text-3xl mb-3">📊</div>
-                <h3 class="font-semibold">Data Science</h3>
+              
+              <div class="bg-gradient-to-br from-purple-50 to-violet-100 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group hover:transform hover:scale-105" onclick="searchCoursesByCategory('data-science')">
+                <div class="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">📊</div>
+                <h3 class="text-xl font-bold text-gray-800 mb-3">Data Science</h3>
+                <p class="text-gray-600">Analyze data and extract meaningful insights</p>
               </div>
-              <div class="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition duration-300 cursor-pointer" onclick="searchCoursesByCategory('artificial-intelligence')">
-                <div class="text-3xl mb-3">🤖</div>
-                <h3 class="font-semibold">AI & ML</h3>
+              
+              <div class="bg-gradient-to-br from-orange-50 to-red-100 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group hover:transform hover:scale-105" onclick="searchCoursesByCategory('artificial-intelligence')">
+                <div class="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">🤖</div>
+                <h3 class="text-xl font-bold text-gray-800 mb-3">AI & Machine Learning</h3>
+                <p class="text-gray-600">Build intelligent systems and neural networks</p>
               </div>
-              <div class="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition duration-300 cursor-pointer" onclick="searchCoursesByCategory('cybersecurity')">
-                <div class="text-3xl mb-3">🔒</div>
-                <h3 class="font-semibold">Cybersecurity</h3>
+              
+              <div class="bg-gradient-to-br from-red-50 to-pink-100 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group hover:transform hover:scale-105" onclick="searchCoursesByCategory('cybersecurity')">
+                <div class="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">🔒</div>
+                <h3 class="text-xl font-bold text-gray-800 mb-3">Cybersecurity</h3>
+                <p class="text-gray-600">Protect systems and data from digital threats</p>
               </div>
-              <div class="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition duration-300 cursor-pointer" onclick="searchCoursesByCategory('cloud-computing')">
-                <div class="text-3xl mb-3">☁️</div>
-                <h3 class="font-semibold">Cloud Computing</h3>
+              
+              <div class="bg-gradient-to-br from-cyan-50 to-blue-100 p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group hover:transform hover:scale-105" onclick="searchCoursesByCategory('cloud-computing')">
+                <div class="text-5xl mb-4 group-hover:scale-110 transition-transform duration-300">☁️</div>
+                <h3 class="text-xl font-bold text-gray-800 mb-3">Cloud Computing</h3>
+                <p class="text-gray-600">Master cloud platforms and DevOps practices</p>
               </div>
             </div>
           </div>
         </section>
 
-        <section class="py-16">
-          <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center mb-12">
-              Featured Courses
-            </h2>
+        <!-- Featured Courses Section -->
+        <section class="py-20 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 relative overflow-hidden">
+          <!-- Background decoration -->
+          <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-20 left-20 w-40 h-40 bg-yellow-400 rounded-full filter blur-xl"></div>
+            <div class="absolute bottom-20 right-20 w-60 h-60 bg-blue-400 rounded-full filter blur-xl"></div>
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-400 rounded-full filter blur-xl"></div>
+          </div>
+          
+          <div class="container mx-auto px-4 relative z-10">
+            <div class="text-center mb-16">
+              <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">
+                Featured <span class="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-pink-400">Courses</span>
+              </h2>
+              <p class="text-xl text-gray-200 max-w-3xl mx-auto">
+                Discover our most popular and highly-rated courses designed to accelerate your career growth
+              </p>
+            </div>
+            
             <div
               id="featured-courses"
-              class="grid grid-cols-1 md:grid-cols-3 gap-8"
+              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12"
             >
               <!-- Courses will be loaded dynamically -->
             </div>
-            <div class="text-center mt-8">
-              <button onclick="showPage('courses')" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300">
-                View All Courses
+            
+            <div class="text-center">
+              <button 
+                onclick="showPage('courses')" 
+                class="bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 px-8 py-4 rounded-xl font-bold text-lg hover:from-yellow-300 hover:to-orange-400 transform hover:scale-105 transition-all duration-300 shadow-2xl"
+              >
+                <i class="fas fa-arrow-right mr-2"></i>View All Courses
               </button>
             </div>
           </div>
