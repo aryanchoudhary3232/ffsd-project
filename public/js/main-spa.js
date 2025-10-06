@@ -2,6 +2,35 @@
 let currentUser = null;
 let currentPage = "home";
 
+// Mobile menu toggle function
+function toggleMobileMenu() {
+  const mobileMenu = document.getElementById("mobile-menu");
+  const mobileAuthLinks = document.getElementById("mobile-auth-links");
+  const mobileUserLinks = document.getElementById("mobile-user-links");
+  const menuButton = document.querySelector(".mobile-menu-button");
+
+  if (mobileMenu) {
+    if (mobileMenu.classList.contains("hidden")) {
+      mobileMenu.classList.remove("hidden");
+      if (menuButton) menuButton.setAttribute("aria-expanded", "true");
+    } else {
+      mobileMenu.classList.add("hidden");
+      if (menuButton) menuButton.setAttribute("aria-expanded", "false");
+    }
+  }
+
+  // Update mobile auth/user links visibility based on current user state
+  if (mobileAuthLinks && mobileUserLinks) {
+    if (currentUser) {
+      mobileAuthLinks.classList.add("hidden");
+      mobileUserLinks.classList.remove("hidden");
+    } else {
+      mobileAuthLinks.classList.remove("hidden");
+      mobileUserLinks.classList.add("hidden");
+    }
+  }
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   console.log("🚀 SeekoBharat SPA DOMContentLoaded fired");
 
@@ -420,36 +449,46 @@ function createCourseElement(course, showEnrollButton = false) {
   if (coursesView === "list") {
     // List view layout
     div.className =
-      "bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow";
+      "bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-102 group";
     div.innerHTML = `
       <div class="flex">
-        <img src="${course.image || "/placeholder.jpg"}" alt="${
+        <div class="relative flex-shrink-0 overflow-hidden">
+          <img src="${course.image || "/placeholder.jpg"}" alt="${
       course.title
-    }" class="w-48 h-32 object-cover flex-shrink-0">
+    }" class="w-48 h-32 object-cover group-hover:scale-110 transition-transform duration-500">
+          <div class="absolute inset-0 bg-gradient-to-r from-transparent to-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        </div>
         <div class="flex-1 p-6">
           <div class="flex justify-between items-start mb-2">
-            <h3 class="text-xl font-semibold">${course.title}</h3>
-            <span class="text-2xl font-bold text-indigo-600">${formattedPrice}</span>
+            <div>
+              <h3 class="text-xl font-bold text-gray-800 group-hover:text-indigo-600 transition-colors duration-300">${
+                course.title
+              }</h3>
+              ${
+                course.category
+                  ? `<span class="inline-block mt-1 text-sm text-indigo-600 font-medium">${course.category.replace(
+                      "-",
+                      " "
+                    )}</span>`
+                  : ""
+              }
+            </div>
+            <span class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">${formattedPrice}</span>
           </div>
-          <p class="text-gray-600 mb-3">${shortDescription}</p>
+          <p class="text-gray-600 mb-3 leading-relaxed">${shortDescription}</p>
           <div class="flex items-center space-x-4 mb-3">
             ${
               course.difficulty
-                ? `<span class="px-2 py-1 text-xs font-medium rounded ${difficultyColor}">${course.difficulty}</span>`
-                : ""
-            }
-            ${
-              course.category
-                ? `<span class="text-sm text-gray-500">${course.category.replace(
-                    "-",
-                    " "
-                  )}</span>`
+                ? `<span class="px-3 py-1 text-xs font-bold rounded-full ${difficultyColor} shadow-md">${course.difficulty}</span>`
                 : ""
             }
             ${
               rating > 0
-                ? `<span class="text-sm text-yellow-500">${ratingStars} (${rating})</span>`
-                : ""
+                ? `<div class="flex items-center">
+                     <span class="text-yellow-400 mr-1">${ratingStars}</span>
+                     <span class="text-sm text-gray-500">(${rating})</span>
+                   </div>`
+                : '<span class="text-sm text-gray-400">No ratings yet</span>'
             }
             ${
               createdDate
@@ -461,17 +500,17 @@ function createCourseElement(course, showEnrollButton = false) {
             <div class="text-sm text-gray-500">
               ${
                 course.enrolledStudents
-                  ? `${course.enrolledStudents} students enrolled`
-                  : "New course"
+                  ? `<i class="fas fa-users mr-1"></i>${course.enrolledStudents} students enrolled`
+                  : "<i class='fas fa-star mr-1'></i>New course"
               }
             </div>
             ${
               showEnrollButton
-                ? `<button onclick="addToCart('${course._id}')" class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition duration-300">
-                   Add to Cart
+                ? `<button onclick="addToCart('${course._id}')" class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg">
+                   <i class="fas fa-shopping-cart mr-1"></i>Add to Cart
                  </button>`
-                : `<button onclick="viewCourse('${course._id}')" class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition duration-300">
-                   View Course
+                : `<button onclick="viewCourse('${course._id}')" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transform hover:scale-105 transition-all duration-300 shadow-lg">
+                   <i class="fas fa-eye mr-1"></i>View Course
                  </button>`
             }
           </div>
@@ -481,53 +520,63 @@ function createCourseElement(course, showEnrollButton = false) {
   } else {
     // Grid view layout (default)
     div.className =
-      "bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow";
+      "bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:scale-105 group";
     div.innerHTML = `
-      <img src="${course.image || "/placeholder.jpg"}" alt="${
+      <div class="relative overflow-hidden">
+        <img src="${course.image || "/placeholder.jpg"}" alt="${
       course.title
-    }" class="w-full h-48 object-cover">
-      <div class="p-6">
-        <div class="flex justify-between items-start mb-2">
-          <h3 class="text-xl font-semibold line-clamp-1">${course.title}</h3>
+    }" class="w-full h-52 object-cover group-hover:scale-110 transition-transform duration-500">
+        <div class="absolute top-4 right-4">
           ${
             course.difficulty
-              ? `<span class="px-2 py-1 text-xs font-medium rounded ${difficultyColor}">${course.difficulty}</span>`
+              ? `<span class="px-3 py-1 text-xs font-bold rounded-full ${difficultyColor} shadow-lg">${course.difficulty}</span>`
               : ""
           }
         </div>
-        <p class="text-gray-600 mb-4 line-clamp-3">${shortDescription}</p>
-        <div class="flex items-center justify-between mb-4">
-          ${
-            rating > 0
-              ? `<span class="text-sm text-yellow-500">${ratingStars} (${rating})</span>`
-              : '<span class="text-sm text-gray-400">No ratings yet</span>'
-          }
+        <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      </div>
+      <div class="p-6">
+        <div class="mb-3">
+          <h3 class="text-xl font-bold text-gray-800 line-clamp-1 group-hover:text-indigo-600 transition-colors duration-300">${
+            course.title
+          }</h3>
           ${
             course.category
-              ? `<span class="text-sm text-gray-500">${course.category.replace(
+              ? `<span class="inline-block mt-2 text-sm text-indigo-600 font-medium">${course.category.replace(
                   "-",
                   " "
                 )}</span>`
               : ""
           }
         </div>
-        <div class="flex justify-between items-center">
-          <span class="text-2xl font-bold text-indigo-600">${formattedPrice}</span>
+        <p class="text-gray-600 mb-4 line-clamp-3 leading-relaxed">${shortDescription}</p>
+        <div class="flex items-center justify-between mb-4">
+          ${
+            rating > 0
+              ? `<div class="flex items-center">
+                   <span class="text-yellow-400 mr-1">${ratingStars}</span>
+                   <span class="text-sm text-gray-500">(${rating})</span>
+                 </div>`
+              : '<span class="text-sm text-gray-400">No ratings yet</span>'
+          }
+          ${
+            course.enrolledStudents
+              ? `<span class="text-sm text-gray-500">${course.enrolledStudents} students</span>`
+              : ""
+          }
+        </div>
+        <div class="flex justify-between items-center pt-4 border-t border-gray-100">
+          <span class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">${formattedPrice}</span>
           ${
             showEnrollButton
-              ? `<button onclick="addToCart('${course._id}')" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition duration-300">
-                 Add to Cart
+              ? `<button onclick="addToCart('${course._id}')" class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg">
+                 <i class="fas fa-shopping-cart mr-1"></i>Add to Cart
                </button>`
-              : `<button onclick="viewCourse('${course._id}')" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition duration-300">
-                 View Course
+              : `<button onclick="viewCourse('${course._id}')" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transform hover:scale-105 transition-all duration-300 shadow-lg">
+                 <i class="fas fa-eye mr-1"></i>View Course
                </button>`
           }
         </div>
-        ${
-          course.enrolledStudents
-            ? `<div class="mt-2 text-sm text-gray-500">${course.enrolledStudents} students enrolled</div>`
-            : ""
-        }
       </div>
     `;
   }
@@ -945,13 +994,21 @@ function showSuccess(element, message) {
 function updateNavigation() {
   const authLinks = document.getElementById("auth-links");
   const userLinks = document.getElementById("user-links");
+  const mobileAuthLinks = document.getElementById("mobile-auth-links");
+  const mobileUserLinks = document.getElementById("mobile-user-links");
 
   if (currentUser) {
-    authLinks.classList.add("hidden");
-    userLinks.classList.remove("hidden");
+    // Hide auth links, show user links
+    if (authLinks) authLinks.classList.add("hidden");
+    if (userLinks) userLinks.classList.remove("hidden");
+    if (mobileAuthLinks) mobileAuthLinks.classList.add("hidden");
+    if (mobileUserLinks) mobileUserLinks.classList.remove("hidden");
   } else {
-    authLinks.classList.remove("hidden");
-    userLinks.classList.add("hidden");
+    // Show auth links, hide user links
+    if (authLinks) authLinks.classList.remove("hidden");
+    if (userLinks) userLinks.classList.add("hidden");
+    if (mobileAuthLinks) mobileAuthLinks.classList.remove("hidden");
+    if (mobileUserLinks) mobileUserLinks.classList.add("hidden");
   }
 }
 

@@ -9,12 +9,19 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/css/styles.css" />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
       /* Ensure body is always visible */
       body {
         visibility: visible !important;
         opacity: 1 !important;
         display: block !important;
+        font-family: 'Inter', sans-serif;
       }
       
       .hidden {
@@ -44,13 +51,17 @@
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 1;
+        line-clamp: 1;
       }
       .line-clamp-3 {
         overflow: hidden;
         display: -webkit-box;
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 3;
+        line-clamp: 3;
       }
+      
+      /* Custom animations */
       @keyframes pulse {
         0%, 100% {
           opacity: 1;
@@ -59,6 +70,34 @@
           opacity: .5;
         }
       }
+      @keyframes bounceIn {
+        0% {
+          opacity: 0;
+          transform: scale(0.3);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.05);
+        }
+        70% {
+          transform: scale(0.9);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      @keyframes slideInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
       .animate-pulse {
         animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
       }
@@ -180,32 +219,46 @@
   </head>
   <body class="bg-gray-100">
     <!-- Navigation -->
-    <nav id="navbar" class="text-white shadow-2xl sticky top-0 z-50 backdrop-blur-sm bg-opacity-95" style="background-color: #B87C4C;">
-      <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-        <div class="flex items-center space-x-3">
-          <div class="text-3xl">🎓</div>
-          <div>
-            <div class="text-2xl font-extrabold bg-gradient-to-r from-yellow-300 to-pink-300 bg-clip-text text-transparent">SeekoBharat</div>
-            <div class="text-xs text-gray-400">Learn. Grow. Succeed.</div>
+    <nav id="navbar" class="bg-black text-white p-4">
+      <div class="container mx-auto flex justify-between items-center">
+        <div class="text-xl font-bold">SeekoBharat</div>
+        <div id="nav-links" class="space-x-4">
+          <a href="#" onclick="showPage('home')" class="hover:text-gray-300"
+            >Home</a
+          >
+          <a href="#" onclick="showPage('courses')" class="hover:text-gray-300"
+            >Courses</a
+          >
+          <a href="#" onclick="showPage('about')" class="hover:text-gray-300"
+            >About</a
+          >
+          <a href="#" onclick="showPage('contact')" class="hover:text-gray-300"
+            >Contact</a
+          >
+          <div id="auth-links">
+            <a href="#" onclick="showPage('login')" class="hover:text-gray-300"
+              >Login</a
+            >
+            <a
+              href="#"
+              onclick="showPage('register')"
+              class="hover:text-gray-300"
+              >Register</a
+            >
           </div>
-        </div>
-        <div id="nav-links" class="flex items-center space-x-6">
-          <a href="#" onclick="showPage('home')" class="transition duration-300 font-medium" style="color: #F7F4EA;">Home</a>
-          <a href="#" onclick="showPage('courses')" class="transition duration-300 font-medium" style="color: #F7F4EA;">Courses</a>
-          <a href="#" onclick="showPage('about')" class="transition duration-300 font-medium" style="color: #F7F4EA;">About</a>
-          <a href="#" onclick="showPage('contact')" class="transition duration-300 font-medium" style="color: #F7F4EA;">Contact</a>
-          <div id="auth-links" class="flex items-center space-x-3 ml-4 border-l pl-4" style="border-color: #EBD9D1;">
-            <a href="#" onclick="showPage('login')" class="transition duration-300 font-medium" style="color: #F7F4EA;">Login</a>
-            <a href="#" onclick="showPage('register')" class="text-white px-6 py-2 rounded-full font-bold transition duration-300 shadow-lg" style="background-color: #A8BBA3;">
-              Sign Up Free
-            </a>
-          </div>
-          <div id="user-links" class="hidden flex items-center space-x-4 ml-4 border-l border-gray-600 pl-4">
-            <a href="#" onclick="showPage('dashboard')" class="hover:text-yellow-300 transition duration-300 font-medium">Dashboard</a>
-            <a href="#" onclick="showPage('cart')" class="relative hover:text-yellow-300 transition duration-300 font-medium">
-              🛒 Cart
-            </a>
-            <a href="#" onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-600 transition duration-300">Logout</a>
+          <div id="user-links" class="hidden">
+            <a
+              href="#"
+              onclick="showPage('dashboard')"
+              class="hover:text-gray-300"
+              >Dashboard</a
+            >
+            <a href="#" onclick="showPage('cart')" class="hover:text-gray-300"
+              >Cart</a
+            >
+            <a href="#" onclick="logout()" class="hover:text-gray-300"
+              >Logout</a
+            >
           </div>
         </div>
       </div>
@@ -215,213 +268,150 @@
     <div id="main-content">
       <!-- Home Page -->
       <div id="home-page" class="page">
-        <!-- Hero Section with Gradient Background -->
-        <section class="hero gradient-bg text-white py-24 md:py-32 relative overflow-hidden">
-          <!-- Decorative Elements -->
-          <div class="absolute top-0 left-0 w-full h-full opacity-10">
-            <div class="absolute top-10 left-10 w-72 h-72 bg-white rounded-full filter blur-3xl"></div>
-            <div class="absolute bottom-10 right-10 w-96 h-96 bg-white rounded-full filter blur-3xl"></div>
-          </div>
-          
-          <div class="container mx-auto px-4 relative z-10">
-            <div class="flex flex-col md:flex-row items-center gap-12">
-              <div class="md:w-1/2 mb-8 md:mb-0 fade-in-up">
-                <div class="inline-block glass-effect px-4 py-2 rounded-full text-sm mb-6">
-                  🎓 India's #1 E-Learning Platform
-                </div>
-                <h1 class="text-5xl md:text-7xl font-extrabold mb-6 leading-tight">
-                  Transform Your Future with
-                  <span class="block mt-2 text-yellow-300">SeekoBharat</span>
+        <section class="hero bg-black text-white py-16">
+          <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center">
+              <div class="md:w-1/2 mb-8 md:mb-0">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                  Expand Your Knowledge with SeekoBharat
                 </h1>
-                <p class="text-xl md:text-2xl mb-8 text-gray-100 leading-relaxed">
-                  Master new skills, unlock opportunities, and build the career of your dreams with expert-led courses.
+                <p class="text-xl mb-6">
+                  Learn from industry experts and advance your career with our
+                  comprehensive courses.
                 </p>
                 <div class="flex flex-wrap gap-4">
-                  <button onclick="showPage('register')" class="bg-yellow-400 text-gray-900 px-8 py-4 rounded-lg text-lg font-bold hover:bg-yellow-300 transition duration-300 btn-glow">
-                    Start Learning Free →
+                  <button
+                    onclick="showPage('courses')"
+                    class="bg-white text-black px-6 py-2 rounded hover:bg-gray-200"
+                  >
+                    Browse Courses
                   </button>
-                  <button onclick="showPage('courses')" class="glass-effect text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-purple-600 transition duration-300">
-                    Explore Courses
+                  <button
+                    onclick="showPage('register')"
+                    class="border border-white text-white px-6 py-2 rounded hover:bg-white hover:text-black"
+                  >
+                    Sign Up for Free
                   </button>
-                </div>
-                
-                <!-- Trust Indicators -->
-                <div class="mt-12 flex flex-wrap items-center gap-8">
-                  <div class="text-center">
-                    <div class="text-3xl font-bold">500+</div>
-                    <div class="text-sm text-gray-200">Courses</div>
-                  </div>
-                  <div class="text-center">
-                    <div class="text-3xl font-bold">10K+</div>
-                    <div class="text-sm text-gray-200">Students</div>
-                  </div>
-                  <div class="text-center">
-                    <div class="text-3xl font-bold">4.8★</div>
-                    <div class="text-sm text-gray-200">Rating</div>
-                  </div>
                 </div>
               </div>
-              <div class="md:w-1/2 slide-in-right">
-                <div class="relative float-animation">
-                  <img
-                    src="/img/hero-image.svg"
-                    alt="Learning Illustration"
-                    class="w-full max-w-lg mx-auto drop-shadow-2xl"
-                  />
-                  <!-- Floating Badge -->
-                  <div class="absolute top-10 right-0 bg-white text-gray-900 px-6 py-3 rounded-full shadow-xl">
-                    <div class="text-sm font-semibold">🏆 95% Success Rate</div>
-                  </div>
-                  <div class="absolute bottom-10 left-0 bg-white text-gray-900 px-6 py-3 rounded-full shadow-xl">
-                    <div class="text-sm font-semibold">📚 200+ Expert Teachers</div>
-                  </div>
-                </div>
+              <div class="md:w-1/2">
+                <img
+                  src="/img/hero-image.svg"
+                  alt="Learning Illustration"
+                  class="w-full max-w-lg mx-auto"
+                />
               </div>
             </div>
-          </div>
-          
-          <!-- Wave Divider -->
-          <div class="absolute bottom-0 left-0 w-full">
-            <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M0 0L60 10C120 20 240 40 360 46.7C480 53 600 47 720 43.3C840 40 960 40 1080 46.7C1200 53 1320 67 1380 73.3L1440 80V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0V0Z" fill="#F3F4F6"/>
-            </svg>
           </div>
         </section>
 
         <!-- Stats Section -->
-        <section class="py-20" style="background-color: #F7F4EA;">
+        <section class="py-16 bg-gray-100">
           <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div class="text-white p-8 rounded-2xl shadow-lg card-hover text-center" style="background-color: #A8BBA3;">
-                <div class="text-5xl font-extrabold stat-counter mb-3" id="total-courses">500+</div>
-                <div class="text-lg font-medium" style="color: #F7F4EA;">Courses Available</div>
-                <div class="mt-4 text-sm opacity-90">Across 50+ categories</div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+              <div>
+                <div class="text-4xl font-bold text-blue-600 mb-2" id="total-courses">500+</div>
+                <div class="text-gray-700">Courses Available</div>
               </div>
-              <div class="text-white p-8 rounded-2xl shadow-lg card-hover text-center" style="background-color: #B87C4C;">
-                <div class="text-5xl font-extrabold stat-counter mb-3" id="total-students">10,000+</div>
-                <div class="text-lg font-medium" style="color: #F7F4EA;">Students Enrolled</div>
-                <div class="mt-4 text-sm opacity-90">Worldwide community</div>
+              <div>
+                <div class="text-4xl font-bold text-green-600 mb-2" id="total-students">10,000+</div>
+                <div class="text-gray-700">Students Enrolled</div>
               </div>
-              <div class="text-white p-8 rounded-2xl shadow-lg card-hover text-center" style="background-color: #EBD9D1;">
-                <div class="text-5xl font-extrabold stat-counter mb-3" id="total-instructors">200+</div>
-                <div class="text-lg font-medium" style="color: #B87C4C;">Expert Instructors</div>
-                <div class="mt-4 text-sm opacity-90">Industry professionals</div>
+              <div>
+                <div class="text-4xl font-bold text-purple-600 mb-2" id="total-instructors">200+</div>
+                <div class="text-gray-700">Expert Instructors</div>
               </div>
-              <div class="text-white p-8 rounded-2xl shadow-lg card-hover text-center" style="background-color: #A8BBA3;">
-                <div class="text-5xl font-extrabold stat-counter mb-3" id="completion-rate">95%</div>
-                <div class="text-lg font-medium" style="color: #F7F4EA;">Completion Rate</div>
-                <div class="mt-4 text-sm opacity-90">Student satisfaction</div>
+              <div>
+                <div class="text-4xl font-bold text-orange-600 mb-2" id="completion-rate">95%</div>
+                <div class="text-gray-700">Completion Rate</div>
               </div>
             </div>
           </div>
         </section>
 
         <!-- How It Works Section -->
-        <section class="py-20 bg-white">
+        <section class="py-16">
           <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-              <h2 class="text-4xl md:text-5xl font-extrabold mb-4">
-                <span class="text-gradient">How It Works</span>
-              </h2>
-              <p class="text-xl text-gray-600">Start your learning journey in just 3 simple steps</p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-              <div class="bg-white p-8 rounded-2xl shadow-xl card-hover border-t-4" style="border-top-color: #A8BBA3;">
-                <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg" style="background-color: #A8BBA3;">
-                  <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <h2 class="text-3xl font-bold text-center mb-12">How It Works</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div class="text-center">
+                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                   </svg>
                 </div>
-                <div class="text-lg font-bold mb-3" style="color: #A8BBA3;">STEP 1</div>
-                <h3 class="text-2xl font-bold mb-4 text-gray-800">Browse Courses</h3>
-                <p class="text-gray-600 leading-relaxed">Explore our vast library of 500+ courses across various technologies, from beginner to advanced skill levels.</p>
+                <h3 class="text-xl font-semibold mb-2">1. Browse Courses</h3>
+                <p class="text-gray-600">Explore our vast library of courses across various technologies and skill levels.</p>
               </div>
-              <div class="bg-white p-8 rounded-2xl shadow-xl card-hover border-t-4" style="border-top-color: #B87C4C;">
-                <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg" style="background-color: #B87C4C;">
-                  <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="text-center">
+                <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
                   </svg>
                 </div>
-                <div class="text-lg font-bold mb-3" style="color: #B87C4C;">STEP 2</div>
-                <h3 class="text-2xl font-bold mb-4 text-gray-800">Learn & Practice</h3>
-                <p class="text-gray-600 leading-relaxed">Follow structured lessons, complete assignments, and work on real-world projects with expert guidance.</p>
+                <h3 class="text-xl font-semibold mb-2">2. Learn & Practice</h3>
+                <p class="text-gray-600">Follow structured lessons, complete assignments, and practice with real-world projects.</p>
               </div>
-              <div class="bg-white p-8 rounded-2xl shadow-xl card-hover border-t-4" style="border-top-color: #EBD9D1;">
-                <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg" style="background-color: #EBD9D1;">
-                  <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="text-center">
+                <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
                   </svg>
                 </div>
-                <div class="text-lg font-bold mb-3" style="color: #B87C4C;">STEP 3</div>
-                <h3 class="text-2xl font-bold mb-4 text-gray-800">Get Certified</h3>
-                <p class="text-gray-600 leading-relaxed">Earn industry-recognized certificates to showcase your new skills and boost your career prospects.</p>
+                <h3 class="text-xl font-semibold mb-2">3. Get Certified</h3>
+                <p class="text-gray-600">Complete courses and receive certificates to showcase your new skills to employers.</p>
               </div>
             </div>
           </div>
         </section>
 
         <!-- Categories Section -->
-        <section class="py-20" style="background-color: #F7F4EA;">
+        <section class="py-16 bg-gray-50">
           <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-              <h2 class="text-4xl md:text-5xl font-extrabold mb-4">
-                <span class="text-gradient">Popular Categories</span>
-              </h2>
-              <p class="text-xl text-gray-600">Explore top learning paths designed for your success</p>
-            </div>
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-              <div class="category-card bg-white p-8 rounded-2xl shadow-lg text-center card-hover cursor-pointer border-2 border-transparent" style="transition: border-color 0.3s;" onmouseover="this.style.borderColor='#A8BBA3'" onmouseout="this.style.borderColor='transparent'" onclick="searchCoursesByCategory('web-development')">
-                <div class="text-5xl mb-4">🌐</div>
-                <h3 class="font-bold text-gray-800">Web Development</h3>
-                <p class="text-sm text-gray-500 mt-2">120+ courses</p>
+            <h2 class="text-3xl font-bold text-center mb-12">Popular Categories</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+              <div class="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition duration-300 cursor-pointer" onclick="searchCoursesByCategory('web-development')">
+                <div class="text-3xl mb-3">🌐</div>
+                <h3 class="font-semibold">Web Development</h3>
               </div>
-              <div class="category-card bg-white p-8 rounded-2xl shadow-lg text-center card-hover cursor-pointer border-2 border-transparent" style="transition: border-color 0.3s;" onmouseover="this.style.borderColor='#B87C4C'" onmouseout="this.style.borderColor='transparent'" onclick="searchCoursesByCategory('mobile-development')">
-                <div class="text-5xl mb-4">📱</div>
-                <h3 class="font-bold text-gray-800">Mobile Development</h3>
-                <p class="text-sm text-gray-500 mt-2">85+ courses</p>
+              <div class="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition duration-300 cursor-pointer" onclick="searchCoursesByCategory('mobile-development')">
+                <div class="text-3xl mb-3">📱</div>
+                <h3 class="font-semibold">Mobile Development</h3>
               </div>
-              <div class="category-card bg-white p-8 rounded-2xl shadow-lg text-center card-hover cursor-pointer border-2 border-transparent" style="transition: border-color 0.3s;" onmouseover="this.style.borderColor='#A8BBA3'" onmouseout="this.style.borderColor='transparent'" onclick="searchCoursesByCategory('data-science')">
-                <div class="text-5xl mb-4">📊</div>
-                <h3 class="font-bold text-gray-800">Data Science</h3>
-                <p class="text-sm text-gray-500 mt-2">95+ courses</p>
+              <div class="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition duration-300 cursor-pointer" onclick="searchCoursesByCategory('data-science')">
+                <div class="text-3xl mb-3">📊</div>
+                <h3 class="font-semibold">Data Science</h3>
               </div>
-              <div class="category-card bg-white p-8 rounded-2xl shadow-lg text-center card-hover cursor-pointer border-2 border-transparent" style="transition: border-color 0.3s;" onmouseover="this.style.borderColor='#EBD9D1'" onmouseout="this.style.borderColor='transparent'" onclick="searchCoursesByCategory('artificial-intelligence')">
-                <div class="text-5xl mb-4">🤖</div>
-                <h3 class="font-bold text-gray-800">AI & ML</h3>
-                <p class="text-sm text-gray-500 mt-2">75+ courses</p>
+              <div class="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition duration-300 cursor-pointer" onclick="searchCoursesByCategory('artificial-intelligence')">
+                <div class="text-3xl mb-3">🤖</div>
+                <h3 class="font-semibold">AI & ML</h3>
               </div>
-              <div class="category-card bg-white p-8 rounded-2xl shadow-lg text-center card-hover cursor-pointer border-2 border-transparent" style="transition: border-color 0.3s;" onmouseover="this.style.borderColor='#B87C4C'" onmouseout="this.style.borderColor='transparent'" onclick="searchCoursesByCategory('cybersecurity')">
-                <div class="text-5xl mb-4">🔒</div>
-                <h3 class="font-bold text-gray-800">Cybersecurity</h3>
-                <p class="text-sm text-gray-500 mt-2">60+ courses</p>
+              <div class="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition duration-300 cursor-pointer" onclick="searchCoursesByCategory('cybersecurity')">
+                <div class="text-3xl mb-3">🔒</div>
+                <h3 class="font-semibold">Cybersecurity</h3>
               </div>
-              <div class="category-card bg-white p-8 rounded-2xl shadow-lg text-center card-hover cursor-pointer border-2 border-transparent" style="transition: border-color 0.3s;" onmouseover="this.style.borderColor='#A8BBA3'" onmouseout="this.style.borderColor='transparent'" onclick="searchCoursesByCategory('cloud-computing')">
-                <div class="text-5xl mb-4">☁️</div>
-                <h3 class="font-bold text-gray-800">Cloud Computing</h3>
-                <p class="text-sm text-gray-500 mt-2">70+ courses</p>
+              <div class="bg-white p-6 rounded-lg shadow-md text-center hover:shadow-lg transition duration-300 cursor-pointer" onclick="searchCoursesByCategory('cloud-computing')">
+                <div class="text-3xl mb-3">☁️</div>
+                <h3 class="font-semibold">Cloud Computing</h3>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- Featured Courses Section -->
-        <section class="py-20" style="background-color: #EBD9D1;">
+        <section class="py-16">
           <div class="container mx-auto px-4">
-            <div class="text-center mb-16">
-              <h2 class="text-4xl md:text-5xl font-extrabold mb-4">
-                <span class="text-gradient">Featured Courses</span>
-              </h2>
-              <p class="text-xl text-gray-600">Handpicked courses to accelerate your career growth</p>
-            </div>
+            <h2 class="text-3xl font-bold text-center mb-12">
+              Featured Courses
+            </h2>
             <div
               id="featured-courses"
-              class="grid grid-cols-1 md:grid-cols-3 gap-8"
+              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12"
             >
               <!-- Courses will be loaded dynamically -->
             </div>
-            <div class="text-center mt-12">
-              <button onclick="showPage('courses')" class="text-white px-10 py-4 rounded-full text-lg font-bold transition duration-300 shadow-xl" style="background-color: #B87C4C;">
-                View All Courses →
+            <div class="text-center mt-8">
+              <button onclick="showPage('courses')" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300">
+                View All Courses
               </button>
             </div>
           </div>
