@@ -3,76 +3,281 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sikho Bharat - LMS</title>
+    <title>Sikho Bharat - Learn in Your Mother Tongue</title>
     <link rel="stylesheet" href="../css/home.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   </head>
   <body>
+    <!-- Register Message Toast -->
+    <div class="register_message_container"></div>
+
     <div class="container">
       <!-- Header Section -->
       <header>
-        <div class="logo">📘 Sikho Bharat</div>
+        <div class="logo">
+          <i class="fas fa-graduation-cap"></i>
+          <span>Sikho Bharat</span>
+        </div>
         <nav>
           <ul>
-            <li><a href="#">Home</a></li>
-            <li><a href="#">Courses</a></li>
-            <li><a href="#">Languages</a></li>
-            <li><a href="#">About</a></li>
-            <li><a href="./login.html">Login</a></li>
+            <li><a href="#" class="active">Home</a></li>
+            <li><a href="#courses">Courses</a></li>
+            <li><a href="#languages">Languages</a></li>
+            <li><a href="#about">About</a></li>
           </ul>
         </nav>
+        <div class="header-actions">
+          <a href="./login.html" class="btn-login">
+            <i class="fas fa-sign-in-alt"></i> Login
+          </a>
+          <a href="#" class="btn-primary">Get Started</a>
+        </div>
       </header>
 
       <!-- Hero Section -->
       <section class="hero">
-        <div class="hero-text">
-          <h1>Learn in Your <span>Mother Tongue</span></h1>
-          <p>
-            Access quality courses in Hindi, English, Telugu, Rajasthani, Tamil,
-            Haryanvi and more.
-          </p>
-          <button class="btn">Get Started</button>
+        <div class="hero-content">
+          <div class="hero-text">
+            <span class="badge">🎓 Quality Education for All</span>
+            <h1>
+              Learn in Your <br />
+              <span class="gradient-text">Mother Tongue</span>
+            </h1>
+            <p>
+              Break language barriers and unlock your potential with courses in Hindi, English,
+              Telugu, Tamil, and more regional languages. Quality education, accessible to everyone.
+            </p>
+            <div class="hero-actions">
+              <button class="btn btn-primary">
+                <i class="fas fa-play-circle"></i> Start Learning
+              </button>
+              <button class="btn btn-secondary">
+                <i class="fas fa-book-open"></i> Explore Courses
+              </button>
+            </div>
+            <div class="hero-stats">
+              <div class="stat-item">
+                <h3>10,000+</h3>
+                <p>Active Learners</p>
+              </div>
+              <div class="stat-item">
+                <h3>500+</h3>
+                <p>Courses</p>
+              </div>
+              <div class="stat-item">
+                <h3>6+</h3>
+                <p>Languages</p>
+              </div>
+            </div>
+          </div>
+          <div class="hero-image">
+            <div class="floating-card card-1">
+              <i class="fas fa-laptop-code"></i>
+              <span>Web Development</span>
+            </div>
+            <div class="floating-card card-2">
+              <i class="fas fa-database"></i>
+              <span>Data Science</span>
+            </div>
+            <div class="floating-card card-3">
+              <i class="fas fa-mobile-alt"></i>
+              <span>App Development</span>
+            </div>
+            <div class="hero-illustration">
+              <i class="fas fa-user-graduate"></i>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features Section -->
+      <section class="features">
+        <div class="section-header">
+          <h2>Why Choose Sikho Bharat?</h2>
+          <p>Experience education designed for Indian learners</p>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-language"></i>
+            </div>
+            <h3>Multi-Language Support</h3>
+            <p>Learn in your preferred language - Hindi, English, Telugu, Tamil, and more</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-certificate"></i>
+            </div>
+            <h3>Certified Courses</h3>
+            <p>Get recognized certificates upon course completion</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-chalkboard-teacher"></i>
+            </div>
+            <h3>Expert Instructors</h3>
+            <p>Learn from industry professionals and experienced educators</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-clock"></i>
+            </div>
+            <h3>Learn at Your Pace</h3>
+            <p>Flexible learning schedules that fit your lifestyle</p>
+          </div>
         </div>
       </section>
 
       <!-- Languages Section -->
-      <section class="languages">
-        <h2>Available Languages</h2>
+      <section class="languages" id="languages">
+        <div class="section-header">
+          <h2>Available Languages</h2>
+          <p>Choose your preferred language and start learning today</p>
+        </div>
         <div class="lang-grid">
-          <div class="lang-card">🇮🇳 Hindi</div>
-          <div class="lang-card">🌍 English</div>
-          <div class="lang-card">🇮🇳 Telugu</div>
-          <div class="lang-card">🇮🇳 Rajasthani</div>
-          <div class="lang-card">🇮🇳 Tamil</div>
-          <div class="lang-card">🇮🇳 Haryanvi</div>
+          <div class="lang-card">
+            <div class="lang-icon">🇮🇳</div>
+            <h3>Hindi</h3>
+            <p>हिंदी में सीखें</p>
+            <span class="course-count">200+ Courses</span>
+          </div>
+          <div class="lang-card">
+            <div class="lang-icon">🌍</div>
+            <h3>English</h3>
+            <p>Learn in English</p>
+            <span class="course-count">300+ Courses</span>
+          </div>
+          <div class="lang-card">
+            <div class="lang-icon">🇮🇳</div>
+            <h3>Telugu</h3>
+            <p>తెలుగులో నేర్చుకోండి</p>
+            <span class="course-count">150+ Courses</span>
+          </div>
+          <div class="lang-card">
+            <div class="lang-icon">🇮🇳</div>
+            <h3>Tamil</h3>
+            <p>தமிழில் கற்றுக்கொள்ளுங்கள்</p>
+            <span class="course-count">120+ Courses</span>
+          </div>
+          <div class="lang-card">
+            <div class="lang-icon">🇮🇳</div>
+            <h3>Rajasthani</h3>
+            <p>राजस्थानी में सीखो</p>
+            <span class="course-count">80+ Courses</span>
+          </div>
+          <div class="lang-card">
+            <div class="lang-icon">🇮🇳</div>
+            <h3>Haryanvi</h3>
+            <p>हरियाणवी में सीखो</p>
+            <span class="course-count">60+ Courses</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Call to Action -->
+      <section class="cta">
+        <div class="cta-content">
+          <h2>Ready to Start Your Learning Journey?</h2>
+          <p>Join thousands of learners and unlock your potential today</p>
+          <button class="btn btn-cta">
+            <i class="fas fa-rocket"></i> Get Started Now
+          </button>
         </div>
       </section>
 
       <!-- Footer -->
       <footer>
-        <p>© 2025 Sikho Bharat. All Rights Reserved.</p>
+        <div class="footer-content">
+          <div class="footer-section">
+            <h3><i class="fas fa-graduation-cap"></i> Sikho Bharat</h3>
+            <p>Empowering learners across India with quality education in their mother tongue.</p>
+            <div class="social-links">
+              <a href="#"><i class="fab fa-facebook"></i></a>
+              <a href="#"><i class="fab fa-twitter"></i></a>
+              <a href="#"><i class="fab fa-instagram"></i></a>
+              <a href="#"><i class="fab fa-linkedin"></i></a>
+            </div>
+          </div>
+          <div class="footer-section">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="#">About Us</a></li>
+              <li><a href="#">Courses</a></li>
+              <li><a href="#">Languages</a></li>
+              <li><a href="#">Contact</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h4>Support</h4>
+            <ul>
+              <li><a href="#">Help Center</a></li>
+              <li><a href="#">FAQs</a></li>
+              <li><a href="#">Terms & Conditions</a></li>
+              <li><a href="#">Privacy Policy</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h4>Contact Us</h4>
+            <ul>
+              <li><i class="fas fa-envelope"></i> info@sikhobharat.com</li>
+              <li><i class="fas fa-phone"></i> +91 98765 43210</li>
+              <li><i class="fas fa-map-marker-alt"></i> New Delhi, India</li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>© 2025 Sikho Bharat. All Rights Reserved. Made with ❤️ in India</p>
+        </div>
       </footer>
-
-      <div class="register_message_container"></div>
     </div>
 
     <script>
+      // Toast notification for registration message
       const register_message = localStorage.getItem("register_message");
       const register_message_container = document.querySelector(
         ".register_message_container"
       );
 
       if (register_message) {
-        register_message_container.innerHTML = register_message;
-
+        register_message_container.innerHTML = `
+          <div class="toast-notification">
+            <i class="fas fa-check-circle"></i>
+            <span>${register_message}</span>
+            <button onclick="this.parentElement.remove()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        `;
+        register_message_container.style.display = "block";
         localStorage.removeItem("register_message");
 
         setTimeout(() => {
           register_message_container.style.display = "none";
-          register_message_container.style.border = "none";
-        }, 3000);
-      } else {
-        register_message_container.style.border = "none";
+        }, 5000);
       }
+
+      // Smooth scroll for navigation links
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute("href"));
+          if (target) {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        });
+      });
+
+      // Add scroll effect to header
+      window.addEventListener("scroll", () => {
+        const header = document.querySelector("header");
+        if (window.scrollY > 50) {
+          header.style.boxShadow = "0 2px 10px rgba(0,0,0,0.1)";
+          header.style.padding = "12px 50px";
+        } else {
+          header.style.boxShadow = "none";
+          header.style.padding = "15px 50px";
+        }
+      });
     </script>
   </body>
 </html>
