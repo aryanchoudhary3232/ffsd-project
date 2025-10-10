@@ -375,7 +375,7 @@ const AdminController = {
       }
 
       if (language !== "all") {
-        courses = courses.filter((course) => course.language === language);
+        courses = courses.filter((course) => course.courseLanguage === language);
       }
 
       // Apply sorting
@@ -401,26 +401,55 @@ const AdminController = {
 
       // Enhance courses with instructor data and student count
       const enhancedCoursesPromises = courses.map(async (course) => {
-        let instructor = null;
-        let instructorName = "Unknown Instructor";
+        let instructorName = course.instructor || "Unknown Instructor"; // Use existing instructor field as fallback
+
+        console.log(`Processing course: ${course.title}`);
+        console.log(`Course instructorId: ${course.instructorId}`);
+        console.log(`Course instructor field: ${course.instructor}`);
 
         if (
           course.instructorId &&
           AdminController.isValidObjectId(course.instructorId)
         ) {
-          instructor = await User.findById(course.instructorId);
-          if (instructor) {
-            instructorName =
-              instructor.name ||
-              instructor.username ||
-              instructor.email ||
-              "Unknown Instructor";
+          try {
+            const instructor = await User.findById(course.instructorId);
+            console.log(
+              `Found instructor:`,
+              instructor
+                ? `${
+                    instructor.name || instructor.username || instructor.email
+                  }`
+                : "null"
+            );
+
+            if (instructor) {
+              instructorName =
+                instructor.name ||
+                instructor.username ||
+                instructor.email ||
+                course.instructor || // Fallback to stored instructor name
+                "Unknown Instructor";
+            }
+          } catch (error) {
+            console.error(
+              `Error fetching instructor for course ${course.title}:`,
+              error
+            );
+            // Keep the fallback name (course.instructor or "Unknown Instructor")
           }
+        } else {
+          console.log(
+            `Invalid or missing instructorId for course: ${course.title}`
+          );
         }
 
         const studentCount = await User.countDocuments({
           enrolledCourses: course._id,
         });
+
+        console.log(
+          `Final instructor name for ${course.title}: ${instructorName}`
+        );
 
         return {
           ...course,
@@ -434,7 +463,7 @@ const AdminController = {
       let filteredCourses = enhancedCourses;
       if (language !== "all") {
         filteredCourses = enhancedCourses.filter(
-          (course) => course.language === language
+          (course) => course.courseLanguage === language
         );
       }
 
@@ -444,7 +473,7 @@ const AdminController = {
       const languages = [
         ...new Set(
           enhancedCourses
-            .map((course) => course.language)
+            .map((course) => course.courseLanguage)
             .filter((lang) => lang) // Remove undefined or empty languages
         ),
       ];
@@ -510,6 +539,8 @@ const AdminController = {
       }
 
       // Ensure instructor is never undefined, provide default values if instructor not found
+      // idhar maine course  course.instructor add kiya hai 
+      // isko dekh lena 
       const instructorName =
         instructor?.name ||
         instructor?.username ||
@@ -550,8 +581,8 @@ const AdminController = {
         instructor: instructor, // Pass the full instructor object as before
         enrolledStudents, // Pass the enrolled students array as before
         // Add success/error messages if needed (optional, based on your flash setup)
-        success_msg: req.flash('success_msg'),
-        error_msg: req.flash('error_msg')
+        success_msg: req.flash("success_msg"),
+        error_msg: req.flash("error_msg"),
       });
     } catch (error) {
       console.error("Admin Get Course Details error:", error);
@@ -568,7 +599,7 @@ const AdminController = {
     try {
       const courseId = req.params.id;
       const course = await Course.getCourseById(courseId);
-
+      console.log(".....", course);
       if (!course) {
         req.flash("error_msg", "Course not found");
         return res.redirect("/admin/courses");
@@ -608,7 +639,9 @@ const AdminController = {
         instructor = await User.findById(instructorId);
       }
       // Use instructor's name or username, provide clearer fallbacks
-      const instructorName = instructor ? (instructor.name || instructor.username || "Instructor Name Missing") : "Unknown Instructor";
+      const instructorName = instructor
+        ? instructor.name || instructor.username || "Instructor Name Missing"
+        : "Unknown Instructor";
 
       const courseData = {
         title,
@@ -622,13 +655,13 @@ const AdminController = {
           : "/img/placeholder.svg",
         // Add language if it's part of the form
         language: req.body.language || null, // Assuming language might be in req.body
-        status: 'draft', // Default status
+        status: "draft", // Default status
         featured: false, // Default featured
         createdAt: new Date(),
         updatedAt: new Date(),
         modules: [], // Initialize modules
         rating: 0, // Initialize rating
-        students: 0 // Initialize students count (though calculated dynamically elsewhere)
+        students: 0, // Initialize students count (though calculated dynamically elsewhere)
       };
 
       const newCourse = await Course.createCourse(courseData);
@@ -678,11 +711,17 @@ const AdminController = {
         if (AdminController.isValidObjectId(instructorId)) {
           const instructor = await User.findById(instructorId);
           if (instructor) {
-            instructorName = instructor.name || instructor.username || "Instructor Name Missing"; // Get name from fetched user
+            instructorName =
+              instructor.name ||
+              instructor.username ||
+              "Instructor Name Missing"; // Get name from fetched user
             finalInstructorId = instructor._id; // Update the ID to be saved
           } else {
             // Instructor ID provided but not found
-            req.flash("error_msg", "Selected instructor not found. Keeping original instructor.");
+            req.flash(
+              "error_msg",
+              "Selected instructor not found. Keeping original instructor."
+            );
             // Keep original instructorName and finalInstructorId by not changing them here
           }
         } else {
@@ -690,11 +729,10 @@ const AdminController = {
           return res.redirect(`/admin/courses/${courseId}/edit`);
         }
       } else if (!instructorId && course.instructorId) {
-          // If instructorId is cleared in the form, remove instructor info
-          instructorName = "Unknown Instructor";
-          finalInstructorId = null;
+        // If instructorId is cleared in the form, remove instructor info
+        instructorName = "Unknown Instructor";
+        finalInstructorId = null;
       }
-
 
       const courseData = {
         title,
@@ -706,7 +744,7 @@ const AdminController = {
         instructorId: finalInstructorId, // Use the determined ID (could be null)
         instructor: instructorName, // Use the determined name
         language: req.body.language || course.language, // Update language if provided
-        updatedAt: new Date() // Update the timestamp
+        updatedAt: new Date(), // Update the timestamp
       };
 
       if (req.file) {

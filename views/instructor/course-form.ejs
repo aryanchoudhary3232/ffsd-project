@@ -93,20 +93,20 @@
             class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">-- Select a language --</option>
-            <option value="English" <%= isEdit && course.language === 'English' ? 'selected' : !isEdit ? 'selected' : '' %>>English</option>
-            <option value="Hindi" <%= isEdit && course.language === 'Hindi' ? 'selected' : '' %>>Hindi</option>
-            <option value="Marathi" <%= isEdit && course.language === 'Marathi' ? 'selected' : '' %>>Marathi</option>
-            <option value="Telugu" <%= isEdit && course.language === 'Telugu' ? 'selected' : '' %>>Telugu</option>
-            <option value="Malayalam" <%= isEdit && course.language === 'Malayalam' ? 'selected' : '' %>>Malayalam</option>
-            <option value="Kannada" <%= isEdit && course.language === 'Kannada' ? 'selected' : '' %>>Kannada</option>
-            <option value="Marwadi" <%= isEdit && course.language === 'Marwadi' ? 'selected' : '' %>>Marwadi</option>
-            <option value="Haryanvi" <%= isEdit && course.language === 'Haryanvi' ? 'selected' : '' %>>Haryanvi</option>
-            <option value="Tamil" <%= isEdit && course.language === 'Tamil' ? 'selected' : '' %>>Tamil</option>
-            <option value="Bengali" <%= isEdit && course.language === 'Bengali' ? 'selected' : '' %>>Bengali</option>
-            <option value="Gujarati" <%= isEdit && course.language === 'Gujarati' ? 'selected' : '' %>>Gujarati</option>
-            <option value="Punjabi" <%= isEdit && course.language === 'Punjabi' ? 'selected' : '' %>>Punjabi</option>
-            <option value="Odia" <%= isEdit && course.language === 'Odia' ? 'selected' : '' %>>Odia</option>
-            <option value="Bhojpuri" <%= isEdit && course.language === 'Bhojpuri' ? 'selected' : '' %>>Bhojpuri</option>
+            <option value="English" <%= isEdit && course.courseLanguage === 'English' ? 'selected' : !isEdit ? 'selected' : '' %>>English</option>
+            <option value="Hindi" <%= isEdit && course.courseLanguage === 'Hindi' ? 'selected' : '' %>>Hindi</option>
+            <option value="Marathi" <%= isEdit && course.courseLanguage === 'Marathi' ? 'selected' : '' %>>Marathi</option>
+            <option value="Telugu" <%= isEdit && course.courseLanguage === 'Telugu' ? 'selected' : '' %>>Telugu</option>
+            <option value="Malayalam" <%= isEdit && course.courseLanguage === 'Malayalam' ? 'selected' : '' %>>Malayalam</option>
+            <option value="Kannada" <%= isEdit && course.courseLanguage === 'Kannada' ? 'selected' : '' %>>Kannada</option>
+            <option value="Marwadi" <%= isEdit && course.courseLanguage === 'Marwadi' ? 'selected' : '' %>>Marwadi</option>
+            <option value="Haryanvi" <%= isEdit && course.courseLanguage === 'Haryanvi' ? 'selected' : '' %>>Haryanvi</option>
+            <option value="Tamil" <%= isEdit && course.courseLanguage === 'Tamil' ? 'selected' : '' %>>Tamil</option>
+            <option value="Bengali" <%= isEdit && course.courseLanguage === 'Bengali' ? 'selected' : '' %>>Bengali</option>
+            <option value="Gujarati" <%= isEdit && course.courseLanguage === 'Gujarati' ? 'selected' : '' %>>Gujarati</option>
+            <option value="Punjabi" <%= isEdit && course.courseLanguage === 'Punjabi' ? 'selected' : '' %>>Punjabi</option>
+            <option value="Odia" <%= isEdit && course.courseLanguage === 'Odia' ? 'selected' : '' %>>Odia</option>
+            <option value="Bhojpuri" <%= isEdit && course.courseLanguage === 'Bhojpuri' ? 'selected' : '' %>>Bhojpuri</option>
           </select>
           <div class="error-message text-red-500 text-sm mt-1 hidden" id="language-error"></div>
         </div>

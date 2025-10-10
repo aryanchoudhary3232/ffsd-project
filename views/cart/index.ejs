@@ -20,15 +20,15 @@
     <div class="flex flex-col md:flex-row gap-8">
       <!-- Cart Items Section -->
       <div class="md:w-2/3">
+      <div id="cart-items-wrapper">
         <% if (cartItems && cartItems.length > 0) { %>
           <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden">
             <div class="p-4 border-b border-gray-700">
-              <h2 class="text-lg font-semibold">
+              <h2 class="text-lg font-semibold" id="cart-items-heading">
                 <%= cartItems.length %> Course<%= cartItems.length > 1 ? 's' : '' %> in Cart
               </h2>
             </div>
-            
-            <div class="divide-y divide-gray-700">
+            <div class="divide-y divide-gray-700" id="cart-items-list">
               <% cartItems.forEach(function(item) { %>
                 <div class="p-4 flex flex-col md:flex-row gap-4">
                   <div class="md:w-1/4">
@@ -58,7 +58,7 @@
             </div>
           </div>
         <% } else { %>
-          <div class="bg-gray-800 rounded-lg shadow-md p-8 text-center">
+          <div class="bg-gray-800 rounded-lg shadow-md p-8 text-center" id="cart-empty-state">
             <div class="text-gray-500 mb-4">
               <i class="fas fa-shopping-cart text-6xl"></i>
             </div>
@@ -73,20 +73,20 @@
       
       <!-- Order Summary Section -->
       <div class="md:w-1/3">
-        <div class="bg-gray-800 rounded-lg shadow-md p-6 sticky top-6">
+        <div class="bg-gray-800 rounded-lg shadow-md p-6 sticky top-6" id="order-summary">
           <h2 class="text-lg font-semibold mb-4">Order Summary</h2>
           
           <% if (cartItems && cartItems.length > 0) { %>
-            <div class="space-y-2 mb-4">
-              <div class="flex justify-between">
-                <span>Original Price:</span>
-                <span>$<%= total.toFixed(2) %></span>
-              </div>
-              <div class="flex justify-between font-bold text-lg pt-2 border-t border-gray-700">
-                <span>Total:</span>
-                <span>$<%= total.toFixed(2) %></span>
-              </div>
-            </div>
+                <div class="space-y-2 mb-4">
+          <div class="flex justify-between">
+            <span>Original Price:</span>
+            <span id="order-original-price">$<%= total.toFixed(2) %></span>
+          </div>
+          <div class="flex justify-between font-bold text-lg pt-2 border-t border-gray-700">
+            <span>Total:</span>
+            <span id="order-total-price">$<%= total.toFixed(2) %></span>
+          </div>
+        </div>
             
             <a href="/cart/checkout" class="block w-full text-center bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors mb-4">
               Checkout

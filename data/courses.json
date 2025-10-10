@@ -1,520 +1,589 @@
 [
-  {
-    "id": "1",
-    "title": "Complete Web Development Bootcamp",
-    "description": "Learn web development from scratch with this comprehensive bootcamp covering HTML, CSS, JavaScript, React, Node.js, and more.",
-    "category": "Web Development",
-    "price": 59.99,
-    "instructorId": "2",
-    "instructor": "Jane Smith",
-    "thumbnail": "/img/courses/web-dev.jpg",
-    "rating": 4.8,
-    "students": 4,
-    "createdAt": "2023-01-20",
-    "updatedAt": "2025-03-27T17:49:58.478Z",
-    "featured": true,
-    "modules": [
-      {
-        "id": "m1",
-        "title": "Introduction to Web Development",
-        "lessons": [
-          {
-            "id": "l2",
-            "title": "Setting Up Your Development Environment",
-            "type": "video",
-            "duration": "15:30",
-            "file": "/video/video2.mp4"
-          },
-          {
-            "id": "l3",
-            "title": "Web Development Basics",
-            "type": "video",
-            "duration": "12:45",
-            "file": "/video/video3.mp4"
-          },
-          {
-            "id": "l4",
-            "title": "Introduction Quiz",
-            "type": "quiz",
-            "duration": "10 questions",
-            "file": null
-          }
-        ]
-      },
-      {
-        "id": "m2",
-        "title": "HTML Fundamentals",
-        "lessons": [
-          {
-            "id": "l5",
-            "title": "HTML Document Structure",
-            "type": "video",
-            "duration": "14:20",
-            "file": "/video/video4.mp4"
-          },
-          {
-            "id": "l6",
-            "title": "HTML Elements and Attributes",
-            "type": "video",
-            "duration": "18:45",
-            "file": "/video/video.mp4"
-          },
-          {
-            "id": "l7",
-            "title": "HTML Forms",
-            "type": "video",
-            "duration": "20:10",
-            "file": "/video/video1.mp4"
-          },
-          {
-            "id": "l8",
-            "title": "HTML Cheat Sheet",
-            "type": "pdf",
-            "duration": "",
-            "file": "/docs/html-cheatsheet.pdf"
-          }
-        ]
-      },
-      {
-        "id": "m3",
-        "title": "CSS Styling",
-        "lessons": [
-          {
-            "id": "l9",
-            "title": "CSS Selectors",
-            "type": "video",
-            "duration": "16:30",
-            "file": "/video/video3.mp4"
-          },
-          {
-            "id": "l10",
-            "title": "CSS Box Model",
-            "type": "video",
-            "duration": "15:15",
-            "file": "/video/video4.mp4"
-          },
-          {
-            "id": "l11",
-            "title": "CSS Flexbox",
-            "type": "video",
-            "duration": "22:40",
-            "file": "/video/video.mp4"
-          },
-          {
-            "id": "l12",
-            "title": "CSS Grid",
-            "type": "video",
-            "duration": "25:10",
-            "file": "/video/video1.mp4"
-          },
-          {
-            "id": "l13",
-            "title": "CSS Assignment",
-            "type": "assignment",
-            "duration": "",
-            "file": "/docs/css-assignment.pdf"
-          }
-        ]
-      },
-      {
-        "id": "m4",
-        "title": "JavaScript Basics",
-        "lessons": [
-          {
-            "id": "l14",
-            "title": "JavaScript Introduction",
-            "type": "video",
-            "duration": "18:20",
-            "file": "/video/video3.mp4"
-          },
-          {
-            "id": "l15",
-            "title": "Variables and Data Types",
-            "type": "video",
-            "duration": "20:45",
-            "file": "/video/video4.mp4"
-          },
-          {
-            "id": "l16",
-            "title": "Functions and Scope",
-            "type": "video",
-            "duration": "24:30",
-            "file": "/video/video.mp4"
-          },
-          {
-            "id": "l17",
-            "title": "DOM Manipulation",
-            "type": "video",
-            "duration": "28:15",
-            "file": "/video/video1.mp4"
-          },
-          {
-            "id": "l18",
-            "title": "JavaScript Practice Exercises",
-            "type": "pdf",
-            "duration": "",
-            "file": "/docs/js-exercises.pdf"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "2",
-    "title": "Advanced JavaScript Concepts",
-    "description": "Take your JavaScript skills to the next level with advanced concepts like closures, prototypes, async/await, and more.",
-    "category": "JavaScript",
-    "price": 69.99,
-    "instructorId": "4",
-    "instructor": "Michael Wilson",
-    "thumbnail": "/img/courses/js-advanced.jpg",
-    "rating": 4.9,
-    "students": 987,
-    "createdAt": "2023-02-20",
-    "updatedAt": "2025-03-24T20:31:12.275Z",
-    "featured": true,
-    "modules": [
-      {
-        "id": "m1",
-        "title": "JavaScript Deep Dive",
-        "lessons": [
-          {
-            "id": "l1",
-            "title": "Execution Context and Call Stack",
-            "type": "video",
-            "duration": "22:15",
-            "file": "/video/video3.mp4"
-          },
-          {
-            "id": "l2",
-            "title": "Scope and Closures",
-            "type": "video",
-            "duration": "25:30",
-            "file": "/video/video4.mp4"
-          },
-          {
-            "id": "l3",
-            "title": "this Keyword and Binding",
-            "type": "video",
-            "duration": "20:45",
-            "file": "/video/video.mp4"
-          }
-        ]
-      },
-      {
-        "id": "m2",
-        "title": "Object-Oriented JavaScript",
-        "lessons": [
-          {
-            "id": "l4",
-            "title": "Prototypes and Inheritance",
-            "type": "video",
-            "duration": "28:20",
-            "file": "/video/video1.mp4"
-          },
-          {
-            "id": "l5",
-            "title": "ES6 Classes",
-            "type": "video",
-            "duration": "24:45",
-            "file": "/video/video2.mp4"
-          },
-          {
-            "id": "l6",
-            "title": "Design Patterns",
-            "type": "video",
-            "duration": "32:10",
-            "file": "/video/video3.mp4"
-          }
-        ]
-      },
-      {
-        "id": "m3",
-        "title": "Asynchronous JavaScript",
-        "lessons": [
-          {
-            "id": "l7",
-            "title": "Callbacks and Promises",
-            "type": "video",
-            "duration": "26:30",
-            "file": "/video/video4.mp4"
-          },
-          {
-            "id": "l8",
-            "title": "Async/Await",
-            "type": "video",
-            "duration": "22:15",
-            "file": "/video/video.mp4"
-          },
-          {
-            "id": "l9",
-            "title": "Event Loop",
-            "type": "video",
-            "duration": "18:40",
-            "file": "/video/video1.mp4"
-          }
-        ]
-      },
-      {
-        "id": "1742848269547",
-        "title": "Non constant",
-        "lessons": []
-      },
-      {
-        "id": "1742848272275",
-        "title": "Non constant",
-        "lessons": []
-      }
-    ]
-  },
-  {
-    "id": "3",
-    "title": "React.js for Beginners",
-    "description": "Learn React.js from scratch and build modern, interactive web applications with the most popular JavaScript library.",
-    "category": "React",
-    "price": 79.99,
-    "instructorId": "2",
-    "instructor": "Jane Smith",
-    "thumbnail": "/img/courses/react-basics.jpg",
-    "rating": 4.7,
-    "students": 1532,
-    "createdAt": "2023-03-15",
-    "updatedAt": "2023-12-05",
-    "featured": true,
-    "modules": [
-      {
-        "id": "m1",
-        "title": "React Fundamentals",
-        "lessons": [
-          {
-            "id": "l1",
-            "title": "Introduction to React",
-            "type": "video",
-            "duration": "15:20",
-            "file": "/video/video2.mp4"
-          },
-          {
-            "id": "l2",
-            "title": "Setting Up React Environment",
-            "type": "video",
-            "duration": "18:45",
-            "file": "/video/video3.mp4"
-          },
-          {
-            "id": "l3",
-            "title": "JSX Syntax",
-            "type": "video",
-            "duration": "14:30",
-            "file": "/video/video3.mp4"
-          }
-        ]
-      },
-      {
-        "id": "m2",
-        "title": "React Components",
-        "lessons": [
-          {
-            "id": "l4",
-            "title": "Functional Components",
-            "type": "video",
-            "duration": "22:15",
-            "file": "/video/video4.mp4"
-          },
-          {
-            "id": "l5",
-            "title": "Class Components",
-            "type": "video",
-            "duration": "20:30",
-            "file": "/video/video.mp4"
-          },
-          {
-            "id": "l6",
-            "title": "Props and State",
-            "type": "video",
-            "duration": "25:45",
-            "file": "/video/video1.mp4"
-          }
-        ]
-      },
-      {
-        "id": "m3",
-        "title": "React Hooks",
-        "lessons": [
-          {
-            "id": "l7",
-            "title": "useState Hook",
-            "type": "video",
-            "duration": "18:20",
-            "file": "/video/video2.mp4"
-          },
-          {
-            "id": "l8",
-            "title": "useEffect Hook",
-            "type": "video",
-            "duration": "24:15",
-            "file": "/video/video3.mp4"
-          },
-          {
-            "id": "l9",
-            "title": "Custom Hooks",
-            "type": "video",
-            "duration": "22:40",
-            "file": "/video/video4.mp4"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "4",
-    "title": "Node.js Backend Development",
-    "description": "Learn server-side JavaScript with Node.js and build scalable backend applications with Express.js, MongoDB, and more.",
-    "category": "Backend",
-    "price": 74.99,
-    "instructorId": "4",
-    "instructor": "Michael Wilson",
-    "thumbnail": "/img/courses/nodejs.jpg",
-    "rating": 4.6,
-    "students": 876,
-    "createdAt": "2023-04-10",
-    "updatedAt": "2023-11-25",
-    "featured": false,
-    "modules": [
-      {
-        "id": "m1",
-        "title": "Node.js Basics",
-        "lessons": [
-          {
-            "id": "l1",
-            "title": "Introduction to Node.js",
-            "type": "video",
-            "duration": "16:30",
-            "file": "/video/video.mp4"
-          },
-          {
-            "id": "l2",
-            "title": "Node.js Modules",
-            "type": "video",
-            "duration": "20:15",
-            "file": "/video/video1.mp4"
-          },
-          {
-            "id": "l3",
-            "title": "File System Operations",
-            "type": "video",
-            "duration": "18:45",
-            "file": "/video/video3.mp4"
-          }
-        ]
-      },
-      {
-        "id": "m2",
-        "title": "Express.js Framework",
-        "lessons": [
-          {
-            "id": "l4",
-            "title": "Setting Up Express",
-            "type": "video",
-            "duration": "15:20",
-            "file": "/video/video3.mp4"
-          },
-          {
-            "id": "l5",
-            "title": "Routing in Express",
-            "type": "video",
-            "duration": "22:30",
-            "file": "/video/video4.mp4"
-          },
-          {
-            "id": "l6",
-            "title": "Middleware",
-            "type": "video",
-            "duration": "24:15",
-            "file": "/video/video.mp4"
-          }
-        ]
-      },
-      {
-        "id": "m3",
-        "title": "Database Integration",
-        "lessons": [
-          {
-            "id": "l7",
-            "title": "MongoDB Basics",
-            "type": "video",
-            "duration": "26:40",
-            "file": "/video/video1.mp4"
-          },
-          {
-            "id": "l8",
-            "title": "Mongoose ODM",
-            "type": "video",
-            "duration": "28:15",
-            "file": "/video/video3.mp4"
-          },
-          {
-            "id": "l9",
-            "title": "CRUD Operations",
-            "type": "video",
-            "duration": "32:20",
-            "file": "/video/video4.mp4"
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "1742791944339",
-    "title": "hello",
-    "description": "this is a course",
-    "category": "Web Development",
-    "price": 40,
-    "instructorId": "4",
-    "instructor": "Michael Wilson",
-    "thumbnail": "/uploads/1742791944282-Screenshot 2025-03-04 at 22-50-34 Checkout - GameSir Official Store.png",
-    "rating": 0,
-    "students": 4,
-    "createdAt": "2025-03-24T04:52:24.339Z",
-    "updatedAt": "2025-03-27T08:38:55.037Z",
-    "modules": [
-      {
-        "id": "1743055487619",
-        "title": "now fixed",
-        "lessons": [
-          {
-            "id": "1743055507288",
-            "title": "here is a lesson",
-            "type": "video",
-            "duration": "2:20",
-            "file": "/uploads/1743055507212-video3.mp4"
-          },
-          {
-            "id": "1743055904561",
-            "title": "fixed lesson",
-            "type": "video",
-            "duration": "4:30",
-            "file": "/uploads/1743055904485-video.mp4"
-          }
-        ]
-      }
-    ],
-    "featured": false,
-    "status": "draft"
-  },
-  {
-    "id": "1743159420560",
-    "title": "abcd423434@",
-    "description": "fgfdsfgdszd",
-    "category": "fdff",
-    "price": 132,
-    "instructorId": "2",
-    "instructor": "Jane",
-    "thumbnail": "/uploads/1743159420531-IMG_20250324_235113.jpg",
-    "rating": 0,
-    "students": 0,
-    "createdAt": "2025-03-28T10:57:00.560Z",
-    "updatedAt": "2025-03-28T10:57:00.560Z",
-    "modules": [],
-    "featured": false
-  }
+    {
+        "id":  "1",
+        "title":  "Complete Web Development Bootcamp",
+        "description":  "Learn web development from scratch with this comprehensive bootcamp covering HTML, CSS, JavaScript, React, Node.js, and more.",
+        "category":  "Web Development",
+        "price":  59.99,
+        "instructorId":  "2",
+        "instructor":  "Jane Smith",
+        "thumbnail":  "/img/courses/web-dev.jpg",
+        "rating":  4.8,
+        "students":  4,
+        "createdAt":  "2023-01-20",
+        "updatedAt":  "2025-03-27T17:49:58.478Z",
+        "featured":  true,
+        "modules":  [
+                        {
+                            "id":  "m1",
+                            "title":  "Introduction to Web Development",
+                            "lessons":  [
+                                            {
+                                                "id":  "l2",
+                                                "title":  "Setting Up Your Development Environment",
+                                                "type":  "video",
+                                                "duration":  "15:30",
+                                                "file":  "/video/video2.mp4"
+                                            },
+                                            {
+                                                "id":  "l3",
+                                                "title":  "Web Development Basics",
+                                                "type":  "video",
+                                                "duration":  "12:45",
+                                                "file":  "/video/video3.mp4"
+                                            },
+                                            {
+                                                "id":  "l4",
+                                                "title":  "Introduction Quiz",
+                                                "type":  "quiz",
+                                                "duration":  "10 questions",
+                                                "file":  null
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "m2",
+                            "title":  "HTML Fundamentals",
+                            "lessons":  [
+                                            {
+                                                "id":  "l5",
+                                                "title":  "HTML Document Structure",
+                                                "type":  "video",
+                                                "duration":  "14:20",
+                                                "file":  "/video/video4.mp4"
+                                            },
+                                            {
+                                                "id":  "l6",
+                                                "title":  "HTML Elements and Attributes",
+                                                "type":  "video",
+                                                "duration":  "18:45",
+                                                "file":  "/video/video.mp4"
+                                            },
+                                            {
+                                                "id":  "l7",
+                                                "title":  "HTML Forms",
+                                                "type":  "video",
+                                                "duration":  "20:10",
+                                                "file":  "/video/video1.mp4"
+                                            },
+                                            {
+                                                "id":  "l8",
+                                                "title":  "HTML Cheat Sheet",
+                                                "type":  "pdf",
+                                                "duration":  "",
+                                                "file":  "/docs/html-cheatsheet.pdf"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "m3",
+                            "title":  "CSS Styling",
+                            "lessons":  [
+                                            {
+                                                "id":  "l9",
+                                                "title":  "CSS Selectors",
+                                                "type":  "video",
+                                                "duration":  "16:30",
+                                                "file":  "/video/video3.mp4"
+                                            },
+                                            {
+                                                "id":  "l10",
+                                                "title":  "CSS Box Model",
+                                                "type":  "video",
+                                                "duration":  "15:15",
+                                                "file":  "/video/video4.mp4"
+                                            },
+                                            {
+                                                "id":  "l11",
+                                                "title":  "CSS Flexbox",
+                                                "type":  "video",
+                                                "duration":  "22:40",
+                                                "file":  "/video/video.mp4"
+                                            },
+                                            {
+                                                "id":  "l12",
+                                                "title":  "CSS Grid",
+                                                "type":  "video",
+                                                "duration":  "25:10",
+                                                "file":  "/video/video1.mp4"
+                                            },
+                                            {
+                                                "id":  "l13",
+                                                "title":  "CSS Assignment",
+                                                "type":  "assignment",
+                                                "duration":  "",
+                                                "file":  "/docs/css-assignment.pdf"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "m4",
+                            "title":  "JavaScript Basics",
+                            "lessons":  [
+                                            {
+                                                "id":  "l14",
+                                                "title":  "JavaScript Introduction",
+                                                "type":  "video",
+                                                "duration":  "18:20",
+                                                "file":  "/video/video3.mp4"
+                                            },
+                                            {
+                                                "id":  "l15",
+                                                "title":  "Variables and Data Types",
+                                                "type":  "video",
+                                                "duration":  "20:45",
+                                                "file":  "/video/video4.mp4"
+                                            },
+                                            {
+                                                "id":  "l16",
+                                                "title":  "Functions and Scope",
+                                                "type":  "video",
+                                                "duration":  "24:30",
+                                                "file":  "/video/video.mp4"
+                                            },
+                                            {
+                                                "id":  "l17",
+                                                "title":  "DOM Manipulation",
+                                                "type":  "video",
+                                                "duration":  "28:15",
+                                                "file":  "/video/video1.mp4"
+                                            },
+                                            {
+                                                "id":  "l18",
+                                                "title":  "JavaScript Practice Exercises",
+                                                "type":  "pdf",
+                                                "duration":  "",
+                                                "file":  "/docs/js-exercises.pdf"
+                                            }
+                                        ]
+                        }
+                    ],
+        "courseLanguage":  "English"
+    },
+    {
+        "id":  "2",
+        "title":  "Advanced JavaScript Concepts",
+        "description":  "Take your JavaScript skills to the next level with advanced concepts like closures, prototypes, async/await, and more.",
+        "category":  "JavaScript",
+        "price":  69.99,
+        "instructorId":  "4",
+        "instructor":  "Michael Wilson",
+        "thumbnail":  "/img/courses/js-advanced.jpg",
+        "rating":  4.9,
+        "students":  987,
+        "createdAt":  "2023-02-20",
+        "updatedAt":  "2025-03-24T20:31:12.275Z",
+        "featured":  true,
+        "modules":  [
+                        {
+                            "id":  "m1",
+                            "title":  "JavaScript Deep Dive",
+                            "lessons":  [
+                                            {
+                                                "id":  "l1",
+                                                "title":  "Execution Context and Call Stack",
+                                                "type":  "video",
+                                                "duration":  "22:15",
+                                                "file":  "/video/video3.mp4"
+                                            },
+                                            {
+                                                "id":  "l2",
+                                                "title":  "Scope and Closures",
+                                                "type":  "video",
+                                                "duration":  "25:30",
+                                                "file":  "/video/video4.mp4"
+                                            },
+                                            {
+                                                "id":  "l3",
+                                                "title":  "this Keyword and Binding",
+                                                "type":  "video",
+                                                "duration":  "20:45",
+                                                "file":  "/video/video.mp4"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "m2",
+                            "title":  "Object-Oriented JavaScript",
+                            "lessons":  [
+                                            {
+                                                "id":  "l4",
+                                                "title":  "Prototypes and Inheritance",
+                                                "type":  "video",
+                                                "duration":  "28:20",
+                                                "file":  "/video/video1.mp4"
+                                            },
+                                            {
+                                                "id":  "l5",
+                                                "title":  "ES6 Classes",
+                                                "type":  "video",
+                                                "duration":  "24:45",
+                                                "file":  "/video/video2.mp4"
+                                            },
+                                            {
+                                                "id":  "l6",
+                                                "title":  "Design Patterns",
+                                                "type":  "video",
+                                                "duration":  "32:10",
+                                                "file":  "/video/video3.mp4"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "m3",
+                            "title":  "Asynchronous JavaScript",
+                            "lessons":  [
+                                            {
+                                                "id":  "l7",
+                                                "title":  "Callbacks and Promises",
+                                                "type":  "video",
+                                                "duration":  "26:30",
+                                                "file":  "/video/video4.mp4"
+                                            },
+                                            {
+                                                "id":  "l8",
+                                                "title":  "Async/Await",
+                                                "type":  "video",
+                                                "duration":  "22:15",
+                                                "file":  "/video/video.mp4"
+                                            },
+                                            {
+                                                "id":  "l9",
+                                                "title":  "Event Loop",
+                                                "type":  "video",
+                                                "duration":  "18:40",
+                                                "file":  "/video/video1.mp4"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "1742848269547",
+                            "title":  "Non constant",
+                            "lessons":  [
+
+                                        ]
+                        },
+                        {
+                            "id":  "1742848272275",
+                            "title":  "Non constant",
+                            "lessons":  [
+
+                                        ]
+                        }
+                    ],
+        "courseLanguage":  "English"
+    },
+    {
+        "id":  "3",
+        "title":  "React.js for Beginners",
+        "description":  "Learn React.js from scratch and build modern, interactive web applications with the most popular JavaScript library.",
+        "category":  "React",
+        "price":  79.99,
+        "instructorId":  "2",
+        "instructor":  "Jane Smith",
+        "thumbnail":  "/img/courses/react-basics.jpg",
+        "rating":  4.7,
+        "students":  1532,
+        "createdAt":  "2023-03-15",
+        "updatedAt":  "2023-12-05",
+        "featured":  true,
+        "modules":  [
+                        {
+                            "id":  "m1",
+                            "title":  "React Fundamentals",
+                            "lessons":  [
+                                            {
+                                                "id":  "l1",
+                                                "title":  "Introduction to React",
+                                                "type":  "video",
+                                                "duration":  "15:20",
+                                                "file":  "/video/video2.mp4"
+                                            },
+                                            {
+                                                "id":  "l2",
+                                                "title":  "Setting Up React Environment",
+                                                "type":  "video",
+                                                "duration":  "18:45",
+                                                "file":  "/video/video3.mp4"
+                                            },
+                                            {
+                                                "id":  "l3",
+                                                "title":  "JSX Syntax",
+                                                "type":  "video",
+                                                "duration":  "14:30",
+                                                "file":  "/video/video3.mp4"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "m2",
+                            "title":  "React Components",
+                            "lessons":  [
+                                            {
+                                                "id":  "l4",
+                                                "title":  "Functional Components",
+                                                "type":  "video",
+                                                "duration":  "22:15",
+                                                "file":  "/video/video4.mp4"
+                                            },
+                                            {
+                                                "id":  "l5",
+                                                "title":  "Class Components",
+                                                "type":  "video",
+                                                "duration":  "20:30",
+                                                "file":  "/video/video.mp4"
+                                            },
+                                            {
+                                                "id":  "l6",
+                                                "title":  "Props and State",
+                                                "type":  "video",
+                                                "duration":  "25:45",
+                                                "file":  "/video/video1.mp4"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "m3",
+                            "title":  "React Hooks",
+                            "lessons":  [
+                                            {
+                                                "id":  "l7",
+                                                "title":  "useState Hook",
+                                                "type":  "video",
+                                                "duration":  "18:20",
+                                                "file":  "/video/video2.mp4"
+                                            },
+                                            {
+                                                "id":  "l8",
+                                                "title":  "useEffect Hook",
+                                                "type":  "video",
+                                                "duration":  "24:15",
+                                                "file":  "/video/video3.mp4"
+                                            },
+                                            {
+                                                "id":  "l9",
+                                                "title":  "Custom Hooks",
+                                                "type":  "video",
+                                                "duration":  "22:40",
+                                                "file":  "/video/video4.mp4"
+                                            }
+                                        ]
+                        }
+                    ],
+        "courseLanguage":  "English"
+    },
+    {
+        "id":  "4",
+        "title":  "Node.js Backend Development",
+        "description":  "Learn server-side JavaScript with Node.js and build scalable backend applications with Express.js, MongoDB, and more.",
+        "category":  "Backend",
+        "price":  74.99,
+        "instructorId":  "4",
+        "instructor":  "Michael Wilson",
+        "thumbnail":  "/img/courses/nodejs.jpg",
+        "rating":  4.6,
+        "students":  876,
+        "createdAt":  "2023-04-10",
+        "updatedAt":  "2023-11-25",
+        "featured":  false,
+        "modules":  [
+                        {
+                            "id":  "m1",
+                            "title":  "Node.js Basics",
+                            "lessons":  [
+                                            {
+                                                "id":  "l1",
+                                                "title":  "Introduction to Node.js",
+                                                "type":  "video",
+                                                "duration":  "16:30",
+                                                "file":  "/video/video.mp4"
+                                            },
+                                            {
+                                                "id":  "l2",
+                                                "title":  "Node.js Modules",
+                                                "type":  "video",
+                                                "duration":  "20:15",
+                                                "file":  "/video/video1.mp4"
+                                            },
+                                            {
+                                                "id":  "l3",
+                                                "title":  "File System Operations",
+                                                "type":  "video",
+                                                "duration":  "18:45",
+                                                "file":  "/video/video3.mp4"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "m2",
+                            "title":  "Express.js Framework",
+                            "lessons":  [
+                                            {
+                                                "id":  "l4",
+                                                "title":  "Setting Up Express",
+                                                "type":  "video",
+                                                "duration":  "15:20",
+                                                "file":  "/video/video3.mp4"
+                                            },
+                                            {
+                                                "id":  "l5",
+                                                "title":  "Routing in Express",
+                                                "type":  "video",
+                                                "duration":  "22:30",
+                                                "file":  "/video/video4.mp4"
+                                            },
+                                            {
+                                                "id":  "l6",
+                                                "title":  "Middleware",
+                                                "type":  "video",
+                                                "duration":  "24:15",
+                                                "file":  "/video/video.mp4"
+                                            }
+                                        ]
+                        },
+                        {
+                            "id":  "m3",
+                            "title":  "Database Integration",
+                            "lessons":  [
+                                            {
+                                                "id":  "l7",
+                                                "title":  "MongoDB Basics",
+                                                "type":  "video",
+                                                "duration":  "26:40",
+                                                "file":  "/video/video1.mp4"
+                                            },
+                                            {
+                                                "id":  "l8",
+                                                "title":  "Mongoose ODM",
+                                                "type":  "video",
+                                                "duration":  "28:15",
+                                                "file":  "/video/video3.mp4"
+                                            },
+                                            {
+                                                "id":  "l9",
+                                                "title":  "CRUD Operations",
+                                                "type":  "video",
+                                                "duration":  "32:20",
+                                                "file":  "/video/video4.mp4"
+                                            }
+                                        ]
+                        }
+                    ],
+        "courseLanguage":  "English"
+    },
+    {
+        "id":  "1742791944339",
+        "title":  "hello",
+        "description":  "this is a course",
+        "category":  "Web Development",
+        "price":  40,
+        "instructorId":  "4",
+        "instructor":  "Michael Wilson",
+        "thumbnail":  "/uploads/1742791944282-Screenshot 2025-03-04 at 22-50-34 Checkout - GameSir Official Store.png",
+        "rating":  0,
+        "students":  4,
+        "createdAt":  "2025-03-24T04:52:24.339Z",
+        "updatedAt":  "2025-03-27T08:38:55.037Z",
+        "modules":  [
+                        {
+                            "id":  "1743055487619",
+                            "title":  "now fixed",
+                            "lessons":  [
+                                            {
+                                                "id":  "1743055507288",
+                                                "title":  "here is a lesson",
+                                                "type":  "video",
+                                                "duration":  "2:20",
+                                                "file":  "/uploads/1743055507212-video3.mp4"
+                                            },
+                                            {
+                                                "id":  "1743055904561",
+                                                "title":  "fixed lesson",
+                                                "type":  "video",
+                                                "duration":  "4:30",
+                                                "file":  "/uploads/1743055904485-video.mp4"
+                                            }
+                                        ]
+                        }
+                    ],
+        "featured":  false,
+        "status":  "draft",
+        "courseLanguage":  "English"
+    },
+    {
+        "id":  "1743159420560",
+        "title":  "abcd423434@",
+        "description":  "fgfdsfgdszd",
+        "category":  "fdff",
+        "price":  132,
+        "instructorId":  "2",
+        "instructor":  "Jane",
+        "thumbnail":  "/uploads/1743159420531-IMG_20250324_235113.jpg",
+        "rating":  0,
+        "students":  0,
+        "createdAt":  "2025-03-28T10:57:00.560Z",
+        "updatedAt":  "2025-03-28T10:57:00.560Z",
+        "modules":  [
+
+                    ],
+        "featured":  false,
+        "courseLanguage":  "English"
+    },
+    {
+        "instructorId":  "2",
+        "id":  "101",
+        "instructor":  "Jane Smith",
+        "courseLanguage":  "Hindi",
+        "modules":  [
+
+                    ],
+        "title":  "Hindi Programming Basics",
+        "category":  "Programming",
+        "students":  10,
+        "price":  29.99,
+        "description":  "Learn programming fundamentals in Hindi language",
+        "thumbnail":  "/img/courses/img1.png",
+        "featured":  false,
+        "rating":  4.5,
+        "createdAt":  "2024-01-01",
+        "updatedAt":  "2024-01-01"
+    },
+    {
+        "instructorId":  "2",
+        "id":  "102",
+        "instructor":  "Jane Smith",
+        "courseLanguage":  "Marathi",
+        "modules":  [
+
+                    ],
+        "title":  "Marathi Web Development",
+        "category":  "Web Development",
+        "students":  15,
+        "price":  39.99,
+        "description":  "Complete web development course in Marathi",
+        "thumbnail":  "/img/courses/img1.png",
+        "featured":  false,
+        "rating":  4.6,
+        "createdAt":  "2024-01-01",
+        "updatedAt":  "2024-01-01"
+    },
+    {
+        "instructorId":  "2",
+        "id":  "103",
+        "instructor":  "Jane Smith",
+        "courseLanguage":  "Telugu",
+        "modules":  [
+
+                    ],
+        "title":  "Telugu Data Science",
+        "category":  "Data Science",
+        "students":  8,
+        "price":  49.99,
+        "description":  "Data Science fundamentals in Telugu language",
+        "thumbnail":  "/img/courses/img1.png",
+        "featured":  false,
+        "rating":  4.7,
+        "createdAt":  "2024-01-01",
+        "updatedAt":  "2024-01-01"
+    }
 ]

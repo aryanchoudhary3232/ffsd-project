@@ -1,88 +1,134 @@
 $(document).ready(function() {
-  // Handle all forms that add to cart (regardless of class name)
-  const allForms = $('form');
-  
-  allForms.each(function() {
+
+  // === Refresh Cart UI ===
+  function refreshCartUI() {
+    $.ajax({
+      url: '/cart',
+      method: 'GET',
+      dataType: 'json',
+      success: function(data) {
+        if (!data.success) return;
+
+        const cartItemsContainer = $('.divide-y.divide-gray-700');
+        cartItemsContainer.empty();
+
+        if (data.cartItems.length > 0) {
+          data.cartItems.forEach(function(item) {
+            cartItemsContainer.append(`
+              <div class="p-4 flex flex-col md:flex-row gap-4">
+                <div class="md:w-1/4">
+                  <img src="${item.course.thumbnail}" alt="${item.course.title}" class="w-full h-32 object-cover rounded-md">
+                </div>
+                <div class="md:w-2/4">
+                  <h3 class="text-lg font-semibold mb-1">${item.course.title}</h3>
+                  <p class="text-gray-400 mb-2">By ${item.course.instructor}</p>
+                  <div class="flex items-center mb-2">
+                    <span class="text-yellow-500 mr-1">★</span>
+                    <span>${item.course.rating}</span>
+                    <span class="text-gray-500 ml-1">(${item.course.students} students)</span>
+                  </div>
+                  <p class="text-sm text-gray-500">Added on ${new Date(item.addedAt).toLocaleDateString()}</p>
+                </div>
+                <div class="md:w-1/4 flex flex-col justify-between items-end">
+                  <div class="text-xl font-bold">$${item.course.price.toFixed(2)}</div>
+                  <form action="/cart/remove" method="POST" class="mt-2 remove-from-cart-form">
+                    <input type="hidden" name="courseId" value="${item.course._id}">
+                    <button type="submit" class="text-red-400 hover:text-red-600">
+                      <i class="fas fa-trash-alt mr-1"></i> Remove
+                    </button>
+                  </form>
+                </div>
+              </div>
+            `);
+          });
+        } else {
+          cartItemsContainer.append(`
+            <div class="bg-gray-800 rounded-lg shadow-md p-8 text-center w-full">
+              <div class="text-gray-500 mb-4">
+                <i class="fas fa-shopping-cart text-6xl"></i>
+              </div>
+              <h2 class="text-xl font-bold mb-2">Your cart is empty</h2>
+              <p class="text-gray-500 mb-6">Looks like you haven't added any courses yet.</p>
+              <a href="/courses" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors">
+                Browse Courses
+              </a>
+            </div>
+          `);
+        }
+
+        // Update totals
+        $('.md\\:w-1\\/3 .font-bold.text-lg.pt-2 span:last-child').text(`$${data.total.toFixed(2)}`);
+        $('.md\\:w-1\\/3 .flex.justify-between span:last-child').first().text(`$${data.total.toFixed(2)}`);
+
+        // Update cart count
+        $('.text-lg.font-semibold').first().text(`${data.cartItems.length} Course${data.cartItems.length !== 1 ? 's' : ''} in Cart`);
+      }
+    });
+  }
+
+  // === ADD TO CART ===
+  $(document).on('submit', 'form[action*="/cart/add"]', function(e) {
+    e.preventDefault();
+
     const form = $(this);
-    const formAction = form.attr('action');
-    
-    // Check if the form action contains '/cart/add'
-    if (formAction && formAction.includes('/cart/add')) {
-      form.on('submit', function(e) {
-        e.preventDefault();
-        
-        // Show loading state
-        const submitButton = form.find('button[type="submit"]');
-        const originalText = submitButton.text();
-        submitButton.prop('disabled', true).text('Adding...');
-        
-        $.ajax({
-          url: formAction,
-          method: 'POST',
-          data: form.serialize(),
-          dataType: 'json',
-          success: function(data) {
-            if(data.success) {
-              // Show success message and redirect to cart page
-              alert('Course added to cart successfully!');
-              window.location.href = '/cart';
-            } else {
-              alert(data.message || 'Failed to add course to cart');
-              submitButton.prop('disabled', false).text(originalText);
-            }
-          },
-          error: function(xhr, status, error) {
-            console.error('Error:', error);
-            let errorMessage = 'An error occurred while adding to cart';
-            
-            if (xhr.responseJSON && xhr.responseJSON.message) {
-              errorMessage = xhr.responseJSON.message;
-            }
-            
-            alert(errorMessage);
-            submitButton.prop('disabled', false).text(originalText);
-          }
-        });
-      });
-    }
-    
-    // Check if the form action contains '/cart/remove'
-    if (formAction && formAction.includes('/cart/remove')) {
-      form.on('submit', function(e) {
-        e.preventDefault();
-        
-        // Show loading state
-        const submitButton = form.find('button[type="submit"]');
-        const originalText = submitButton.text();
-        submitButton.prop('disabled', true).text('Removing...');
-        
-        $.ajax({
-          url: formAction,
-          method: 'POST',
-          data: form.serialize(),
-          dataType: 'json',
-          success: function(data) {
-            if(data.success) {
-              // Redirect to cart page after removing
-              window.location.href = '/cart';
-            } else {
-              alert(data.message || 'Failed to remove course from cart');
-              submitButton.prop('disabled', false).text(originalText);
-            }
-          },
-          error: function(xhr, status, error) {
-            console.error('Error:', error);
-            let errorMessage = 'An error occurred while removing from cart';
-            
-            if (xhr.responseJSON && xhr.responseJSON.message) {
-              errorMessage = xhr.responseJSON.message;
-            }
-            
-            alert(errorMessage);
-            submitButton.prop('disabled', false).text(originalText);
-          }
-        });
-      });
-    }
+    const submitButton = form.find('button[type="submit"]');
+    const originalText = submitButton.text();
+
+    submitButton.prop('disabled', true).text('Adding...');
+
+    $.ajax({
+      url: form.attr('action'),
+      method: 'POST',
+      data: form.serialize(),
+      dataType: 'json',
+      success: function(data) {
+        if (data.success) {
+          alert('Course added to cart successfully!');
+          refreshCartUI();
+        } else {
+          alert(data.message || 'Failed to add course to cart');
+        }
+        submitButton.prop('disabled', false).text(originalText);
+      },
+      error: function(xhr) {
+        console.error('Error:', xhr.responseText);
+        alert('An error occurred while adding to cart');
+        submitButton.prop('disabled', false).text(originalText);
+      }
+    });
   });
+
+  // === REMOVE FROM CART ===
+  $(document).on('submit', '.remove-from-cart-form, form[action*="/cart/remove"]', function(e) {
+    e.preventDefault();
+
+    const form = $(this);
+    const submitButton = form.find('button[type="submit"]');
+    const originalText = submitButton.text();
+
+    submitButton.prop('disabled', true).text('Removing...');
+
+    $.ajax({
+      url: form.attr('action'),
+      method: 'POST',
+      data: form.serialize(),
+      dataType: 'json',
+      success: function(data) {
+        if (data.success) {
+          refreshCartUI();
+        } else {
+          alert(data.message || 'Failed to remove course from cart');
+        }
+        submitButton.prop('disabled', false).text(originalText);
+      },
+      error: function(xhr) {
+        console.error('Error:', xhr.responseText);
+        alert('An error occurred while removing from cart');
+        submitButton.prop('disabled', false).text(originalText);
+      }
+    });
+  });
+
+  // Initial load (optional if cart is already rendered server-side)
+  refreshCartUI();
 });
