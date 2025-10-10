@@ -174,6 +174,31 @@ const AdminController = {
     const userId = req.params.id;
     const { name, email, role } = req.body;
 
+    const buildUpdatePayload = (includeRole = true) => {
+      const payload = {};
+
+      if (typeof name === "string") {
+        const trimmedName = name.trim();
+        if (trimmedName) {
+          payload.name = trimmedName;
+          payload.username = trimmedName;
+        }
+      }
+
+      if (typeof email === "string") {
+        const trimmedEmail = email.trim();
+        if (trimmedEmail) {
+          payload.email = trimmedEmail;
+        }
+      }
+
+      if (includeRole && role) {
+        payload.role = role;
+      }
+
+      return payload;
+    };
+
     try {
       const user = await User.findById(userId);
       if (!user) {
@@ -198,17 +223,46 @@ const AdminController = {
         }
         if (user.role === "admin" && role !== "admin") {
           req.flash("error_msg", "Admin role cannot be changed.");
-          await User.findByIdAndUpdate(userId, { name, email });
+          const adminUpdate = await User.findByIdAndUpdate(
+            userId,
+            buildUpdatePayload(false),
+            { new: true }
+          );
+          if (
+            adminUpdate &&
+            req.session.user &&
+            req.session.user.id === userId.toString()
+          ) {
+            req.session.user = {
+              ...req.session.user,
+              name: adminUpdate.name || adminUpdate.username,
+              username: adminUpdate.username || adminUpdate.name,
+              email: adminUpdate.email,
+            };
+          }
           req.flash("success_msg", "Admin user info (excluding role) updated.");
           return res.redirect("/admin/users");
         }
       }
 
-      await User.findByIdAndUpdate(
+      const updatedUser = await User.findByIdAndUpdate(
         userId,
-        { name, email, role },
+        buildUpdatePayload(true),
         { new: true }
       );
+      if (
+        updatedUser &&
+        req.session.user &&
+        req.session.user.id === userId.toString()
+      ) {
+        req.session.user = {
+          ...req.session.user,
+          name: updatedUser.name || updatedUser.username,
+          username: updatedUser.username || updatedUser.name,
+          email: updatedUser.email,
+          role: updatedUser.role,
+        };
+      }
       req.flash("success_msg", "User updated successfully");
       res.redirect("/admin/users");
     } catch (error) {

@@ -84,7 +84,22 @@ const UserController = {
 
     const userId = req.session.user.id;
     const { name, email, currentPassword, newPassword, confirmPassword } = req.body;
-    const updates = { name, email };
+    const updates = {};
+
+    if (typeof name === "string") {
+      const trimmedName = name.trim();
+      if (trimmedName) {
+        updates.name = trimmedName;
+        updates.username = trimmedName;
+      }
+    }
+
+    if (typeof email === "string") {
+      const trimmedEmail = email.trim();
+      if (trimmedEmail) {
+        updates.email = trimmedEmail;
+      }
+    }
 
     try {
       const user = await User.findById(userId);
@@ -113,7 +128,8 @@ const UserController = {
 
       req.session.user = {
         ...req.session.user,
-        name: updatedUser.name,
+        name: updatedUser.name || updatedUser.username,
+        username: updatedUser.username || updatedUser.name,
         email: updatedUser.email
       };
 
