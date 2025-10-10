@@ -118,7 +118,7 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <a href="/admin/courses/<%= course._id %>" class="text-indigo-400 hover:text-indigo-200 mr-3">View</a>
-                  <a href="/admin/courses/<%= course._id %>/edit-course" class="text-blue-400 hover:text-blue-200 mr-3">Edit</a>
+                  <a href="/admin/courses/<%= course._id %>/edit" class="text-blue-400 hover:text-blue-200 mr-3">Edit</a>
                   <form action="/admin/courses/<%= course._id %>/delete?_method=DELETE" method="POST" class="inline">
                     <button type="submit" class="text-red-400 hover:text-red-200" onclick="return confirm('Are you sure you want to delete this course?');">Delete</button>
                   </form>
