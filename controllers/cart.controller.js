@@ -8,26 +8,39 @@ const Progress = require("../models/progress.model"); // Assuming Mongoose Progr
 const CartController = {
   // Get cart page
   getCart: async (req, res) => {
-    if (!req.session.user) {
-      req.flash("error_msg", "Please login to view your cart");
-      return res.redirect("/login");
+  if (!req.session.user) {
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+    req.flash("error_msg", "Please login to view your cart");
+    return res.redirect("/login");
+  }
+
+  try {
+    const userId = req.session.user.id;
+    const cartData = await CartModel.getCartWithCourses(userId);
+
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+      return res.json({
+        success: true,
+        cartItems: cartData.items,
+        total: cartData.total,
+      });
     }
 
-    try {
-        const userId = req.session.user.id;
-        // Use CartModel.getCartWithCourses instead of Cart.findOne
-        const cartData = await CartModel.getCartWithCourses(userId);
-
-        res.render("cart/index", {
-          cartItems: cartData.items, // Pass populated items
-          total: cartData.total,
-        });
-    } catch (error) {
-        console.error("Get Cart error:", error);
-        req.flash("error_msg", "Could not load cart.");
-        res.redirect('/');
+    res.render("cart/index", {
+      cartItems: cartData.items,
+      total: cartData.total,
+    });
+  } catch (error) {
+    console.error("Get Cart error:", error);
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+      return res.status(500).json({ success: false, message: "Could not load cart." });
     }
-  },
+    req.flash("error_msg", "Could not load cart.");
+    res.redirect('/');
+  }
+},
 
   // Add to cart
   addToCart: async (req, res) => {
