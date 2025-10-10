@@ -321,7 +321,7 @@ const AdminController = {
       }
 
       if (language !== "all") {
-        courses = courses.filter((course) => course.language === language);
+        courses = courses.filter((course) => course.courseLanguage === language);
       }
 
       // Apply sorting
@@ -380,7 +380,7 @@ const AdminController = {
       let filteredCourses = enhancedCourses;
       if (language !== "all") {
         filteredCourses = enhancedCourses.filter(
-          (course) => course.language === language
+          (course) => course.courseLanguage === language
         );
       }
 
@@ -390,7 +390,7 @@ const AdminController = {
       const languages = [
         ...new Set(
           enhancedCourses
-            .map((course) => course.language)
+            .map((course) => course.courseLanguage)
             .filter((lang) => lang) // Remove undefined or empty languages
         ),
       ];

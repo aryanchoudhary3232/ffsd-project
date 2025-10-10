@@ -31,7 +31,7 @@ async function addLanguagesToCourses() {
     // Create at least one sample course for each language if none exists
     for (const language of languages) {
       // Check if any course with this language exists
-      const courseWithLanguage = await coursesCollection.findOne({ language });
+      const courseWithLanguage = await coursesCollection.findOne({ courseLanguage: language });
 
       if (!courseWithLanguage) {
         console.log(`Adding sample course in ${language} language`);
@@ -41,10 +41,10 @@ async function addLanguagesToCourses() {
           title: `Sample ${language} Course`,
           description: `This is a sample course in ${language} language.`,
           category: "General",
-          language: language,
+          courseLanguage: language,
           price: 0, // Free course
           instructorId: "system",
-          thumbnail: "/img/placeholder.svg",
+          thumbnail: "/img/courses/img1.png",
           createdAt: new Date(),
           updatedAt: new Date(),
           modules: [],
@@ -56,10 +56,10 @@ async function addLanguagesToCourses() {
       }
     }
 
-    // Update any courses that might have null or undefined language
+    // Update any courses that might have null or undefined courseLanguage
     const updateResult = await coursesCollection.updateMany(
-      { language: { $in: [null, undefined, ""] } },
-      { $set: { language: "English" } }
+      { courseLanguage: { $in: [null, undefined, ""] } },
+      { $set: { courseLanguage: "English" } }
     );
 
     console.log(

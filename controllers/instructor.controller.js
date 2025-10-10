@@ -298,7 +298,7 @@ const InstructorController = {
           title,
           description,
           category,
-          language: language || course.language || "English",
+          courseLanguage: language || course.courseLanguage || course.language || "English",
           price: Number.parseFloat(price) || 0,
           status: status || course.status,
           instructor: instructorName, // Always update instructor name
