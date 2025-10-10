@@ -27,12 +27,12 @@ const CourseController = {
       if (category && category !== "all" && language && language !== "all") {
         courses = courses.filter(
           (course) =>
-            course.category === category && course.language === language
+            course.category === category && course.courseLanguage === language
         );
       } else if (category && category !== "all") {
         courses = courses.filter((course) => course.category === category);
       } else if (language && language !== "all") {
-        courses = courses.filter((course) => course.language === language);
+        courses = courses.filter((course) => course.courseLanguage === language);
       }
 
       // Apply sorting
