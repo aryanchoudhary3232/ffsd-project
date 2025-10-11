@@ -4,9 +4,9 @@
 - **Group ID:** 25
 - **Project Title:** SeekhoBharat
 - **SPOC:**  
-  Name: SUDHAN P  
-  Email: sudhan.p23@iiits.in  
-  Roll Number: S20230010231
+  Name: SHREYAAN LOKE  
+  Email: shreyaan.l23@iiits.in  
+  Roll Number: S20230010224
 
 ## Team Members & Roles
 
