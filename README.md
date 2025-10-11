@@ -1,52 +1,39 @@
-[README.md](https://github.com/user-attachments/files/22866086/README.md)
-# SeekoBharat - Regional Language E-Learning Platform
+[README_quick.md](https://github.com/user-attachments/files/22866170/README_quick.md)
+# Quick README - SeekhoBharat
 
-SeekoBharat is a full-featured online learning platform focused on making courses available in **regional languages**. Students can access courses in their preferred language, track progress, and earn certificates. Instructors can teach from home, earn income, and manage their courses. Admins oversee content, users, and platform quality.
+- **Group ID:** 25
+- **Project Title:** SeekhoBharat
+- **SPOC:**  
+  Name: SUDHAN P  
+  Email: sudhan.p23@iiits.in  
+  Roll Number: S20230010231
 
-## Key Features
+## Team Members & Roles
 
-- **User Roles:** Student, Instructor, Admin  
-- **Multilingual Courses:** Students can learn in regional languages  
-- **Authentication:** Secure registration and login  
-- **Course Management:** Instructors create courses; admin approval required before publishing  
-- **Progress Tracking:** Students can track lesson completion and course progress  
-- **Ratings & Reviews:** Students can rate and review courses  
-- **Shopping Cart & Checkout:** Easy course purchase workflow  
-- **Responsive UI:** Mobile-friendly design using Tailwind CSS and EJS  
-- **Admin Dashboard:** Monitor users, courses, revenue, and platform analytics  
-- **Instructor Dashboard:** Manage own courses, view student progress and analytics  
+1. **Landing Page:** Shreyaan  
+2. **Navbar:** Sudhan  
+3. **Footer:** Shreyaan  
+4. **Courses Page:** Sudhan  
+5. **Student Dashboard:** Shreyaan  
+6. **Course Details:** Sudhan  
+7. **Cart:** Shreyaan & Sudhan  
+8. **Login/Register Page & MongoDB:** Anchal  
+9. **Admin Dashboard:** Arun & Aryan (Backup)  
+10. **Course Video Page:** Anchal  
+11. **Instructor Dashboard:** Aryan  
+12. **Manage Courses Dashboard:** Aryan  
+13. **View Analytics & Users (Instructor):** Aryan & Arun  
+14. **Create New Course:** Arun & Aryan  
+15. **Profile:** Shreyaan
 
-## Project Structure
-
-- `config/` — Database configuration  
-- `controllers/` — Logic for routes (admin, auth, cart, course, instructor, rating, user)  
-- `data/` — Seed and persistent data (JSON/DB files)  
-- `middleware/` — Authentication and other middleware  
-- `models/` — Data models (Course, User, Order, Progress, Rating, Comment, etc.)  
-- `public/` — Static assets (CSS, JS, images)  
-- `routes/` — Express route definitions  
-- `scripts/` — Utility scripts (migrations, index setup)  
-- `views/` — EJS templates for all pages  
-- `server.js` — Main Express server  
-- `package.json` — Project metadata and dependencies  
-- `README.md` — Project documentation  
-
-## Technologies Used
-
-- **Backend:** Node.js, Express.js, MongoDB (Mongoose & native driver)  
-- **Frontend:** EJS, Tailwind CSS, Vanilla JS  
-- **Authentication & Security:** Express-session, bcryptjs  
-- **File Handling:** Multer for uploads  
-- **Deployment:** Vercel configuration included  
-
-## Getting Started
+## How to Run (Local)
 
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) v14+  
-- [MongoDB](https://www.mongodb.com/) running locally  
+- [MongoDB](https://www.mongodb.com/) running locally
 
-### Installation
+### Steps
 
 1. Clone the repository:
 ```bash
@@ -59,9 +46,8 @@ cd ffsd-project
 npm install
 ```
 
-3. Set up the database:  
-Ensure MongoDB is running at `mongodb://localhost:27017/seekho-bharat`.  
-(Optional) Seed initial data using scripts in the `scripts/` folder.
+3. Ensure MongoDB is running locally (`mongodb://localhost:27017/seekho-bharat`)  
+   (Optional) Seed initial data using scripts in the `scripts/` folder.
 
 4. Start the server:
 ```bash
@@ -69,14 +55,35 @@ npm start
 ```
 Visit [http://localhost:3000](http://localhost:3000) in your browser.
 
-### Scripts
+## Key Files & Functions
 
-- Start server: `npm start`  
-- Run migrations: `node scripts/migrate-users.js`  
-- Initialize indexes: `node scripts/init-indexes.js`  
+- **Server & Routes:** `server.js`, `routes/` (Express endpoints)  
+- **Controllers:** `controllers/` (handles requests and logic for courses, cart, auth, admin, instructor)  
+- **Models:** `models/` (Course, User, Order, Progress, Rating, Comment, etc.)  
+- **Middleware:** `middleware/` (authentication, validations)  
+- **Views:** `views/` (EJS templates for all pages)  
+- **Scripts:** `scripts/` (migrations, database setup)  
+- **Validation & Dynamic Features:**  
+  - Authentication validation in `middleware/auth.js`  
+  - Course enrollment & progress tracking in `controllers/courseController.js`  
+  - Cart operations in `controllers/cartController.js`  
+  - Admin approvals in `controllers/adminController.js`  
 
-## Usage
+## Demo Link & Exact Timestamps
 
-- **Students:** Browse courses, enroll, track progress, and leave reviews  
-- **Instructors:** Create/manage courses, upload content, view analytics  
-- **Admins:** Approve courses, manage users, view platform stats
+- **Demo Link:** *(Insert hosted link if available)*  
+- **Exact Timestamps:** *(Specify timestamps to show key features in the demo)*
+
+## Evidence Locations
+
+- `network_evidence/` — captures network requests and API responses  
+- `git-logs.txt` — all commit history and development logs  
+- Other supporting evidence can be included in project folder
+
+## Technologies Used
+
+- **Backend:** Node.js, Express.js, MongoDB  
+- **Frontend:** EJS, Tailwind CSS, Vanilla JS  
+- **Authentication & Security:** Express-session, bcryptjs  
+- **File Handling:** Multer  
+- **Deployment:** Vercel configuration included
