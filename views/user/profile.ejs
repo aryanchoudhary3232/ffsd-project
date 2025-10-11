@@ -39,8 +39,14 @@
                 name="name" 
                 value="<%= user.username %>" 
                 required
+                minlength="2"
+                maxlength="50"
+                pattern="[a-zA-Z\s'-]+"
+                title="Name can only contain letters, spaces, apostrophes, and hyphens"
                 class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
               >
+              <div id="nameError" class="text-red-400 text-sm mt-1 hidden"></div>
+              <p class="text-gray-400 text-xs mt-1">Only letters, spaces, apostrophes, and hyphens allowed</p>
             </div>
             <!-- Email -->
             <div>
@@ -51,8 +57,12 @@
                 name="email" 
                 value="<%= user.email %>" 
                 required
+                pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com"
+                title="Please enter a valid email address in format: xyz@abc.com"
                 class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
               >
+              <div id="emailError" class="text-red-400 text-sm mt-1 hidden"></div>
+              <p class="text-gray-400 text-xs mt-1">Must be in format: xyz@abc.com</p>
             </div>
           </div>
           
@@ -70,6 +80,7 @@
                   name="currentPassword" 
                   class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
                 >
+                <div id="currentPasswordError" class="text-red-400 text-sm mt-1 hidden"></div>
               </div>
               <div>
                 <label for="newPassword" class="block text-sm font-medium text-gray-300 mb-1">New Password</label>
@@ -77,8 +88,14 @@
                   type="password" 
                   id="newPassword" 
                   name="newPassword" 
+                  minlength="6"
+                  maxlength="128"
+                  pattern="(?=.*[a-zA-Z])(?=.*\d).{6,}"
+                  title="Password must be at least 6 characters and contain at least one letter and one number"
                   class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
                 >
+                <div id="newPasswordError" class="text-red-400 text-sm mt-1 hidden"></div>
+                <p class="text-gray-400 text-xs mt-1">At least 6 characters with one letter and one number</p>
               </div>
               <div>
                 <label for="confirmPassword" class="block text-sm font-medium text-gray-300 mb-1">Confirm New Password</label>
@@ -88,6 +105,7 @@
                   name="confirmPassword" 
                   class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
                 >
+                <div id="confirmPasswordError" class="text-red-400 text-sm mt-1 hidden"></div>
               </div>
             </div>
           </div>
@@ -109,16 +127,141 @@
   <%- include('../partials/scripts') %>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      const nameField = document.getElementById('name');
+      const emailField = document.getElementById('email');
+      const currentPasswordField = document.getElementById('currentPassword');
       const newPasswordField = document.getElementById('newPassword');
       const confirmPasswordField = document.getElementById('confirmPassword');
       const form = document.querySelector('form');
       
+      // Validation functions
+      function validateName(name) {
+        if (!name || name.trim().length === 0) {
+          return 'Name is required';
+        }
+        if (name.trim().length < 2) {
+          return 'Name must be at least 2 characters long';
+        }
+        if (name.trim().length > 50) {
+          return 'Name must be less than 50 characters';
+        }
+        const nameRegex = /^[a-zA-Z\s'-]+$/;
+        if (!nameRegex.test(name.trim())) {
+          return 'Name can only contain letters, spaces, apostrophes, and hyphens';
+        }
+        return null;
+      }
+      
+      function validateEmail(email) {
+        if (!email || email.trim().length === 0) {
+          return 'Email is required';
+        }
+        // Check for format: xyz@abc.com
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$/;
+        if (!emailRegex.test(email.trim())) {
+          return 'Please enter a valid email address in format: xyz@abc.com';
+        }
+        return null;
+      }
+      
+      function validatePassword(password) {
+        if (!password) return null; // Optional field
+        if (password.length < 6) {
+          return 'Password must be at least 6 characters long';
+        }
+        if (password.length > 128) {
+          return 'Password must be less than 128 characters';
+        }
+        if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(password)) {
+          return 'Password must contain at least one letter and one number';
+        }
+        return null;
+      }
+      
+      function showError(fieldId, message) {
+        const errorDiv = document.getElementById(fieldId + 'Error');
+        const field = document.getElementById(fieldId);
+        if (message) {
+          errorDiv.textContent = message;
+          errorDiv.classList.remove('hidden');
+          field.classList.add('border-red-500');
+        } else {
+          errorDiv.classList.add('hidden');
+          field.classList.remove('border-red-500');
+        }
+      }
+      
+      // Real-time validation
+      nameField.addEventListener('input', function() {
+        const error = validateName(this.value);
+        showError('name', error);
+      });
+      
+      emailField.addEventListener('input', function() {
+        const error = validateEmail(this.value);
+        showError('email', error);
+      });
+      
+      newPasswordField.addEventListener('input', function() {
+        const error = validatePassword(this.value);
+        showError('newPassword', error);
+        
+        // Also check confirm password if it has a value
+        if (confirmPasswordField.value) {
+          const confirmError = this.value !== confirmPasswordField.value ? 'Passwords do not match' : null;
+          showError('confirmPassword', confirmError);
+        }
+      });
+      
+      confirmPasswordField.addEventListener('input', function() {
+        const error = newPasswordField.value !== this.value ? 'Passwords do not match' : null;
+        showError('confirmPassword', error);
+      });
+      
+      // Form submission validation
       form.addEventListener('submit', function(e) {
-        // Check if password fields match (only if any password is entered)
+        let hasErrors = false;
+        
+        // Validate name
+        const nameError = validateName(nameField.value);
+        if (nameError) {
+          showError('name', nameError);
+          hasErrors = true;
+        }
+        
+        // Validate email
+        const emailError = validateEmail(emailField.value);
+        if (emailError) {
+          showError('email', emailError);
+          hasErrors = true;
+        }
+        
+        // Validate passwords (only if new password is entered)
         if (newPasswordField.value || confirmPasswordField.value) {
+          if (!currentPasswordField.value) {
+            showError('currentPassword', 'Current password is required to change password');
+            hasErrors = true;
+          }
+          
+          const passwordError = validatePassword(newPasswordField.value);
+          if (passwordError) {
+            showError('newPassword', passwordError);
+            hasErrors = true;
+          }
+          
           if (newPasswordField.value !== confirmPasswordField.value) {
-            e.preventDefault();
-            alert('New passwords do not match');
+            showError('confirmPassword', 'Passwords do not match');
+            hasErrors = true;
+          }
+        }
+        
+        if (hasErrors) {
+          e.preventDefault();
+          // Scroll to first error
+          const firstError = document.querySelector('.border-red-500');
+          if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstError.focus();
           }
         }
       });

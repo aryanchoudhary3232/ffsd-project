@@ -307,7 +307,7 @@ const InstructorController = {
           title,
           description,
           category,
-          language: language || course.language || "English",
+          courseLanguage: language || course.courseLanguage || course.language || "English",
           price: Number.parseFloat(price) || 0,
           status: status || course.status,
           instructor: instructorName, // Always update instructor name
@@ -631,6 +631,8 @@ const InstructorController = {
   },
 
   updateLesson: (req, res) => {
+        console.log('.........updateLesson')
+
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
@@ -723,6 +725,7 @@ const InstructorController = {
       } catch (error) {
         console.error("Update Lesson error:", error);
         const errorMsg = error.message || "Error updating lesson";
+        console.log('.........', errorMsg)
         if (req.xhr || req.headers.accept.includes("json")) {
           return res.status(500).json({ success: false, message: errorMsg });
         }

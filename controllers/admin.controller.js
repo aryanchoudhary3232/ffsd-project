@@ -196,6 +196,31 @@ const AdminController = {
     const userId = req.params.id;
     const { name, email, role } = req.body;
 
+    const buildUpdatePayload = (includeRole = true) => {
+      const payload = {};
+
+      if (typeof name === "string") {
+        const trimmedName = name.trim();
+        if (trimmedName) {
+          payload.name = trimmedName;
+          payload.username = trimmedName;
+        }
+      }
+
+      if (typeof email === "string") {
+        const trimmedEmail = email.trim();
+        if (trimmedEmail) {
+          payload.email = trimmedEmail;
+        }
+      }
+
+      if (includeRole && role) {
+        payload.role = role;
+      }
+
+      return payload;
+    };
+
     try {
       const user = await User.findById(userId);
       if (!user) {
@@ -220,17 +245,46 @@ const AdminController = {
         }
         if (user.role === "admin" && role !== "admin") {
           req.flash("error_msg", "Admin role cannot be changed.");
-          await User.findByIdAndUpdate(userId, { name, email });
+          const adminUpdate = await User.findByIdAndUpdate(
+            userId,
+            buildUpdatePayload(false),
+            { new: true }
+          );
+          if (
+            adminUpdate &&
+            req.session.user &&
+            req.session.user.id === userId.toString()
+          ) {
+            req.session.user = {
+              ...req.session.user,
+              name: adminUpdate.name || adminUpdate.username,
+              username: adminUpdate.username || adminUpdate.name,
+              email: adminUpdate.email,
+            };
+          }
           req.flash("success_msg", "Admin user info (excluding role) updated.");
           return res.redirect("/admin/users");
         }
       }
 
-      await User.findByIdAndUpdate(
+      const updatedUser = await User.findByIdAndUpdate(
         userId,
-        { name, email, role },
+        buildUpdatePayload(true),
         { new: true }
       );
+      if (
+        updatedUser &&
+        req.session.user &&
+        req.session.user.id === userId.toString()
+      ) {
+        req.session.user = {
+          ...req.session.user,
+          name: updatedUser.name || updatedUser.username,
+          username: updatedUser.username || updatedUser.name,
+          email: updatedUser.email,
+          role: updatedUser.role,
+        };
+      }
       req.flash("success_msg", "User updated successfully");
       res.redirect("/admin/users");
     } catch (error) {
@@ -343,7 +397,7 @@ const AdminController = {
       }
 
       if (language !== "all") {
-        courses = courses.filter((course) => course.language === language);
+        courses = courses.filter((course) => course.courseLanguage === language);
       }
 
       // Apply sorting
@@ -369,26 +423,55 @@ const AdminController = {
 
       // Enhance courses with instructor data and student count
       const enhancedCoursesPromises = courses.map(async (course) => {
-        let instructor = null;
-        let instructorName = "Unknown Instructor";
+        let instructorName = course.instructor || "Unknown Instructor"; // Use existing instructor field as fallback
+
+        console.log(`Processing course: ${course.title}`);
+        console.log(`Course instructorId: ${course.instructorId}`);
+        console.log(`Course instructor field: ${course.instructor}`);
 
         if (
           course.instructorId &&
           AdminController.isValidObjectId(course.instructorId)
         ) {
-          instructor = await User.findById(course.instructorId);
-          if (instructor) {
-            instructorName =
-              instructor.name ||
-              instructor.username ||
-              instructor.email ||
-              "Unknown Instructor";
+          try {
+            const instructor = await User.findById(course.instructorId);
+            console.log(
+              `Found instructor:`,
+              instructor
+                ? `${
+                    instructor.name || instructor.username || instructor.email
+                  }`
+                : "null"
+            );
+
+            if (instructor) {
+              instructorName =
+                instructor.name ||
+                instructor.username ||
+                instructor.email ||
+                course.instructor || // Fallback to stored instructor name
+                "Unknown Instructor";
+            }
+          } catch (error) {
+            console.error(
+              `Error fetching instructor for course ${course.title}:`,
+              error
+            );
+            // Keep the fallback name (course.instructor or "Unknown Instructor")
           }
+        } else {
+          console.log(
+            `Invalid or missing instructorId for course: ${course.title}`
+          );
         }
 
         const studentCount = await User.countDocuments({
           enrolledCourses: course._id,
         });
+
+        console.log(
+          `Final instructor name for ${course.title}: ${instructorName}`
+        );
 
         return {
           ...course,
@@ -402,7 +485,7 @@ const AdminController = {
       let filteredCourses = enhancedCourses;
       if (language !== "all") {
         filteredCourses = enhancedCourses.filter(
-          (course) => course.language === language
+          (course) => course.courseLanguage === language
         );
       }
 
@@ -412,7 +495,7 @@ const AdminController = {
       const languages = [
         ...new Set(
           enhancedCourses
-            .map((course) => course.language)
+            .map((course) => course.courseLanguage)
             .filter((lang) => lang) // Remove undefined or empty languages
         ),
       ];
@@ -478,6 +561,8 @@ const AdminController = {
       }
 
       // Ensure instructor is never undefined, provide default values if instructor not found
+      // idhar maine course  course.instructor add kiya hai 
+      // isko dekh lena 
       const instructorName =
         instructor?.name ||
         instructor?.username ||
@@ -536,7 +621,7 @@ const AdminController = {
     try {
       const courseId = req.params.id;
       const course = await Course.getCourseById(courseId);
-
+      console.log(".....", course);
       if (!course) {
         req.flash("error_msg", "Course not found");
         return res.redirect("/admin/courses");

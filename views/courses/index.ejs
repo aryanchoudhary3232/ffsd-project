@@ -125,33 +125,35 @@
     <% } %>
 
     <% if (courses.length > 0) { %>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <% courses.forEach(function(course) { %>
-          <div class="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:transform hover:scale-105 border border-gray-300">
-            <img src="<%= course.thumbnail %>" alt="<%= course.title %>" class="w-full h-48 object-cover" />
-            <div class="p-6">
-              <div class="flex justify-between items-start mb-2">
-                <h3 class="text-xl font-bold"><%= course.title %></h3>
-                <span class="bg-primary px-2 py-1 rounded-full text-sm font-semibold">$<%= course.price.toFixed(2) %></span>
-              </div>
-              <p class="text-gray-600 mb-4"><%= course.instructor %></p>
-              <div class="flex justify-between items-center mb-4">
-                <div class="flex items-center">
-                  <span class="text-white mr-1">★</span>
-                  <span><%= course.rating %></span>
-                  <span class="text-gray-500 ml-1">(<%= course.students %>)</span>
+      <div id="courses-area">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <% courses.forEach(function(course) { %>
+            <div class="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:transform hover:scale-105 border border-gray-300">
+              <img src="<%= course.thumbnail %>" alt="<%= course.title %>" class="w-full h-48 object-cover" />
+              <div class="p-6">
+                <div class="flex justify-between items-start mb-2">
+                  <h3 class="text-xl font-bold"><%= course.title %></h3>
+                  <span class="bg-primary px-2 py-1 rounded-full text-sm font-semibold">$<%= course.price.toFixed(2) %></span>
                 </div>
-                <span class="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-xs"><%= course.category %></span>
+                <p class="text-gray-600 mb-4"><%= course.instructor %></p>
+                <div class="flex justify-between items-center mb-4">
+                  <div class="flex items-center">
+                    <span class="text-white mr-1">★</span>
+                    <span><%= course.rating %></span>
+                    <span class="text-gray-500 ml-1">(<%= course.students %>)</span>
+                  </div>
+                  <span class="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-xs"><%= course.category %></span>
+                </div>
+                <div class="flex items-center mb-4">
+                  <i class="fas fa-globe text-gray-500 mr-2"></i>
+                  <span class="text-gray-600 text-sm"><%= course.courseLanguage || 'English' %></span>
+                </div>
+                <p class="text-gray-700 mb-4 line-clamp-2"><%= course.description %></p>
+                <a href="/courses/<%= course._id || course.id %>" class="block w-full text-center bg-primary py-2 px-4 rounded-md hover:bg-primary-dark transition-colors">View Course</a>
               </div>
-              <div class="flex items-center mb-4">
-                <i class="fas fa-globe text-gray-500 mr-2"></i>
-                <span class="text-gray-600 text-sm"><%= course.language || 'English' %></span>
-              </div>
-              <p class="text-gray-700 mb-4 line-clamp-2"><%= course.description %></p>
-              <a href="/courses/<%= course._id || course.id %>" class="block w-full text-center bg-primary py-2 px-4 rounded-md hover:bg-primary-dark transition-colors">View Course</a>
             </div>
-          </div>
-        <% }); %>
+          <% }); %>
+        </div>
       </div>
     <% } else { %>
       <div class="bg-white rounded-lg shadow-md p-8 text-center border border-gray-300">
@@ -185,6 +187,33 @@
       
       window.location.href = url;
     }
+
+    const searchInput = document.querySelector('input[name="search"]');
+    const coursesContainer = document.getElementById('courses-area');
+
+
+    searchInput.addEventListener('input', async () => {
+      const query = searchInput.value;
+      const category = document.getElementById('category-filter').value;
+      const language = document.getElementById('language-filter').value;
+      const sort = document.getElementById('sort-filter').value;
+
+      let url = `/courses?ajax=1&search=${encodeURIComponent(query)}`;
+      if (category && category !== 'all') url += `&category=${encodeURIComponent(category)}`;
+      if (language && language !== 'all') url += `&language=${encodeURIComponent(language)}`;
+      if (sort) url += `&sort=${encodeURIComponent(sort)}`;
+
+      try {
+        const res = await fetch(url);
+        const html = await res.text();
+        coursesContainer.innerHTML = html;
+      } catch (err) {
+        console.error("Live search failed:", err);
+      }
+    });
+
+
+
   </script>
 </body>
 </html>

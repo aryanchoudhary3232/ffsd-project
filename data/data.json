@@ -1,1191 +1,1370 @@
 {
-  "users": [
-    {
-      "id": "1",
-      "name": "Admin User",
-      "email": "admin@seekhobharat.com",
-      "password": "123456",
-      "role": "admin",
-      "joinDate": "2023-01-01",
-      "enrolledCourses": [
-        "2",
-        "1742757772637",
-        "1742757216231",
-        "3"
-      ],
-      "completedCourses": []
-    },
-    {
-      "id": "2",
-      "name": "Jane",
-      "email": "jane@example.com",
-      "password": "123456",
-      "role": "instructor",
-      "joinDate": "2023-01-15",
-      "enrolledCourses": [
-        "4",
-        "1",
-        "1743013827800",
-        "1742791944339"
-      ],
-      "completedCourses": []
-    },
-    {
-      "id": "3",
-      "name": "John Doe",
-      "email": "john@example.com",
-      "password": "123456",
-      "role": "student",
-      "joinDate": "2023-02-01",
-      "enrolledCourses": [
-        "1",
-        "2",
-        "4",
-        "3",
-        "1742791944339"
-      ],
-      "completedCourses": []
-    },
-    {
-      "id": "4",
-      "name": "Michael Wilson",
-      "email": "michael@example.com",
-      "password": "123456",
-      "role": "instructor",
-      "joinDate": "2023-02-15",
-      "enrolledCourses": [
-        "1742791944339"
-      ],
-      "completedCourses": []
-    },
-    {
-      "id": "5",
-      "name": "Sarah Johnson",
-      "email": "sarah@example.com",
-      "password": "123456",
-      "role": "student",
-      "joinDate": "2023-03-01",
-      "enrolledCourses": [
-        "1",
-        "4"
-      ],
-      "completedCourses": []
-    },
-    {
-      "id": "1742016238405",
-      "name": "Shreyaan",
-      "email": "16shreyaan09@gmail.com",
-      "password": "123456",
-      "role": "instructor",
-      "joinDate": "2025-03-15",
-      "enrolledCourses": [],
-      "completedCourses": []
-    },
-    {
-      "id": "1742016472032",
-      "name": "Shreyaan",
-      "email": "123@gmail.com",
-      "password": "123456",
-      "role": "instructor",
-      "joinDate": "2025-03-15",
-      "enrolledCourses": [],
-      "completedCourses": []
-    },
-    {
-      "id": "1742892188159",
-      "name": "tester",
-      "email": "test@email.com",
-      "password": "123456",
-      "role": "student",
-      "joinDate": "2025-03-25",
-      "enrolledCourses": [
-        "3",
-        "1",
-        "2"
-      ],
-      "completedCourses": []
-    },
-    {
-      "id": "1742896508686",
-      "name": "sarah here",
-      "email": "sarah1@example.com",
-      "password": "123456",
-      "role": "student",
-      "joinDate": "2025-03-25",
-      "enrolledCourses": [],
-      "completedCourses": []
-    },
-    {
-      "id": "1742896718754",
-      "name": "sarah2",
-      "email": "sarah2@example.com",
-      "password": "123456",
-      "role": "student",
-      "joinDate": "2025-03-25",
-      "enrolledCourses": [],
-      "completedCourses": []
-    },
-    {
-      "id": "1742896865238",
-      "name": "sarah3",
-      "email": "sarah3@example.com",
-      "password": "123456",
-      "role": "student",
-      "joinDate": "2025-03-25",
-      "enrolledCourses": [],
-      "completedCourses": []
-    },
-    {
-      "id": "1742897396192",
-      "name": "sarah5",
-      "email": "sarah5@example.com",
-      "password": "123456",
-      "role": "student",
-      "joinDate": "2025-03-25",
-      "enrolledCourses": [],
-      "completedCourses": []
-    },
-    {
-      "id": "1742897412920",
-      "name": "sarah6",
-      "email": "sarah6@example.com",
-      "password": "123456",
-      "role": "student",
-      "joinDate": "2025-03-25",
-      "enrolledCourses": [],
-      "completedCourses": []
-    },
-    {
-      "id": "1742927895805",
-      "name": "sarah7",
-      "email": "sarah7@example.com",
-      "password": "123456",
-      "role": "student",
-      "joinDate": "2025-03-25",
-      "enrolledCourses": [
-        "1742791944339"
-      ],
-      "completedCourses": []
-    },
-    {
-      "id": "1743012921322",
-      "name": "janus",
-      "email": "janus@gmail.com",
-      "password": "123456",
-      "role": "student",
-      "joinDate": "2025-03-26",
-      "enrolledCourses": [
-        "4",
-        "1742791944339",
-        "2"
-      ],
-      "completedCourses": []
-    },
-    {
-      "id": "1743013290791",
-      "name": "asada",
-      "email": "asdasd@gmail.com",
-      "password": "123456",
-      "role": "student",
-      "joinDate": "2025-03-26",
-      "enrolledCourses": [
-        "4"
-      ],
-      "completedCourses": []
-    },
-    {
-      "id": "1742922014299",
-      "name": "snickerdoodle",
-      "email": "student@gmail.com",
-      "password": "123456",
-      "role": "student",
-      "joinDate": "2025-03-25",
-      "enrolledCourses": [
-        "3",
-        "4",
-        "2"
-      ],
-      "completedCourses": []
-    },
-    {
-      "id": "1743008553287",
-      "name": "student1",
-      "email": "rr@g.com",
-      "password": "123456",
-      "role": "student",
-      "joinDate": "2025-03-26",
-      "enrolledCourses": [
-        "4"
-      ],
-      "completedCourses": []
-    },
-    {
-      "id": "1743009397679",
-      "name": "snickerdoodlewtrd",
-      "email": "snickerdoodle@gmail",
-      "password": "123456",
-      "role": "student",
-      "joinDate": "2025-03-26",
-      "enrolledCourses": [],
-      "completedCourses": []
-    },
-    {
-      "id": "1743009444381",
-      "name": "trial",
-      "email": "trial@gmail",
-      "password": "123456",
-      "role": "student",
-      "joinDate": "2025-03-26",
-      "enrolledCourses": [],
-      "completedCourses": []
-    },
-    {
-      "id": "1743011974691",
-      "name": "Sudhan P",
-      "email": "sudhanp2004@gmail.com",
-      "password": "123456",
-      "role": "student",
-      "joinDate": "2025-03-26",
-      "enrolledCourses": [],
-      "completedCourses": []
-    },
-    {
-      "id": "1743023262257",
-      "name": "asdhqeqwe",
-      "email": "asdasdas@asjdasda.asdad",
-      "password": "123456",
-      "role": "student",
-      "joinDate": "2025-03-26",
-      "enrolledCourses": [],
-      "completedCourses": []
-    },
-    {
-      "id": "1743050583735",
-      "name": "saraheigh",
-      "email": "sarah8@example.com",
-      "password": "123456",
-      "role": "student",
-      "joinDate": "2025-03-27",
-      "enrolledCourses": [],
-      "completedCourses": []
-    },
-    {
-      "id": "1743065261157",
-      "name": "testboy",
-      "email": "test@gmail.com",
-      "password": "123456",
-      "role": "student",
-      "joinDate": "2025-03-27",
-      "enrolledCourses": [],
-      "completedCourses": []
-    },
-    {
-      "id": "1743065376410",
-      "name": "testboy",
-      "email": "test1@gmail.com",
-      "password": "123456",
-      "role": "student",
-      "joinDate": "2025-03-27",
-      "enrolledCourses": [],
-      "completedCourses": []
-    }
-  ],
-  "courses": [
-    {
-      "id": "1",
-      "title": "Complete Web Development Bootcamp",
-      "description": "Learn web development from scratch with this comprehensive bootcamp covering HTML, CSS, JavaScript, React, Node.js, and more.",
-      "category": "Web Development",
-      "price": 59.99,
-      "instructorId": "2",
-      "instructor": "Jane Smith",
-      "thumbnail": "/img/courses/web-dev.jpg",
-      "rating": 4.8,
-      "students": 4,
-      "createdAt": "2023-01-20",
-      "updatedAt": "2025-03-27T17:49:58.478Z",
-      "featured": true,
-      "modules": [
-        {
-          "id": "m1",
-          "title": "Introduction to Web Development",
-          "lessons": [
-            {
-              "id": "l2",
-              "title": "Setting Up Your Development Environment",
-              "type": "video",
-              "duration": "15:30",
-              "file": "/video/video2.mp4"
-            },
-            {
-              "id": "l3",
-              "title": "Web Development Basics",
-              "type": "video",
-              "duration": "12:45",
-              "file": "/video/video3.mp4"
-            },
-            {
-              "id": "l4",
-              "title": "Introduction Quiz",
-              "type": "quiz",
-              "duration": "10 questions",
-              "file": null
-            }
-          ]
-        },
-        {
-          "id": "m2",
-          "title": "HTML Fundamentals",
-          "lessons": [
-            {
-              "id": "l5",
-              "title": "HTML Document Structure",
-              "type": "video",
-              "duration": "14:20",
-              "file": "/video/video4.mp4"
-            },
-            {
-              "id": "l6",
-              "title": "HTML Elements and Attributes",
-              "type": "video",
-              "duration": "18:45",
-              "file": "/video/video.mp4"
-            },
-            {
-              "id": "l7",
-              "title": "HTML Forms",
-              "type": "video",
-              "duration": "20:10",
-              "file": "/video/video1.mp4"
-            },
-            {
-              "id": "l8",
-              "title": "HTML Cheat Sheet",
-              "type": "pdf",
-              "duration": "",
-              "file": "/docs/html-cheatsheet.pdf"
-            }
-          ]
-        },
-        {
-          "id": "m3",
-          "title": "CSS Styling",
-          "lessons": [
-            {
-              "id": "l9",
-              "title": "CSS Selectors",
-              "type": "video",
-              "duration": "16:30",
-              "file": "/video/video3.mp4"
-            },
-            {
-              "id": "l10",
-              "title": "CSS Box Model",
-              "type": "video",
-              "duration": "15:15",
-              "file": "/video/video4.mp4"
-            },
-            {
-              "id": "l11",
-              "title": "CSS Flexbox",
-              "type": "video",
-              "duration": "22:40",
-              "file": "/video/video.mp4"
-            },
-            {
-              "id": "l12",
-              "title": "CSS Grid",
-              "type": "video",
-              "duration": "25:10",
-              "file": "/video/video1.mp4"
-            },
-            {
-              "id": "l13",
-              "title": "CSS Assignment",
-              "type": "assignment",
-              "duration": "",
-              "file": "/docs/css-assignment.pdf"
-            }
-          ]
-        },
-        {
-          "id": "m4",
-          "title": "JavaScript Basics",
-          "lessons": [
-            {
-              "id": "l14",
-              "title": "JavaScript Introduction",
-              "type": "video",
-              "duration": "18:20",
-              "file": "/video/video3.mp4"
-            },
-            {
-              "id": "l15",
-              "title": "Variables and Data Types",
-              "type": "video",
-              "duration": "20:45",
-              "file": "/video/video4.mp4"
-            },
-            {
-              "id": "l16",
-              "title": "Functions and Scope",
-              "type": "video",
-              "duration": "24:30",
-              "file": "/video/video.mp4"
-            },
-            {
-              "id": "l17",
-              "title": "DOM Manipulation",
-              "type": "video",
-              "duration": "28:15",
-              "file": "/video/video1.mp4"
-            },
-            {
-              "id": "l18",
-              "title": "JavaScript Practice Exercises",
-              "type": "pdf",
-              "duration": "",
-              "file": "/docs/js-exercises.pdf"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "2",
-      "title": "Advanced JavaScript Concepts",
-      "description": "Take your JavaScript skills to the next level with advanced concepts like closures, prototypes, async/await, and more.",
-      "category": "JavaScript",
-      "price": 69.99,
-      "instructorId": "4",
-      "instructor": "Michael Wilson",
-      "thumbnail": "/img/courses/js-advanced.jpg",
-      "rating": 4.9,
-      "students": 987,
-      "createdAt": "2023-02-20",
-      "updatedAt": "2025-03-24T20:31:12.275Z",
-      "featured": true,
-      "modules": [
-        {
-          "id": "m1",
-          "title": "JavaScript Deep Dive",
-          "lessons": [
-            {
-              "id": "l1",
-              "title": "Execution Context and Call Stack",
-              "type": "video",
-              "duration": "22:15",
-              "file": "/video/video3.mp4"
-            },
-            {
-              "id": "l2",
-              "title": "Scope and Closures",
-              "type": "video",
-              "duration": "25:30",
-              "file": "/video/video4.mp4"
-            },
-            {
-              "id": "l3",
-              "title": "this Keyword and Binding",
-              "type": "video",
-              "duration": "20:45",
-              "file": "/video/video.mp4"
-            }
-          ]
-        },
-        {
-          "id": "m2",
-          "title": "Object-Oriented JavaScript",
-          "lessons": [
-            {
-              "id": "l4",
-              "title": "Prototypes and Inheritance",
-              "type": "video",
-              "duration": "28:20",
-              "file": "/video/video1.mp4"
-            },
-            {
-              "id": "l5",
-              "title": "ES6 Classes",
-              "type": "video",
-              "duration": "24:45",
-              "file": "/video/video2.mp4"
-            },
-            {
-              "id": "l6",
-              "title": "Design Patterns",
-              "type": "video",
-              "duration": "32:10",
-              "file": "/video/video3.mp4"
-            }
-          ]
-        },
-        {
-          "id": "m3",
-          "title": "Asynchronous JavaScript",
-          "lessons": [
-            {
-              "id": "l7",
-              "title": "Callbacks and Promises",
-              "type": "video",
-              "duration": "26:30",
-              "file": "/video/video4.mp4"
-            },
-            {
-              "id": "l8",
-              "title": "Async/Await",
-              "type": "video",
-              "duration": "22:15",
-              "file": "/video/video.mp4"
-            },
-            {
-              "id": "l9",
-              "title": "Event Loop",
-              "type": "video",
-              "duration": "18:40",
-              "file": "/video/video1.mp4"
-            }
-          ]
-        },
-        {
-          "id": "1742848269547",
-          "title": "Non constant",
-          "lessons": []
-        },
-        {
-          "id": "1742848272275",
-          "title": "Non constant",
-          "lessons": []
-        }
-      ]
-    },
-    {
-      "id": "3",
-      "title": "React.js for Beginners",
-      "description": "Learn React.js from scratch and build modern, interactive web applications with the most popular JavaScript library.",
-      "category": "React",
-      "price": 79.99,
-      "instructorId": "2",
-      "instructor": "Jane Smith",
-      "thumbnail": "/img/courses/react-basics.jpg",
-      "rating": 4.7,
-      "students": 1532,
-      "createdAt": "2023-03-15",
-      "updatedAt": "2023-12-05",
-      "featured": true,
-      "modules": [
-        {
-          "id": "m1",
-          "title": "React Fundamentals",
-          "lessons": [
-            {
-              "id": "l1",
-              "title": "Introduction to React",
-              "type": "video",
-              "duration": "15:20",
-              "file": "/video/video2.mp4"
-            },
-            {
-              "id": "l2",
-              "title": "Setting Up React Environment",
-              "type": "video",
-              "duration": "18:45",
-              "file": "/video/video3.mp4"
-            },
-            {
-              "id": "l3",
-              "title": "JSX Syntax",
-              "type": "video",
-              "duration": "14:30",
-              "file": "/video/video3.mp4"
-            }
-          ]
-        },
-        {
-          "id": "m2",
-          "title": "React Components",
-          "lessons": [
-            {
-              "id": "l4",
-              "title": "Functional Components",
-              "type": "video",
-              "duration": "22:15",
-              "file": "/video/video4.mp4"
-            },
-            {
-              "id": "l5",
-              "title": "Class Components",
-              "type": "video",
-              "duration": "20:30",
-              "file": "/video/video.mp4"
-            },
-            {
-              "id": "l6",
-              "title": "Props and State",
-              "type": "video",
-              "duration": "25:45",
-              "file": "/video/video1.mp4"
-            }
-          ]
-        },
-        {
-          "id": "m3",
-          "title": "React Hooks",
-          "lessons": [
-            {
-              "id": "l7",
-              "title": "useState Hook",
-              "type": "video",
-              "duration": "18:20",
-              "file": "/video/video2.mp4"
-            },
-            {
-              "id": "l8",
-              "title": "useEffect Hook",
-              "type": "video",
-              "duration": "24:15",
-              "file": "/video/video3.mp4"
-            },
-            {
-              "id": "l9",
-              "title": "Custom Hooks",
-              "type": "video",
-              "duration": "22:40",
-              "file": "/video/video4.mp4"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "4",
-      "title": "Node.js Backend Development",
-      "description": "Learn server-side JavaScript with Node.js and build scalable backend applications with Express.js, MongoDB, and more.",
-      "category": "Backend",
-      "price": 74.99,
-      "instructorId": "4",
-      "instructor": "Michael Wilson",
-      "thumbnail": "/img/courses/nodejs.jpg",
-      "rating": 4.6,
-      "students": 876,
-      "createdAt": "2023-04-10",
-      "updatedAt": "2023-11-25",
-      "featured": false,
-      "modules": [
-        {
-          "id": "m1",
-          "title": "Node.js Basics",
-          "lessons": [
-            {
-              "id": "l1",
-              "title": "Introduction to Node.js",
-              "type": "video",
-              "duration": "16:30",
-              "file": "/video/video.mp4"
-            },
-            {
-              "id": "l2",
-              "title": "Node.js Modules",
-              "type": "video",
-              "duration": "20:15",
-              "file": "/video/video1.mp4"
-            },
-            {
-              "id": "l3",
-              "title": "File System Operations",
-              "type": "video",
-              "duration": "18:45",
-              "file": "/video/video3.mp4"
-            }
-          ]
-        },
-        {
-          "id": "m2",
-          "title": "Express.js Framework",
-          "lessons": [
-            {
-              "id": "l4",
-              "title": "Setting Up Express",
-              "type": "video",
-              "duration": "15:20",
-              "file": "/video/video3.mp4"
-            },
-            {
-              "id": "l5",
-              "title": "Routing in Express",
-              "type": "video",
-              "duration": "22:30",
-              "file": "/video/video4.mp4"
-            },
-            {
-              "id": "l6",
-              "title": "Middleware",
-              "type": "video",
-              "duration": "24:15",
-              "file": "/video/video.mp4"
-            }
-          ]
-        },
-        {
-          "id": "m3",
-          "title": "Database Integration",
-          "lessons": [
-            {
-              "id": "l7",
-              "title": "MongoDB Basics",
-              "type": "video",
-              "duration": "26:40",
-              "file": "/video/video1.mp4"
-            },
-            {
-              "id": "l8",
-              "title": "Mongoose ODM",
-              "type": "video",
-              "duration": "28:15",
-              "file": "/video/video3.mp4"
-            },
-            {
-              "id": "l9",
-              "title": "CRUD Operations",
-              "type": "video",
-              "duration": "32:20",
-              "file": "/video/video4.mp4"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "1742791944339",
-      "title": "hello",
-      "description": "this is a course",
-      "category": "Web Development",
-      "price": 40,
-      "instructorId": "4",
-      "instructor": "Michael Wilson",
-      "thumbnail": "/uploads/1742791944282-Screenshot 2025-03-04 at 22-50-34 Checkout - GameSir Official Store.png",
-      "rating": 0,
-      "students": 4,
-      "createdAt": "2025-03-24T04:52:24.339Z",
-      "updatedAt": "2025-03-27T08:38:55.037Z",
-      "modules": [
-        {
-          "id": "1743055487619",
-          "title": "now fixed",
-          "lessons": [
-            {
-              "id": "1743055507288",
-              "title": "here is a lesson",
-              "type": "video",
-              "duration": "2:20",
-              "file": "/uploads/1743055507212-video3.mp4"
-            },
-            {
-              "id": "1743055904561",
-              "title": "fixed lesson",
-              "type": "video",
-              "duration": "4:30",
-              "file": "/uploads/1743055904485-video.mp4"
-            }
-          ]
-        }
-      ],
-      "featured": false,
-      "status": "draft"
-    },
-    {
-      "id": "1743159420560",
-      "title": "abcd423434@",
-      "description": "fgfdsfgdszd",
-      "category": "fdff",
-      "price": 132,
-      "instructorId": "2",
-      "instructor": "Jane",
-      "thumbnail": "/uploads/1743159420531-IMG_20250324_235113.jpg",
-      "rating": 0,
-      "students": 0,
-      "createdAt": "2025-03-28T10:57:00.560Z",
-      "updatedAt": "2025-03-28T10:57:00.560Z",
-      "modules": [],
-      "featured": false
-    }
-  ],
-  "progress": [
-    {
-      "userId": "3",
-      "courseId": "1",
-      "progress": 72,
-      "completedLessons": [
-        "l1",
-        "l2",
-        "l3",
-        "l4",
-        "l5",
-        "l6",
-        "l7",
-        "l8",
-        "l9",
-        "l10",
-        "l14",
-        "l15",
-        "l13"
-      ]
-    },
-    {
-      "userId": "3",
-      "courseId": "2",
-      "progress": 44,
-      "completedLessons": [
-        "l1",
-        "l2",
-        "l3",
-        "l4"
-      ]
-    },
-    {
-      "userId": "5",
-      "courseId": "1",
-      "progress": 28,
-      "completedLessons": [
-        "l1",
-        "l2",
-        "l3",
-        "l4",
-        "l5"
-      ]
-    },
-    {
-      "userId": "3",
-      "courseId": "4",
-      "progress": 22,
-      "completedLessons": [
-        "l1",
-        "l2"
-      ]
-    },
-    {
-      "userId": "1",
-      "courseId": "2",
-      "progress": 0,
-      "completedLessons": []
-    },
-    {
-      "userId": "3",
-      "courseId": "3",
-      "progress": 0,
-      "completedLessons": []
-    },
-    {
-      "userId": "2",
-      "courseId": "4",
-      "progress": 0,
-      "completedLessons": []
-    },
-    {
-      "userId": "5",
-      "courseId": "4",
-      "progress": 0,
-      "completedLessons": []
-    },
-    {
-      "userId": "3",
-      "courseId": "4",
-      "progress": 0,
-      "completedLessons": []
-    },
-    {
-      "userId": "1",
-      "courseId": "3",
-      "progress": 0,
-      "completedLessons": []
-    },
-    {
-      "userId": "2",
-      "courseId": "1",
-      "progress": 0,
-      "completedLessons": []
-    },
-    {
-      "userId": "3",
-      "courseId": "1742791944339",
-      "progress": 100,
-      "completedLessons": [
-        "1743055507288",
-        "1743055904561"
-      ]
-    },
-    {
-      "userId": "3",
-      "courseId": "3",
-      "progress": 0,
-      "completedLessons": []
-    },
-    {
-      "userId": "1742892188159",
-      "courseId": "3",
-      "progress": 0,
-      "completedLessons": []
-    },
-    {
-      "userId": "1742892188159",
-      "courseId": "1",
-      "progress": 0,
-      "completedLessons": []
-    },
-    {
-      "userId": "1742892188159",
-      "courseId": "2",
-      "progress": 0,
-      "completedLessons": []
-    },
-    {
-      "userId": "1743012921322",
-      "courseId": "4",
-      "progress": 22,
-      "completedLessons": [
-        "l1",
-        "l2"
-      ]
-    },
-    {
-      "userId": "1743012921322",
-      "courseId": "1742791944339",
-      "progress": 0,
-      "completedLessons": []
-    },
-    {
-      "userId": "1743012921322",
-      "courseId": "2",
-      "progress": 0,
-      "completedLessons": []
-    },
-    {
-      "userId": "1743013290791",
-      "courseId": "4",
-      "progress": 22,
-      "completedLessons": [
-        "l1",
-        "l2"
-      ]
-    },
-    {
-      "userId": "2",
-      "courseId": "1743013827800",
-      "progress": 0,
-      "completedLessons": []
-    },
-    {
-      "userId": "1742922014299",
-      "courseId": "3",
-      "progress": 100,
-      "completedLessons": [
-        "l3",
-        "l4",
-        "l1",
-        "l5",
-        "l6",
-        "l7",
-        "l9",
-        "l2",
-        "l8"
-      ]
-    },
-    {
-      "userId": "1742922014299",
-      "courseId": "4",
-      "progress": 22,
-      "completedLessons": [
-        "l1",
-        "l2"
-      ]
-    },
-    {
-      "userId": "1742922014299",
-      "courseId": "2",
-      "progress": 22,
-      "completedLessons": [
-        "l1",
-        "l2"
-      ]
-    },
-    {
-      "userId": "1743008553287",
-      "courseId": "4",
-      "progress": 22,
-      "completedLessons": [
-        "l1",
-        "l2"
-      ]
-    },
-    {
-      "userId": "4",
-      "courseId": "1742791944339",
-      "progress": 150,
-      "completedLessons": [
-        "1743055320322",
-        "1743055507288",
-        "1743055904561"
-      ]
-    },
-    {
-      "userId": "1742927895805",
-      "courseId": "1742791944339",
-      "progress": 100,
-      "completedLessons": [
-        "1743055507288",
-        "1743055904561"
-      ]
-    },
-    {
-      "userId": "3",
-      "courseId": "1742791944339",
-      "progress": 0,
-      "completedLessons": []
-    },
-    {
-      "userId": "2",
-      "courseId": "1742791944339",
-      "progress": 0,
-      "completedLessons": []
-    }
-  ],
-  "carts": [
-    {
-      "userId": "5",
-      "items": [
-        {
-          "courseId": "3",
-          "addedAt": "2025-03-25T08:28:15.690Z"
-        }
-      ]
-    }
-  ],
-  "orders": [
-    {
-      "id": "1",
-      "userId": "3",
-      "courseId": "1",
-      "amount": 89.99,
-      "paymentMethod": "credit_card",
-      "status": "completed",
-      "createdAt": "2023-02-05"
-    },
-    {
-      "id": "2",
-      "userId": "3",
-      "courseId": "2",
-      "amount": 69.99,
-      "paymentMethod": "paypal",
-      "status": "completed",
-      "createdAt": "2023-03-10"
-    },
-    {
-      "id": "3",
-      "userId": "5",
-      "courseId": "1",
-      "amount": 89.99,
-      "paymentMethod": "credit_card",
-      "status": "completed",
-      "createdAt": "2023-03-15"
-    },
-    {
-      "id": "1741890969986",
-      "userId": "3",
-      "courseId": "4",
-      "amount": 74.99,
-      "paymentMethod": "credit_card",
-      "status": "completed",
-      "createdAt": "2025-03-13T18:36:09.986Z"
-    },
-    {
-      "id": "1741890969990",
-      "userId": "3",
-      "courseId": "3",
-      "amount": 79.99,
-      "paymentMethod": "credit_card",
-      "status": "completed",
-      "createdAt": "2025-03-13T18:36:09.990Z"
-    },
-    {
-      "id": "1742890331439",
-      "userId": "3",
-      "courseId": "1742791944339",
-      "amount": 400,
-      "paymentMethod": "credit_card",
-      "status": "completed",
-      "createdAt": "2025-03-25T08:12:11.439Z"
-    },
-    {
-      "id": "1742892540798",
-      "userId": "1742892188159",
-      "courseId": "1",
-      "amount": 89.99,
-      "paymentMethod": "credit_card",
-      "status": "completed",
-      "createdAt": "2025-03-25T08:49:00.798Z"
-    },
-    {
-      "id": "1742892603365",
-      "userId": "1742892188159",
-      "courseId": "2",
-      "amount": 69.99,
-      "paymentMethod": "credit_card",
-      "status": "completed",
-      "createdAt": "2025-03-25T08:50:03.365Z"
-    },
-    {
-      "id": "1743012929746",
-      "userId": "1743012921322",
-      "courseId": "4",
-      "amount": 74.99,
-      "paymentMethod": "credit_card",
-      "status": "completed",
-      "createdAt": "2025-03-26T18:15:29.746Z"
-    },
-    {
-      "id": "1743013109464",
-      "userId": "1743012921322",
-      "courseId": "2",
-      "amount": 69.99,
-      "paymentMethod": "credit_card",
-      "status": "completed",
-      "createdAt": "2025-03-26T18:18:29.464Z"
-    },
-    {
-      "id": "1743005510522",
-      "userId": "1742922014299",
-      "courseId": "4",
-      "amount": 74.99,
-      "paymentMethod": "paypal",
-      "status": "completed",
-      "createdAt": "2025-03-26T16:11:50.522Z"
-    },
-    {
-      "id": "1743064605199",
-      "userId": "1742927895805",
-      "courseId": "1742791944339",
-      "amount": 400,
-      "paymentMethod": "credit_card",
-      "status": "completed",
-      "createdAt": "2025-03-27T08:36:45.199Z"
-    },
-    {
-      "id": "1743073259354",
-      "userId": "3",
-      "courseId": "1742791944339",
-      "amount": 40,
-      "paymentMethod": "credit_card",
-      "status": "completed",
-      "createdAt": "2025-03-27T11:00:59.354Z"
-    },
-    {
-      "id": "1743159472031",
-      "userId": "2",
-      "courseId": "1742791944339",
-      "amount": 40,
-      "paymentMethod": "credit_card",
-      "status": "completed",
-      "createdAt": "2025-03-28T10:57:52.031Z"
-    }
-  ]
+    "users":  [
+                  {
+                      "id":  "1",
+                      "name":  "Admin User",
+                      "email":  "admin@seekhobharat.com",
+                      "password":  "123456",
+                      "role":  "admin",
+                      "joinDate":  "2023-01-01",
+                      "enrolledCourses":  [
+                                              "2",
+                                              "1742757772637",
+                                              "1742757216231",
+                                              "3"
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "2",
+                      "name":  "Jane",
+                      "email":  "jane@example.com",
+                      "password":  "123456",
+                      "role":  "instructor",
+                      "joinDate":  "2023-01-15",
+                      "enrolledCourses":  [
+                                              "4",
+                                              "1",
+                                              "1743013827800",
+                                              "1742791944339"
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "3",
+                      "name":  "John Doe",
+                      "email":  "john@example.com",
+                      "password":  "123456",
+                      "role":  "student",
+                      "joinDate":  "2023-02-01",
+                      "enrolledCourses":  [
+                                              "1",
+                                              "2",
+                                              "4",
+                                              "3",
+                                              "1742791944339"
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "4",
+                      "name":  "Michael Wilson",
+                      "email":  "michael@example.com",
+                      "password":  "123456",
+                      "role":  "instructor",
+                      "joinDate":  "2023-02-15",
+                      "enrolledCourses":  [
+                                              "1742791944339"
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "5",
+                      "name":  "Sarah Johnson",
+                      "email":  "sarah@example.com",
+                      "password":  "123456",
+                      "role":  "student",
+                      "joinDate":  "2023-03-01",
+                      "enrolledCourses":  [
+                                              "1",
+                                              "4"
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "1742016238405",
+                      "name":  "Shreyaan",
+                      "email":  "16shreyaan09@gmail.com",
+                      "password":  "123456",
+                      "role":  "instructor",
+                      "joinDate":  "2025-03-15",
+                      "enrolledCourses":  [
+
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "1742016472032",
+                      "name":  "Shreyaan",
+                      "email":  "123@gmail.com",
+                      "password":  "123456",
+                      "role":  "instructor",
+                      "joinDate":  "2025-03-15",
+                      "enrolledCourses":  [
+
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "1742892188159",
+                      "name":  "tester",
+                      "email":  "test@email.com",
+                      "password":  "123456",
+                      "role":  "student",
+                      "joinDate":  "2025-03-25",
+                      "enrolledCourses":  [
+                                              "3",
+                                              "1",
+                                              "2"
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "1742896508686",
+                      "name":  "sarah here",
+                      "email":  "sarah1@example.com",
+                      "password":  "123456",
+                      "role":  "student",
+                      "joinDate":  "2025-03-25",
+                      "enrolledCourses":  [
+
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "1742896718754",
+                      "name":  "sarah2",
+                      "email":  "sarah2@example.com",
+                      "password":  "123456",
+                      "role":  "student",
+                      "joinDate":  "2025-03-25",
+                      "enrolledCourses":  [
+
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "1742896865238",
+                      "name":  "sarah3",
+                      "email":  "sarah3@example.com",
+                      "password":  "123456",
+                      "role":  "student",
+                      "joinDate":  "2025-03-25",
+                      "enrolledCourses":  [
+
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "1742897396192",
+                      "name":  "sarah5",
+                      "email":  "sarah5@example.com",
+                      "password":  "123456",
+                      "role":  "student",
+                      "joinDate":  "2025-03-25",
+                      "enrolledCourses":  [
+
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "1742897412920",
+                      "name":  "sarah6",
+                      "email":  "sarah6@example.com",
+                      "password":  "123456",
+                      "role":  "student",
+                      "joinDate":  "2025-03-25",
+                      "enrolledCourses":  [
+
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "1742927895805",
+                      "name":  "sarah7",
+                      "email":  "sarah7@example.com",
+                      "password":  "123456",
+                      "role":  "student",
+                      "joinDate":  "2025-03-25",
+                      "enrolledCourses":  [
+                                              "1742791944339"
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "1743012921322",
+                      "name":  "janus",
+                      "email":  "janus@gmail.com",
+                      "password":  "123456",
+                      "role":  "student",
+                      "joinDate":  "2025-03-26",
+                      "enrolledCourses":  [
+                                              "4",
+                                              "1742791944339",
+                                              "2"
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "1743013290791",
+                      "name":  "asada",
+                      "email":  "asdasd@gmail.com",
+                      "password":  "123456",
+                      "role":  "student",
+                      "joinDate":  "2025-03-26",
+                      "enrolledCourses":  [
+                                              "4"
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "1742922014299",
+                      "name":  "snickerdoodle",
+                      "email":  "student@gmail.com",
+                      "password":  "123456",
+                      "role":  "student",
+                      "joinDate":  "2025-03-25",
+                      "enrolledCourses":  [
+                                              "3",
+                                              "4",
+                                              "2"
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "1743008553287",
+                      "name":  "student1",
+                      "email":  "rr@g.com",
+                      "password":  "123456",
+                      "role":  "student",
+                      "joinDate":  "2025-03-26",
+                      "enrolledCourses":  [
+                                              "4"
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "1743009397679",
+                      "name":  "snickerdoodlewtrd",
+                      "email":  "snickerdoodle@gmail",
+                      "password":  "123456",
+                      "role":  "student",
+                      "joinDate":  "2025-03-26",
+                      "enrolledCourses":  [
+
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "1743009444381",
+                      "name":  "trial",
+                      "email":  "trial@gmail",
+                      "password":  "123456",
+                      "role":  "student",
+                      "joinDate":  "2025-03-26",
+                      "enrolledCourses":  [
+
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "1743011974691",
+                      "name":  "Sudhan P",
+                      "email":  "sudhanp2004@gmail.com",
+                      "password":  "123456",
+                      "role":  "student",
+                      "joinDate":  "2025-03-26",
+                      "enrolledCourses":  [
+
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "1743023262257",
+                      "name":  "asdhqeqwe",
+                      "email":  "asdasdas@asjdasda.asdad",
+                      "password":  "123456",
+                      "role":  "student",
+                      "joinDate":  "2025-03-26",
+                      "enrolledCourses":  [
+
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "1743050583735",
+                      "name":  "saraheigh",
+                      "email":  "sarah8@example.com",
+                      "password":  "123456",
+                      "role":  "student",
+                      "joinDate":  "2025-03-27",
+                      "enrolledCourses":  [
+
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "1743065261157",
+                      "name":  "testboy",
+                      "email":  "test@gmail.com",
+                      "password":  "123456",
+                      "role":  "student",
+                      "joinDate":  "2025-03-27",
+                      "enrolledCourses":  [
+
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  },
+                  {
+                      "id":  "1743065376410",
+                      "name":  "testboy",
+                      "email":  "test1@gmail.com",
+                      "password":  "123456",
+                      "role":  "student",
+                      "joinDate":  "2025-03-27",
+                      "enrolledCourses":  [
+
+                                          ],
+                      "completedCourses":  [
+
+                                           ]
+                  }
+              ],
+    "courses":  [
+                    {
+                        "id":  "1",
+                        "title":  "Complete Web Development Bootcamp",
+                        "description":  "Learn web development from scratch with this comprehensive bootcamp covering HTML, CSS, JavaScript, React, Node.js, and more.",
+                        "category":  "Web Development",
+                        "price":  59.99,
+                        "instructorId":  "2",
+                        "instructor":  "Jane Smith",
+                        "thumbnail":  "/img/courses/web-dev.jpg",
+                        "rating":  4.8,
+                        "students":  4,
+                        "createdAt":  "2023-01-20",
+                        "updatedAt":  "2025-03-27T17:49:58.478Z",
+                        "featured":  true,
+                        "modules":  [
+                                        {
+                                            "id":  "m1",
+                                            "title":  "Introduction to Web Development",
+                                            "lessons":  [
+                                                            {
+                                                                "id":  "l2",
+                                                                "title":  "Setting Up Your Development Environment",
+                                                                "type":  "video",
+                                                                "duration":  "15:30",
+                                                                "file":  "/video/video2.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l3",
+                                                                "title":  "Web Development Basics",
+                                                                "type":  "video",
+                                                                "duration":  "12:45",
+                                                                "file":  "/video/video3.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l4",
+                                                                "title":  "Introduction Quiz",
+                                                                "type":  "quiz",
+                                                                "duration":  "10 questions",
+                                                                "file":  null
+                                                            }
+                                                        ]
+                                        },
+                                        {
+                                            "id":  "m2",
+                                            "title":  "HTML Fundamentals",
+                                            "lessons":  [
+                                                            {
+                                                                "id":  "l5",
+                                                                "title":  "HTML Document Structure",
+                                                                "type":  "video",
+                                                                "duration":  "14:20",
+                                                                "file":  "/video/video4.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l6",
+                                                                "title":  "HTML Elements and Attributes",
+                                                                "type":  "video",
+                                                                "duration":  "18:45",
+                                                                "file":  "/video/video.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l7",
+                                                                "title":  "HTML Forms",
+                                                                "type":  "video",
+                                                                "duration":  "20:10",
+                                                                "file":  "/video/video1.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l8",
+                                                                "title":  "HTML Cheat Sheet",
+                                                                "type":  "pdf",
+                                                                "duration":  "",
+                                                                "file":  "/docs/html-cheatsheet.pdf"
+                                                            }
+                                                        ]
+                                        },
+                                        {
+                                            "id":  "m3",
+                                            "title":  "CSS Styling",
+                                            "lessons":  [
+                                                            {
+                                                                "id":  "l9",
+                                                                "title":  "CSS Selectors",
+                                                                "type":  "video",
+                                                                "duration":  "16:30",
+                                                                "file":  "/video/video3.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l10",
+                                                                "title":  "CSS Box Model",
+                                                                "type":  "video",
+                                                                "duration":  "15:15",
+                                                                "file":  "/video/video4.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l11",
+                                                                "title":  "CSS Flexbox",
+                                                                "type":  "video",
+                                                                "duration":  "22:40",
+                                                                "file":  "/video/video.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l12",
+                                                                "title":  "CSS Grid",
+                                                                "type":  "video",
+                                                                "duration":  "25:10",
+                                                                "file":  "/video/video1.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l13",
+                                                                "title":  "CSS Assignment",
+                                                                "type":  "assignment",
+                                                                "duration":  "",
+                                                                "file":  "/docs/css-assignment.pdf"
+                                                            }
+                                                        ]
+                                        },
+                                        {
+                                            "id":  "m4",
+                                            "title":  "JavaScript Basics",
+                                            "lessons":  [
+                                                            {
+                                                                "id":  "l14",
+                                                                "title":  "JavaScript Introduction",
+                                                                "type":  "video",
+                                                                "duration":  "18:20",
+                                                                "file":  "/video/video3.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l15",
+                                                                "title":  "Variables and Data Types",
+                                                                "type":  "video",
+                                                                "duration":  "20:45",
+                                                                "file":  "/video/video4.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l16",
+                                                                "title":  "Functions and Scope",
+                                                                "type":  "video",
+                                                                "duration":  "24:30",
+                                                                "file":  "/video/video.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l17",
+                                                                "title":  "DOM Manipulation",
+                                                                "type":  "video",
+                                                                "duration":  "28:15",
+                                                                "file":  "/video/video1.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l18",
+                                                                "title":  "JavaScript Practice Exercises",
+                                                                "type":  "pdf",
+                                                                "duration":  "",
+                                                                "file":  "/docs/js-exercises.pdf"
+                                                            }
+                                                        ]
+                                        }
+                                    ],
+                        "courseLanguage":  "English"
+                    },
+                    {
+                        "id":  "2",
+                        "title":  "Advanced JavaScript Concepts",
+                        "description":  "Take your JavaScript skills to the next level with advanced concepts like closures, prototypes, async/await, and more.",
+                        "category":  "JavaScript",
+                        "price":  69.99,
+                        "instructorId":  "4",
+                        "instructor":  "Michael Wilson",
+                        "thumbnail":  "/img/courses/js-advanced.jpg",
+                        "rating":  4.9,
+                        "students":  987,
+                        "createdAt":  "2023-02-20",
+                        "updatedAt":  "2025-03-24T20:31:12.275Z",
+                        "featured":  true,
+                        "modules":  [
+                                        {
+                                            "id":  "m1",
+                                            "title":  "JavaScript Deep Dive",
+                                            "lessons":  [
+                                                            {
+                                                                "id":  "l1",
+                                                                "title":  "Execution Context and Call Stack",
+                                                                "type":  "video",
+                                                                "duration":  "22:15",
+                                                                "file":  "/video/video3.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l2",
+                                                                "title":  "Scope and Closures",
+                                                                "type":  "video",
+                                                                "duration":  "25:30",
+                                                                "file":  "/video/video4.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l3",
+                                                                "title":  "this Keyword and Binding",
+                                                                "type":  "video",
+                                                                "duration":  "20:45",
+                                                                "file":  "/video/video.mp4"
+                                                            }
+                                                        ]
+                                        },
+                                        {
+                                            "id":  "m2",
+                                            "title":  "Object-Oriented JavaScript",
+                                            "lessons":  [
+                                                            {
+                                                                "id":  "l4",
+                                                                "title":  "Prototypes and Inheritance",
+                                                                "type":  "video",
+                                                                "duration":  "28:20",
+                                                                "file":  "/video/video1.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l5",
+                                                                "title":  "ES6 Classes",
+                                                                "type":  "video",
+                                                                "duration":  "24:45",
+                                                                "file":  "/video/video2.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l6",
+                                                                "title":  "Design Patterns",
+                                                                "type":  "video",
+                                                                "duration":  "32:10",
+                                                                "file":  "/video/video3.mp4"
+                                                            }
+                                                        ]
+                                        },
+                                        {
+                                            "id":  "m3",
+                                            "title":  "Asynchronous JavaScript",
+                                            "lessons":  [
+                                                            {
+                                                                "id":  "l7",
+                                                                "title":  "Callbacks and Promises",
+                                                                "type":  "video",
+                                                                "duration":  "26:30",
+                                                                "file":  "/video/video4.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l8",
+                                                                "title":  "Async/Await",
+                                                                "type":  "video",
+                                                                "duration":  "22:15",
+                                                                "file":  "/video/video.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l9",
+                                                                "title":  "Event Loop",
+                                                                "type":  "video",
+                                                                "duration":  "18:40",
+                                                                "file":  "/video/video1.mp4"
+                                                            }
+                                                        ]
+                                        },
+                                        {
+                                            "id":  "1742848269547",
+                                            "title":  "Non constant",
+                                            "lessons":  [
+
+                                                        ]
+                                        },
+                                        {
+                                            "id":  "1742848272275",
+                                            "title":  "Non constant",
+                                            "lessons":  [
+
+                                                        ]
+                                        }
+                                    ],
+                        "courseLanguage":  "English"
+                    },
+                    {
+                        "id":  "3",
+                        "title":  "React.js for Beginners",
+                        "description":  "Learn React.js from scratch and build modern, interactive web applications with the most popular JavaScript library.",
+                        "category":  "React",
+                        "price":  79.99,
+                        "instructorId":  "2",
+                        "instructor":  "Jane Smith",
+                        "thumbnail":  "/img/courses/react-basics.jpg",
+                        "rating":  4.7,
+                        "students":  1532,
+                        "createdAt":  "2023-03-15",
+                        "updatedAt":  "2023-12-05",
+                        "featured":  true,
+                        "modules":  [
+                                        {
+                                            "id":  "m1",
+                                            "title":  "React Fundamentals",
+                                            "lessons":  [
+                                                            {
+                                                                "id":  "l1",
+                                                                "title":  "Introduction to React",
+                                                                "type":  "video",
+                                                                "duration":  "15:20",
+                                                                "file":  "/video/video2.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l2",
+                                                                "title":  "Setting Up React Environment",
+                                                                "type":  "video",
+                                                                "duration":  "18:45",
+                                                                "file":  "/video/video3.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l3",
+                                                                "title":  "JSX Syntax",
+                                                                "type":  "video",
+                                                                "duration":  "14:30",
+                                                                "file":  "/video/video3.mp4"
+                                                            }
+                                                        ]
+                                        },
+                                        {
+                                            "id":  "m2",
+                                            "title":  "React Components",
+                                            "lessons":  [
+                                                            {
+                                                                "id":  "l4",
+                                                                "title":  "Functional Components",
+                                                                "type":  "video",
+                                                                "duration":  "22:15",
+                                                                "file":  "/video/video4.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l5",
+                                                                "title":  "Class Components",
+                                                                "type":  "video",
+                                                                "duration":  "20:30",
+                                                                "file":  "/video/video.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l6",
+                                                                "title":  "Props and State",
+                                                                "type":  "video",
+                                                                "duration":  "25:45",
+                                                                "file":  "/video/video1.mp4"
+                                                            }
+                                                        ]
+                                        },
+                                        {
+                                            "id":  "m3",
+                                            "title":  "React Hooks",
+                                            "lessons":  [
+                                                            {
+                                                                "id":  "l7",
+                                                                "title":  "useState Hook",
+                                                                "type":  "video",
+                                                                "duration":  "18:20",
+                                                                "file":  "/video/video2.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l8",
+                                                                "title":  "useEffect Hook",
+                                                                "type":  "video",
+                                                                "duration":  "24:15",
+                                                                "file":  "/video/video3.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l9",
+                                                                "title":  "Custom Hooks",
+                                                                "type":  "video",
+                                                                "duration":  "22:40",
+                                                                "file":  "/video/video4.mp4"
+                                                            }
+                                                        ]
+                                        }
+                                    ],
+                        "courseLanguage":  "English"
+                    },
+                    {
+                        "id":  "4",
+                        "title":  "Node.js Backend Development",
+                        "description":  "Learn server-side JavaScript with Node.js and build scalable backend applications with Express.js, MongoDB, and more.",
+                        "category":  "Backend",
+                        "price":  74.99,
+                        "instructorId":  "4",
+                        "instructor":  "Michael Wilson",
+                        "thumbnail":  "/img/courses/nodejs.jpg",
+                        "rating":  4.6,
+                        "students":  876,
+                        "createdAt":  "2023-04-10",
+                        "updatedAt":  "2023-11-25",
+                        "featured":  false,
+                        "modules":  [
+                                        {
+                                            "id":  "m1",
+                                            "title":  "Node.js Basics",
+                                            "lessons":  [
+                                                            {
+                                                                "id":  "l1",
+                                                                "title":  "Introduction to Node.js",
+                                                                "type":  "video",
+                                                                "duration":  "16:30",
+                                                                "file":  "/video/video.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l2",
+                                                                "title":  "Node.js Modules",
+                                                                "type":  "video",
+                                                                "duration":  "20:15",
+                                                                "file":  "/video/video1.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l3",
+                                                                "title":  "File System Operations",
+                                                                "type":  "video",
+                                                                "duration":  "18:45",
+                                                                "file":  "/video/video3.mp4"
+                                                            }
+                                                        ]
+                                        },
+                                        {
+                                            "id":  "m2",
+                                            "title":  "Express.js Framework",
+                                            "lessons":  [
+                                                            {
+                                                                "id":  "l4",
+                                                                "title":  "Setting Up Express",
+                                                                "type":  "video",
+                                                                "duration":  "15:20",
+                                                                "file":  "/video/video3.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l5",
+                                                                "title":  "Routing in Express",
+                                                                "type":  "video",
+                                                                "duration":  "22:30",
+                                                                "file":  "/video/video4.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l6",
+                                                                "title":  "Middleware",
+                                                                "type":  "video",
+                                                                "duration":  "24:15",
+                                                                "file":  "/video/video.mp4"
+                                                            }
+                                                        ]
+                                        },
+                                        {
+                                            "id":  "m3",
+                                            "title":  "Database Integration",
+                                            "lessons":  [
+                                                            {
+                                                                "id":  "l7",
+                                                                "title":  "MongoDB Basics",
+                                                                "type":  "video",
+                                                                "duration":  "26:40",
+                                                                "file":  "/video/video1.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l8",
+                                                                "title":  "Mongoose ODM",
+                                                                "type":  "video",
+                                                                "duration":  "28:15",
+                                                                "file":  "/video/video3.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "l9",
+                                                                "title":  "CRUD Operations",
+                                                                "type":  "video",
+                                                                "duration":  "32:20",
+                                                                "file":  "/video/video4.mp4"
+                                                            }
+                                                        ]
+                                        }
+                                    ],
+                        "courseLanguage":  "English"
+                    },
+                    {
+                        "id":  "1742791944339",
+                        "title":  "hello",
+                        "description":  "this is a course",
+                        "category":  "Web Development",
+                        "price":  40,
+                        "instructorId":  "4",
+                        "instructor":  "Michael Wilson",
+                        "thumbnail":  "/uploads/1742791944282-Screenshot 2025-03-04 at 22-50-34 Checkout - GameSir Official Store.png",
+                        "rating":  0,
+                        "students":  4,
+                        "createdAt":  "2025-03-24T04:52:24.339Z",
+                        "updatedAt":  "2025-03-27T08:38:55.037Z",
+                        "modules":  [
+                                        {
+                                            "id":  "1743055487619",
+                                            "title":  "now fixed",
+                                            "lessons":  [
+                                                            {
+                                                                "id":  "1743055507288",
+                                                                "title":  "here is a lesson",
+                                                                "type":  "video",
+                                                                "duration":  "2:20",
+                                                                "file":  "/uploads/1743055507212-video3.mp4"
+                                                            },
+                                                            {
+                                                                "id":  "1743055904561",
+                                                                "title":  "fixed lesson",
+                                                                "type":  "video",
+                                                                "duration":  "4:30",
+                                                                "file":  "/uploads/1743055904485-video.mp4"
+                                                            }
+                                                        ]
+                                        }
+                                    ],
+                        "featured":  false,
+                        "status":  "draft",
+                        "courseLanguage":  "English"
+                    },
+                    {
+                        "id":  "1743159420560",
+                        "title":  "abcd423434@",
+                        "description":  "fgfdsfgdszd",
+                        "category":  "fdff",
+                        "price":  132,
+                        "instructorId":  "2",
+                        "instructor":  "Jane",
+                        "thumbnail":  "/uploads/1743159420531-IMG_20250324_235113.jpg",
+                        "rating":  0,
+                        "students":  0,
+                        "createdAt":  "2025-03-28T10:57:00.560Z",
+                        "updatedAt":  "2025-03-28T10:57:00.560Z",
+                        "modules":  [
+
+                                    ],
+                        "featured":  false,
+                        "courseLanguage":  "English"
+                    },
+                    {
+                        "instructorId":  "2",
+                        "id":  "101",
+                        "instructor":  "Jane Smith",
+                        "courseLanguage":  "Hindi",
+                        "modules":  [
+
+                                    ],
+                        "title":  "Hindi Programming Basics",
+                        "category":  "Programming",
+                        "students":  10,
+                        "price":  29.99,
+                        "description":  "Learn programming fundamentals in Hindi language",
+                        "thumbnail":  "/img/courses/img1.png",
+                        "featured":  false,
+                        "rating":  4.5,
+                        "createdAt":  "2024-01-01",
+                        "updatedAt":  "2024-01-01"
+                    },
+                    {
+                        "instructorId":  "2",
+                        "id":  "102",
+                        "instructor":  "Jane Smith",
+                        "courseLanguage":  "Marathi",
+                        "modules":  [
+
+                                    ],
+                        "title":  "Marathi Web Development",
+                        "category":  "Web Development",
+                        "students":  15,
+                        "price":  39.99,
+                        "description":  "Complete web development course in Marathi",
+                        "thumbnail":  "/img/courses/img1.png",
+                        "featured":  false,
+                        "rating":  4.6,
+                        "createdAt":  "2024-01-01",
+                        "updatedAt":  "2024-01-01"
+                    },
+                    {
+                        "instructorId":  "2",
+                        "id":  "103",
+                        "instructor":  "Jane Smith",
+                        "courseLanguage":  "Telugu",
+                        "modules":  [
+
+                                    ],
+                        "title":  "Telugu Data Science",
+                        "category":  "Data Science",
+                        "students":  8,
+                        "price":  49.99,
+                        "description":  "Data Science fundamentals in Telugu language",
+                        "thumbnail":  "/img/courses/img1.png",
+                        "featured":  false,
+                        "rating":  4.7,
+                        "createdAt":  "2024-01-01",
+                        "updatedAt":  "2024-01-01"
+                    }
+                ],
+    "progress":  [
+                     {
+                         "userId":  "3",
+                         "courseId":  "1",
+                         "progress":  72,
+                         "completedLessons":  [
+                                                  "l1",
+                                                  "l2",
+                                                  "l3",
+                                                  "l4",
+                                                  "l5",
+                                                  "l6",
+                                                  "l7",
+                                                  "l8",
+                                                  "l9",
+                                                  "l10",
+                                                  "l14",
+                                                  "l15",
+                                                  "l13"
+                                              ]
+                     },
+                     {
+                         "userId":  "3",
+                         "courseId":  "2",
+                         "progress":  44,
+                         "completedLessons":  [
+                                                  "l1",
+                                                  "l2",
+                                                  "l3",
+                                                  "l4"
+                                              ]
+                     },
+                     {
+                         "userId":  "5",
+                         "courseId":  "1",
+                         "progress":  28,
+                         "completedLessons":  [
+                                                  "l1",
+                                                  "l2",
+                                                  "l3",
+                                                  "l4",
+                                                  "l5"
+                                              ]
+                     },
+                     {
+                         "userId":  "3",
+                         "courseId":  "4",
+                         "progress":  22,
+                         "completedLessons":  [
+                                                  "l1",
+                                                  "l2"
+                                              ]
+                     },
+                     {
+                         "userId":  "1",
+                         "courseId":  "2",
+                         "progress":  0,
+                         "completedLessons":  [
+
+                                              ]
+                     },
+                     {
+                         "userId":  "3",
+                         "courseId":  "3",
+                         "progress":  0,
+                         "completedLessons":  [
+
+                                              ]
+                     },
+                     {
+                         "userId":  "2",
+                         "courseId":  "4",
+                         "progress":  0,
+                         "completedLessons":  [
+
+                                              ]
+                     },
+                     {
+                         "userId":  "5",
+                         "courseId":  "4",
+                         "progress":  0,
+                         "completedLessons":  [
+
+                                              ]
+                     },
+                     {
+                         "userId":  "3",
+                         "courseId":  "4",
+                         "progress":  0,
+                         "completedLessons":  [
+
+                                              ]
+                     },
+                     {
+                         "userId":  "1",
+                         "courseId":  "3",
+                         "progress":  0,
+                         "completedLessons":  [
+
+                                              ]
+                     },
+                     {
+                         "userId":  "2",
+                         "courseId":  "1",
+                         "progress":  0,
+                         "completedLessons":  [
+
+                                              ]
+                     },
+                     {
+                         "userId":  "3",
+                         "courseId":  "1742791944339",
+                         "progress":  100,
+                         "completedLessons":  [
+                                                  "1743055507288",
+                                                  "1743055904561"
+                                              ]
+                     },
+                     {
+                         "userId":  "3",
+                         "courseId":  "3",
+                         "progress":  0,
+                         "completedLessons":  [
+
+                                              ]
+                     },
+                     {
+                         "userId":  "1742892188159",
+                         "courseId":  "3",
+                         "progress":  0,
+                         "completedLessons":  [
+
+                                              ]
+                     },
+                     {
+                         "userId":  "1742892188159",
+                         "courseId":  "1",
+                         "progress":  0,
+                         "completedLessons":  [
+
+                                              ]
+                     },
+                     {
+                         "userId":  "1742892188159",
+                         "courseId":  "2",
+                         "progress":  0,
+                         "completedLessons":  [
+
+                                              ]
+                     },
+                     {
+                         "userId":  "1743012921322",
+                         "courseId":  "4",
+                         "progress":  22,
+                         "completedLessons":  [
+                                                  "l1",
+                                                  "l2"
+                                              ]
+                     },
+                     {
+                         "userId":  "1743012921322",
+                         "courseId":  "1742791944339",
+                         "progress":  0,
+                         "completedLessons":  [
+
+                                              ]
+                     },
+                     {
+                         "userId":  "1743012921322",
+                         "courseId":  "2",
+                         "progress":  0,
+                         "completedLessons":  [
+
+                                              ]
+                     },
+                     {
+                         "userId":  "1743013290791",
+                         "courseId":  "4",
+                         "progress":  22,
+                         "completedLessons":  [
+                                                  "l1",
+                                                  "l2"
+                                              ]
+                     },
+                     {
+                         "userId":  "2",
+                         "courseId":  "1743013827800",
+                         "progress":  0,
+                         "completedLessons":  [
+
+                                              ]
+                     },
+                     {
+                         "userId":  "1742922014299",
+                         "courseId":  "3",
+                         "progress":  100,
+                         "completedLessons":  [
+                                                  "l3",
+                                                  "l4",
+                                                  "l1",
+                                                  "l5",
+                                                  "l6",
+                                                  "l7",
+                                                  "l9",
+                                                  "l2",
+                                                  "l8"
+                                              ]
+                     },
+                     {
+                         "userId":  "1742922014299",
+                         "courseId":  "4",
+                         "progress":  22,
+                         "completedLessons":  [
+                                                  "l1",
+                                                  "l2"
+                                              ]
+                     },
+                     {
+                         "userId":  "1742922014299",
+                         "courseId":  "2",
+                         "progress":  22,
+                         "completedLessons":  [
+                                                  "l1",
+                                                  "l2"
+                                              ]
+                     },
+                     {
+                         "userId":  "1743008553287",
+                         "courseId":  "4",
+                         "progress":  22,
+                         "completedLessons":  [
+                                                  "l1",
+                                                  "l2"
+                                              ]
+                     },
+                     {
+                         "userId":  "4",
+                         "courseId":  "1742791944339",
+                         "progress":  150,
+                         "completedLessons":  [
+                                                  "1743055320322",
+                                                  "1743055507288",
+                                                  "1743055904561"
+                                              ]
+                     },
+                     {
+                         "userId":  "1742927895805",
+                         "courseId":  "1742791944339",
+                         "progress":  100,
+                         "completedLessons":  [
+                                                  "1743055507288",
+                                                  "1743055904561"
+                                              ]
+                     },
+                     {
+                         "userId":  "3",
+                         "courseId":  "1742791944339",
+                         "progress":  0,
+                         "completedLessons":  [
+
+                                              ]
+                     },
+                     {
+                         "userId":  "2",
+                         "courseId":  "1742791944339",
+                         "progress":  0,
+                         "completedLessons":  [
+
+                                              ]
+                     }
+                 ],
+    "carts":  [
+                  {
+                      "userId":  "5",
+                      "items":  [
+                                    {
+                                        "courseId":  "3",
+                                        "addedAt":  "2025-03-25T08:28:15.690Z"
+                                    }
+                                ]
+                  }
+              ],
+    "orders":  [
+                   {
+                       "id":  "1",
+                       "userId":  "3",
+                       "courseId":  "1",
+                       "amount":  89.99,
+                       "paymentMethod":  "credit_card",
+                       "status":  "completed",
+                       "createdAt":  "2023-02-05"
+                   },
+                   {
+                       "id":  "2",
+                       "userId":  "3",
+                       "courseId":  "2",
+                       "amount":  69.99,
+                       "paymentMethod":  "paypal",
+                       "status":  "completed",
+                       "createdAt":  "2023-03-10"
+                   },
+                   {
+                       "id":  "3",
+                       "userId":  "5",
+                       "courseId":  "1",
+                       "amount":  89.99,
+                       "paymentMethod":  "credit_card",
+                       "status":  "completed",
+                       "createdAt":  "2023-03-15"
+                   },
+                   {
+                       "id":  "1741890969986",
+                       "userId":  "3",
+                       "courseId":  "4",
+                       "amount":  74.99,
+                       "paymentMethod":  "credit_card",
+                       "status":  "completed",
+                       "createdAt":  "2025-03-13T18:36:09.986Z"
+                   },
+                   {
+                       "id":  "1741890969990",
+                       "userId":  "3",
+                       "courseId":  "3",
+                       "amount":  79.99,
+                       "paymentMethod":  "credit_card",
+                       "status":  "completed",
+                       "createdAt":  "2025-03-13T18:36:09.990Z"
+                   },
+                   {
+                       "id":  "1742890331439",
+                       "userId":  "3",
+                       "courseId":  "1742791944339",
+                       "amount":  400,
+                       "paymentMethod":  "credit_card",
+                       "status":  "completed",
+                       "createdAt":  "2025-03-25T08:12:11.439Z"
+                   },
+                   {
+                       "id":  "1742892540798",
+                       "userId":  "1742892188159",
+                       "courseId":  "1",
+                       "amount":  89.99,
+                       "paymentMethod":  "credit_card",
+                       "status":  "completed",
+                       "createdAt":  "2025-03-25T08:49:00.798Z"
+                   },
+                   {
+                       "id":  "1742892603365",
+                       "userId":  "1742892188159",
+                       "courseId":  "2",
+                       "amount":  69.99,
+                       "paymentMethod":  "credit_card",
+                       "status":  "completed",
+                       "createdAt":  "2025-03-25T08:50:03.365Z"
+                   },
+                   {
+                       "id":  "1743012929746",
+                       "userId":  "1743012921322",
+                       "courseId":  "4",
+                       "amount":  74.99,
+                       "paymentMethod":  "credit_card",
+                       "status":  "completed",
+                       "createdAt":  "2025-03-26T18:15:29.746Z"
+                   },
+                   {
+                       "id":  "1743013109464",
+                       "userId":  "1743012921322",
+                       "courseId":  "2",
+                       "amount":  69.99,
+                       "paymentMethod":  "credit_card",
+                       "status":  "completed",
+                       "createdAt":  "2025-03-26T18:18:29.464Z"
+                   },
+                   {
+                       "id":  "1743005510522",
+                       "userId":  "1742922014299",
+                       "courseId":  "4",
+                       "amount":  74.99,
+                       "paymentMethod":  "paypal",
+                       "status":  "completed",
+                       "createdAt":  "2025-03-26T16:11:50.522Z"
+                   },
+                   {
+                       "id":  "1743064605199",
+                       "userId":  "1742927895805",
+                       "courseId":  "1742791944339",
+                       "amount":  400,
+                       "paymentMethod":  "credit_card",
+                       "status":  "completed",
+                       "createdAt":  "2025-03-27T08:36:45.199Z"
+                   },
+                   {
+                       "id":  "1743073259354",
+                       "userId":  "3",
+                       "courseId":  "1742791944339",
+                       "amount":  40,
+                       "paymentMethod":  "credit_card",
+                       "status":  "completed",
+                       "createdAt":  "2025-03-27T11:00:59.354Z"
+                   },
+                   {
+                       "id":  "1743159472031",
+                       "userId":  "2",
+                       "courseId":  "1742791944339",
+                       "amount":  40,
+                       "paymentMethod":  "credit_card",
+                       "status":  "completed",
+                       "createdAt":  "2025-03-28T10:57:52.031Z"
+                   }
+               ]
 }
