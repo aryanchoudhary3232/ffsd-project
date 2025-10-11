@@ -222,15 +222,17 @@ const CourseModel = {
   // Search courses
   searchCourses: async (query) => {
     const { courses } = getCollections();
-    const searchLower = query.toLowerCase();
+
+    // Create a regex that matches the start of the word (case-insensitive)
+    const regex = new RegExp(`^${query}`, "i");
 
     return await courses
       .find({
         $or: [
-          { title: { $regex: searchLower, $options: "i" } },
-          { instructor: { $regex: searchLower, $options: "i" } },
-          { category: { $regex: searchLower, $options: "i" } },
-          { description: { $regex: searchLower, $options: "i" } },
+          { title: regex },
+          { instructor: regex },
+          { category: regex },
+          { description: regex },
         ],
       })
       .toArray();

@@ -7,7 +7,7 @@ const CommentModel = require("../models/comment.model");
 const CourseController = {
   // Get all courses
   getAllCourses: async (req, res) => {
-    const { search, category, language, sort } = req.query;
+    const { search, category, language, sort, ajax } = req.query;
 
     try {
       let courses;
@@ -62,6 +62,14 @@ const CourseController = {
 
       const categories = await CourseModel.getAllCategories();
       const languages = await CourseModel.getAllLanguages();
+
+      if (ajax) {
+        // render only the course cards
+        return res.render("courses/course-cards", { courses, search }, (err, html) => {
+          if (err) return res.status(500).send("Error rendering courses");
+          res.send(html);
+        });
+      }
 
       res.render("courses/index", {
         courses,
