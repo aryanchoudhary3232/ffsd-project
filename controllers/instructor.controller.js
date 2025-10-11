@@ -622,6 +622,8 @@ const InstructorController = {
   },
 
   updateLesson: (req, res) => {
+        console.log('.........updateLesson')
+
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
@@ -714,6 +716,7 @@ const InstructorController = {
       } catch (error) {
         console.error("Update Lesson error:", error);
         const errorMsg = error.message || "Error updating lesson";
+        console.log('.........', errorMsg)
         if (req.xhr || req.headers.accept.includes("json")) {
           return res.status(500).json({ success: false, message: errorMsg });
         }
