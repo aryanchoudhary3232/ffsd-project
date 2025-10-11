@@ -11,7 +11,7 @@
         <a href="/cart" class="nav-link relative flex items-center">
         Cart
         <span
-          id="cart-count"
+          id="cart-count-desktop"
           class="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full hidden"
         >0</span>
       </a>
@@ -51,15 +51,13 @@
       >Profile</a
     >
     <% if (user.role === 'student'){ %>
-    <a href="/cart" class="nav-link relative flex items-center">
-    Cart
-    <span
-      id="cart-count"
-      class="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full hidden"
-    >
-      0
-    </span>
-  </a>
+    <a href="/cart" class="flex items-center py-2 px-4 hover:bg-gray-600 text-white">
+  Cart
+  <span
+    id="cart-count-mobile"
+    class="ml-2 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full hidden"
+  >0</span>
+</a>
     <% } else { %> <% } %>
     <a
       href="/logout"
@@ -83,47 +81,40 @@
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    const menuButton = document.getElementById("mobile-menu-button");
+  const menuButton = document.getElementById("mobile-menu-button");
+  const mobileMenu = document.getElementById("mobile-menu");
+  const cartCount = document.getElementById("cart-count");
 
-    const mobileMenu = document.getElementById("mobile-menu");
-
-    menuButton.addEventListener("click", function () {
-      mobileMenu.classList.toggle("hidden");
-    });
+  menuButton.addEventListener("click", () => {
+    mobileMenu.classList.toggle("hidden");
   });
 
+  async function updateCartCount() {
+  try {
+    const res = await fetch("/cart/count");
+    if (!res.ok) throw new Error("Network error");
+    const data = await res.json();
+    const count = data.count || 0;
 
-  document.addEventListener("DOMContentLoaded", function () {
-    const menuButton = document.getElementById("mobile-menu-button");
-    const mobileMenu = document.getElementById("mobile-menu");
-    const cartCount = document.getElementById("cart-count");
+    const desktopCount = document.getElementById("cart-count-desktop");
+    const mobileCount = document.getElementById("cart-count-mobile");
 
-    // Toggle menu
-    menuButton.addEventListener("click", () => {
-      mobileMenu.classList.toggle("hidden");
-    });
-
-    // Fetch cart count asynchronously (Dynamic + Fetch)
-    async function updateCartCount() {
-      try {
-        const res = await fetch("/cart/count");
-        if (!res.ok) throw new Error("Network error");
-        const data = await res.json();
-        const count = data.count || 0;
-        if (count > 0) {
-          cartCount.textContent = count;
-          cartCount.classList.remove("hidden");
-        } else {
-          cartCount.classList.add("hidden");
-        }
-      } catch (err) {
-        console.error("Cart count fetch failed:", err);
-      }
+    if (count > 0) {
+      desktopCount.textContent = count;
+      mobileCount.textContent = count;
+      desktopCount.classList.remove("hidden");
+      mobileCount.classList.remove("hidden");
+    } else {
+      desktopCount.classList.add("hidden");
+      mobileCount.classList.add("hidden");
     }
+  } catch (err) {
+    console.error("Cart count fetch failed:", err);
+  }
+}
 
-    updateCartCount();
-    // Optional: refresh every 30s
-    setInterval(updateCartCount, 30000);
-  });
+  updateCartCount();
+  setInterval(updateCartCount, 30000);
+});
 
 </script>
