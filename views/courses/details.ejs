@@ -334,15 +334,13 @@
               <i class="fas fa-list mr-2"></i> Manage Courses
             </a>
             <% } else if (user) { %>
-            <form action="/cart/add" method="POST">
-              <input type="hidden" name="courseId" value="<%= course._id %>" />
-              <button
-                type="submit"
-                class="block w-full text-center bg-white border border-primary text-primary py-3 px-4 rounded-md hover:bg-gray-50 transition-colors mb-3"
-              >
-                Add to Cart
-              </button>
-            </form>
+            <button
+              id="add-to-cart-btn"
+              data-course-id="<%= course._id %>"
+              class="block w-full text-center bg-white border border-primary text-primary py-3 px-4 rounded-md hover:bg-gray-50 transition-colors mb-3"
+            >
+              Add to Cart
+            </button>
             <% } else { %>
             <a
               href="/login"
@@ -574,6 +572,35 @@
     }
     return stars;
   }
+
+
+  $(document).ready(function () {
+  $('#add-to-cart-btn').click(async function () {
+    const courseId = $(this).data('course-id');
+    try {
+      const res = await $.ajax({
+        url: '/cart/add',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ courseId }),
+        dataType: 'json'
+      });
+
+      if (res.success) {
+        const cartCount = $('#cart-count');
+        cartCount.text(res.cartCount);
+        cartCount.removeClass('hidden');
+        // Redirect to cart page
+        window.location.href = '/cart';
+      } else {
+        alert(res.message || 'Failed to add course to cart.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error adding course to cart.');
+    }
+  });
+});
 </script>
 </body>
 </html>

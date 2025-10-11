@@ -8,7 +8,13 @@
         <a href="/dashboard" class="nav-link ">Dashboard</a>
         <a href="/user/profile" class="nav-link ">Profile</a>
         <% if (user.role === 'student'){ %>
-        <a href="/cart" class="nav-link ">Cart</a>
+        <a href="/cart" class="nav-link relative flex items-center">
+        Cart
+        <span
+          id="cart-count"
+          class="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full hidden"
+        >0</span>
+      </a>
         <% } else { %> <% } %>
         <a href="/logout" class="nav-link ">Logout</a>
 
@@ -45,9 +51,15 @@
       >Profile</a
     >
     <% if (user.role === 'student'){ %>
-    <a href="/cart" class="block py-2 px-4 text-sm hover:bg-gray-600 text-white"
-      >Cart</a
+    <a href="/cart" class="nav-link relative flex items-center">
+    Cart
+    <span
+      id="cart-count"
+      class="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full hidden"
     >
+      0
+    </span>
+  </a>
     <% } else { %> <% } %>
     <a
       href="/logout"
@@ -79,4 +91,39 @@
       mobileMenu.classList.toggle("hidden");
     });
   });
+
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const menuButton = document.getElementById("mobile-menu-button");
+    const mobileMenu = document.getElementById("mobile-menu");
+    const cartCount = document.getElementById("cart-count");
+
+    // Toggle menu
+    menuButton.addEventListener("click", () => {
+      mobileMenu.classList.toggle("hidden");
+    });
+
+    // Fetch cart count asynchronously (Dynamic + Fetch)
+    async function updateCartCount() {
+      try {
+        const res = await fetch("/cart/count");
+        if (!res.ok) throw new Error("Network error");
+        const data = await res.json();
+        const count = data.count || 0;
+        if (count > 0) {
+          cartCount.textContent = count;
+          cartCount.classList.remove("hidden");
+        } else {
+          cartCount.classList.add("hidden");
+        }
+      } catch (err) {
+        console.error("Cart count fetch failed:", err);
+      }
+    }
+
+    updateCartCount();
+    // Optional: refresh every 30s
+    setInterval(updateCartCount, 30000);
+  });
+
 </script>

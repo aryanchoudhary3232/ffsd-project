@@ -96,6 +96,20 @@ const CartController = {
     }
   },
 
+
+  getCartCount: async (req, res) => {
+    try {
+      const userId = req.session.user.id;
+      const cart = await CartModel.getCart(userId);
+      const count = (cart.items && cart.items.length) || 0;
+      res.json({ count });
+    } catch (err) {
+      console.error("Error in getCartCount:", err);
+      res.status(500).json({ count: 0, error: "Failed to fetch cart count" });
+    }
+  },
+
+
   // Remove from cart
   removeFromCart: async (req, res) => {
     if (!req.session.user) {

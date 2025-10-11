@@ -9,8 +9,13 @@ router.get("/", isAuthenticated, CartController.getCart);
 // Add to cart
 router.post("/add", isAuthenticated, CartController.addToCart);
 
+// Get cart count (for navbar badge)
+router.get("/count", isAuthenticated, CartController.getCartCount);
+
+
 // Remove from cart
 router.post("/remove", isAuthenticated, CartController.removeFromCart);
+
 
 // Checkout
 router.get("/checkout", isAuthenticated, CartController.getCheckout);
