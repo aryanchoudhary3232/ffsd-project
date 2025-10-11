@@ -80,41 +80,60 @@
 </nav>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
+  // Mobile menu toggle
   const menuButton = document.getElementById("mobile-menu-button");
   const mobileMenu = document.getElementById("mobile-menu");
-  const cartCount = document.getElementById("cart-count");
-
   menuButton.addEventListener("click", () => {
     mobileMenu.classList.toggle("hidden");
   });
 
+  // Update cart count
   async function updateCartCount() {
-  try {
-    const res = await fetch("/cart/count");
-    if (!res.ok) throw new Error("Network error");
-    const data = await res.json();
-    const count = data.count || 0;
+    try {
+      const res = await fetch("/cart/count");
+      if (!res.ok) throw new Error("Network error");
+      const data = await res.json();
+      const count = data.count || 0;
+      const desktopCount = document.getElementById("cart-count-desktop");
+      const mobileCount = document.getElementById("cart-count-mobile");
 
-    const desktopCount = document.getElementById("cart-count-desktop");
-    const mobileCount = document.getElementById("cart-count-mobile");
-
-    if (count > 0) {
-      desktopCount.textContent = count;
-      mobileCount.textContent = count;
-      desktopCount.classList.remove("hidden");
-      mobileCount.classList.remove("hidden");
-    } else {
-      desktopCount.classList.add("hidden");
-      mobileCount.classList.add("hidden");
+      if (count > 0) {
+        desktopCount.textContent = count;
+        mobileCount.textContent = count;
+        desktopCount.classList.remove("hidden");
+        mobileCount.classList.remove("hidden");
+      } else {
+        desktopCount.classList.add("hidden");
+        mobileCount.classList.add("hidden");
+      }
+    } catch (err) {
+      console.error("Cart count fetch failed:", err);
     }
-  } catch (err) {
-    console.error("Cart count fetch failed:", err);
   }
-}
-
   updateCartCount();
   setInterval(updateCartCount, 30000);
+
+    // Highlight active tab (desktop + mobile)
+  const currentPath = window.location.pathname;
+
+  // Desktop links
+  const desktopLinks = document.querySelectorAll("nav > div > div.flex a.nav-link");
+  desktopLinks.forEach(link => {
+    link.classList.remove("bg-gray-700", "rounded", "px-2", "text-white"); // remove active classes
+    if (link.getAttribute("href") === currentPath) {
+      link.classList.add("bg-gray-700", "rounded", "px-2", "text-white"); // add only to active
+    }
+  });
+
+  // Mobile links
+  const mobileLinks = document.querySelectorAll("#mobile-menu a");
+  mobileLinks.forEach(link => {
+    link.classList.remove("bg-gray-700", "rounded", "px-2", "text-white"); // remove active classes
+    if (link.getAttribute("href") === currentPath) {
+      link.classList.add("bg-gray-700", "rounded", "px-2", "text-white"); // add only to active
+    }
+  });
 });
 
 </script>
