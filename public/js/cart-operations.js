@@ -41,19 +41,6 @@ $(document).ready(function() {
               </div>
             `);
           });
-        } else {
-          cartItemsContainer.append(`
-            <div class="bg-gray-800 rounded-lg shadow-md p-8 text-center w-full">
-              <div class="text-gray-500 mb-4">
-                <i class="fas fa-shopping-cart text-6xl"></i>
-              </div>
-              <h2 class="text-xl font-bold mb-2">Your cart is empty</h2>
-              <p class="text-gray-500 mb-6">Looks like you haven't added any courses yet.</p>
-              <a href="/courses" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors">
-                Browse Courses
-              </a>
-            </div>
-          `);
         }
 
         // Update totals
