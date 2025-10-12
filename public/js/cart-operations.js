@@ -111,6 +111,7 @@ $(document).ready(function() {
       success: function(data) {
         if (data.success) {
           refreshCartUI();
+          if (window.updateCartCount) window.updateCartCount();
         } else {
           alert(data.message || 'Failed to remove course from cart');
         }

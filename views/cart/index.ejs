@@ -48,7 +48,7 @@
                     <div class="text-xl font-bold">₹<%= item.course.price.toFixed(2) %></div>
                     <form action="/cart/remove" method="POST" class="mt-2 remove-from-cart-form">
                       <input type="hidden" name="courseId" value="<%= item.course._id %>">
-                      <button type="submit" class="text-red-400 hover:text-red-600">
+                      <button class="remove-from-cart-btn" type="submit" class="text-red-400 hover:text-red-600">
                         <i class="fas fa-trash-alt mr-1"></i> Remove
                       </button>
                     </form>
@@ -113,5 +113,42 @@
   <%- include('../partials/scripts') %>
   
   <!-- No need for inline script anymore as it's been moved to cart-operations.js -->
+
+  <script>
+$(document).ready(function () {
+  $(document).on('submit', '.remove-from-cart-form', async function (e) {
+    e.preventDefault();
+    const form = $(this);
+    const courseId = form.find('input[name="courseId"]').val();
+    const submitButton = form.find('button[type="submit"]');
+    const originalText = submitButton.text();
+    submitButton.prop('disabled', true).text('Removing...');
+
+    try {
+      const res = await $.ajax({
+        url: '/cart/remove',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ courseId }),
+        dataType: 'json'
+      });
+
+      if (res.success) {
+        if (window.updateCartCount) window.updateCartCount();
+        // Optionally, remove the item from DOM or refresh UI
+        window.location.reload(); // Or call a function to refresh cart UI without reload
+      } else {
+        alert(res.message || 'Failed to remove course from cart.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error removing course from cart.');
+    } finally {
+      submitButton.prop('disabled', false).text(originalText);
+    }
+  });
+});
+</script>
+
 </body>
 </html>
