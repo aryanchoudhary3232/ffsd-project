@@ -66,7 +66,7 @@ router.get(
   AdminController.getCourseDetails
 );
 router.get(
-  "/courses/:id/edit-course",
+  "/courses/:id/edit",
   isAuthenticated,
   isAdmin,
   AdminController.getEditCourseForm

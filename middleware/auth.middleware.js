@@ -20,10 +20,8 @@ const isAdmin = (req, res, next) => {
 
 // Instructor middleware
 const isInstructor = (req, res, next) => {
-  console.log(".........isInstructor");
 
   if (req.session.user && req.session.user.role === "instructor") {
-  console.log(".........isInstructor next");
 
     return next();
   }

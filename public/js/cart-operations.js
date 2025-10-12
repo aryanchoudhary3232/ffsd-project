@@ -1,7 +1,16 @@
 $(document).ready(function() {
+  
+  // Don't run cart operations on the learning page
+  if (window.isLearningPage) {
+    return;
+  }
 
   // === Refresh Cart UI ===
   function refreshCartUI() {
+    // Only run cart operations on cart pages - use specific cart container IDs
+    const cartItemsContainer = $('#cart-items-list');
+    if (cartItemsContainer.length === 0) return; // Exit if not on cart page
+    
     $.ajax({
       url: '/cart',
       method: 'GET',
@@ -9,7 +18,6 @@ $(document).ready(function() {
       success: function(data) {
         if (!data.success) return;
 
-        const cartItemsContainer = $('.divide-y.divide-gray-700');
         cartItemsContainer.empty();
 
         if (data.cartItems.length > 0) {
@@ -44,11 +52,11 @@ $(document).ready(function() {
         }
 
         // Update totals
-        $('.md\\:w-1\\/3 .font-bold.text-lg.pt-2 span:last-child').text(`$${data.total.toFixed(2)}`);
-        $('.md\\:w-1\\/3 .flex.justify-between span:last-child').first().text(`$${data.total.toFixed(2)}`);
+        $('#order-original-price').text(`$${data.total.toFixed(2)}`);
+        $('#order-total-price').text(`$${data.total.toFixed(2)}`);
 
         // Update cart count
-        $('.text-lg.font-semibold').first().text(`${data.cartItems.length} Course${data.cartItems.length !== 1 ? 's' : ''} in Cart`);
+        $('#cart-items-heading').text(`${data.cartItems.length} Course${data.cartItems.length !== 1 ? 's' : ''} in Cart`);
       }
     });
   }
