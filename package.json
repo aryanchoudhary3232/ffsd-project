@@ -23,6 +23,7 @@
     "fs": "latest",
     "gsap": "latest",
     "method-override": "latest",
+    "mongodb": "^6.20.0",
     "mongoose": "^8.13.2",
     "multer": "latest",
     "nodemon": "^3.1.10",

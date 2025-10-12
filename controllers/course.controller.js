@@ -163,6 +163,15 @@ const CourseController = {
         return res.redirect("/courses");
       }
 
+      console.log('Course found:', course.title);
+      console.log('Course has modules:', course.modules ? 'Yes' : 'No');
+      if (course.modules) {
+        console.log('Number of modules:', course.modules.length);
+        course.modules.forEach((module, idx) => {
+          console.log(`Module ${idx + 1}:`, module.title, 'Lessons:', module.lessons ? module.lessons.length : 0);
+        });
+      }
+
       // Check if enrolled
       if (!user.enrolledCourses || !user.enrolledCourses.some(
         (enrolledCourseId) => enrolledCourseId.toString() === courseId

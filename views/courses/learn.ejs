@@ -28,66 +28,76 @@
 
     <div class="flex flex-1 overflow-hidden relative">
       <!-- Sidebar -->
-      <div id="sidebar" class="hidden md:block md:relative md:w-80 bg-gray-800 border-r border-gray-700 overflow-y-auto h-full md:h-auto">
+      <div id="sidebar" class="md:relative md:w-80 bg-gray-800 border-r border-gray-700 overflow-y-auto h-full md:h-auto fixed z-50 w-3/4 left-0 top-0 -translate-x-full md:translate-x-0 transition-transform duration-300">
         <div class="p-4 border-b border-gray-700">
           <h2 class="font-bold text-lg">Course Content</h2>
           <div class="flex items-center text-sm text-gray-400 mt-1">
-            <span><%= course.modules.length %> modules • </span>
-            <span><%= course.modules.reduce((total, m) => total + m.lessons.length, 0) %> lessons • </span>
-            <span><%= completedLessons.length %> completed</span>
+            <span><%= course.modules && course.modules.length ? course.modules.length : 0 %> modules • </span>
+            <span><%= course.modules ? course.modules.reduce((total, m) => total + (m.lessons ? m.lessons.length : 0), 0) : 0 %> lessons • </span>
+            <span><%= completedLessons ? completedLessons.length : 0 %> completed</span>
           </div>
         </div>
 
         <div class="divide-y divide-gray-700">
-          <% course.modules.forEach(function(module, moduleIndex) { %>
-          <div class="p-4">
-            <div class="flex justify-between items-center mb-2">
-              <h3 class="font-semibold"><%= module.title %></h3>
-              <% 
-                const totalLessons = module.lessons.length;
-                const completedModuleLessons = module.lessons.filter(lesson => 
-                  completedLessons.includes(lesson._id || lesson.id)
-                ).length;
-                const isModuleCompleted = totalLessons === completedModuleLessons && totalLessons > 0;
-              %>
-              <% if (isModuleCompleted) { %>
-              <span class="text-green-400 text-sm">
-                <i class="fas fa-check-circle"></i> Completed
-              </span>
-              <% } else if (completedModuleLessons > 0) { %>
-              <span class="text-purple-400 text-sm">
-                <%= completedModuleLessons %>/<%= totalLessons %>
-              </span>
-              <% } %>
-            </div>
-            <div class="space-y-2 pl-2">
-              <% module.lessons.forEach(function(lesson) { %>
-              <a 
-                href="/courses/<%= course._id %>/learn?lesson=<%= lesson._id || lesson.id %>" 
-                class="flex items-center p-2 rounded-md <%= (currentLesson._id || currentLesson.id) === (lesson._id || lesson.id) ? 'bg-purple-700 text-purple-200' : 'hover:bg-gray-700' %>"
-              >
-                <% if (completedLessons.includes(lesson._id || lesson.id)) { %>
-                <i class="fas fa-check-circle text-green-400 mr-2"></i>
-                <% } else if (lesson.type === 'video') { %>
-                <i class="fas fa-play-circle text-gray-400 mr-2"></i>
-                <% } else if (lesson.type === 'pdf') { %>
-                <i class="fas fa-file-pdf text-red-400 mr-2"></i>
-                <% } else if (lesson.type === 'quiz') { %>
-                <i class="fas fa-question-circle text-purple-400 mr-2"></i>
-                <% } else { %>
-                <i class="fas fa-file-alt text-gray-400 mr-2"></i>
-                <% } %>
-                <span class="<%= currentLesson._id === lesson._id ? 'font-medium' : '' %>">
-                  <%= lesson.title %>
+          <% if (course.modules && course.modules.length > 0) { %>
+            <% course.modules.forEach(function(module, moduleIndex) { %>
+            <div class="p-4">
+              <div class="flex justify-between items-center mb-2">
+                <h3 class="font-semibold"><%= module.title %></h3>
+                <% 
+                  const totalLessons = module.lessons ? module.lessons.length : 0;
+                  const completedModuleLessons = module.lessons ? module.lessons.filter(lesson => 
+                    completedLessons.includes(lesson._id || lesson.id)
+                  ).length : 0;
+                  const isModuleCompleted = totalLessons === completedModuleLessons && totalLessons > 0;
+                %>
+                <% if (isModuleCompleted) { %>
+                <span class="text-green-400 text-sm">
+                  <i class="fas fa-check-circle"></i> Completed
                 </span>
-                <% if (lesson.duration) { %>
-                <span class="ml-auto text-xs text-gray-400"><%= lesson.duration %></span>
+                <% } else if (completedModuleLessons > 0) { %>
+                <span class="text-purple-400 text-sm">
+                  <%= completedModuleLessons %>/<%= totalLessons %>
+                </span>
                 <% } %>
-              </a>
-              <% }); %>
+              </div>
+              <div class="space-y-2 pl-2">
+                <% if (module.lessons && module.lessons.length > 0) { %>
+                  <% module.lessons.forEach(function(lesson) { %>
+                  <a 
+                    href="/courses/<%= course._id %>/learn?lesson=<%= lesson._id || lesson.id %>" 
+                    class="flex items-center p-2 rounded-md <%= (currentLesson._id || currentLesson.id) === (lesson._id || lesson.id) ? 'bg-purple-700 text-purple-200' : 'hover:bg-gray-700' %>"
+                  >
+                    <% if (completedLessons.includes(lesson._id || lesson.id)) { %>
+                    <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                    <% } else if (lesson.type === 'video') { %>
+                    <i class="fas fa-play-circle text-gray-400 mr-2"></i>
+                    <% } else if (lesson.type === 'pdf') { %>
+                    <i class="fas fa-file-pdf text-red-400 mr-2"></i>
+                    <% } else if (lesson.type === 'quiz') { %>
+                    <i class="fas fa-question-circle text-purple-400 mr-2"></i>
+                    <% } else { %>
+                    <i class="fas fa-file-alt text-gray-400 mr-2"></i>
+                    <% } %>
+                    <span class="<%= currentLesson._id === lesson._id ? 'font-medium' : '' %>">
+                      <%= lesson.title %>
+                    </span>
+                    <% if (lesson.duration) { %>
+                    <span class="ml-auto text-xs text-gray-400"><%= lesson.duration %></span>
+                    <% } %>
+                  </a>
+                  <% }); %>
+                <% } else { %>
+                  <p class="text-gray-400 text-sm">No lessons in this module</p>
+                <% } %>
+              </div>
             </div>
-          </div>
-          <% }); %>
+            <% }); %>
+          <% } else { %>
+            <div class="p-4 text-center text-gray-400">
+              <p>No course content available yet.</p>
+            </div>
+          <% } %>
         </div>
       </div>
 
@@ -191,11 +201,18 @@
               let prevLesson = null;
               let nextLesson = null;
               const allLessons = [];
-              course.modules.forEach(module => {
-                module.lessons.forEach(lesson => {
-                  allLessons.push(lesson);
+              
+              // Safely collect all lessons
+              if (course.modules && course.modules.length > 0) {
+                course.modules.forEach(module => {
+                  if (module.lessons && module.lessons.length > 0) {
+                    module.lessons.forEach(lesson => {
+                      allLessons.push(lesson);
+                    });
+                  }
                 });
-              });
+              }
+              
               const currentLessonId = currentLesson._id || currentLesson.id;
               const currentIndex = allLessons.findIndex(l => (l._id || l.id) === currentLessonId);
               if (currentIndex > 0) {
@@ -278,6 +295,9 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   
   <script>
+    // Prevent cart operations from running on the learning page
+    window.isLearningPage = true;
+    
     // Determine the correct lesson ID (prefer _id, fallback to id)
     const lessonIdentifier = '<%= typeof currentLesson._id !== "undefined" ? currentLesson._id : currentLesson.id %>';
     // Clean the identifier if it's an ObjectId string representation like {"$oid":"..."} 
@@ -307,9 +327,17 @@
       $('#sidebar-toggle').on('click', function() {
         const $sidebar = $('#sidebar');
         const $overlay = $('#sidebar-overlay');
-        $sidebar.toggleClass('hidden fixed z-50 w-3/4 left-0 top-0 h-full');
-        $overlay.toggleClass('hidden');
-        $('body').toggleClass('overflow-hidden');
+        
+        // Toggle sidebar visibility with transform
+        if ($sidebar.hasClass('-translate-x-full')) {
+          $sidebar.removeClass('-translate-x-full');
+          $overlay.removeClass('hidden');
+          $('body').addClass('overflow-hidden');
+        } else {
+          $sidebar.addClass('-translate-x-full');
+          $overlay.addClass('hidden');
+          $('body').removeClass('overflow-hidden');
+        }
       });
 
       $('#sidebar-overlay').on('click', function() {
@@ -385,22 +413,16 @@
             
             showToast('Lesson marked as complete!', 'success');
             
-            // Check if there's a next lesson button and ask user if they want to continue
-            const $nextLessonBtn = $('a[href*="/learn?lesson="]').filter(function() {
-              return $(this).text().includes('Next Lesson');
-            });
+            // Check if there's a next lesson button
+            const $nextLessonBtn = $('a:contains("Next Lesson")').last();
             
             if ($nextLessonBtn.length > 0) {
-              // Show option to continue to next lesson
+              // Automatically navigate to next lesson after a short delay
               setTimeout(() => {
-                if (confirm('Great job! Would you like to continue to the next lesson?')) {
-                  window.location.href = $nextLessonBtn.attr('href');
-                } else {
-                  window.location.reload();
-                }
-              }, 1000);
+                window.location.href = $nextLessonBtn.attr('href');
+              }, 1500);
             } else {
-              // No next lesson, just reload
+              // No next lesson, reload to show completion state
               setTimeout(() => { window.location.reload(); }, 1500);
             }
           } else {
