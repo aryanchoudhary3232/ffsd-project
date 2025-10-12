@@ -1,0 +1,230 @@
+commit e4672f2ed82a8cdf3a029dcae5bc242068517570
+Merge: cc2386f 75b7038
+Author:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+AuthorDate: Fri Oct 10 22:00:09 2025 +0530
+Commit:     GitHub <noreply@github.com>
+CommitDate: Fri Oct 10 22:00:09 2025 +0530
+
+    Merge pull request #27 from aryanchoudhary3232/Arunkibranch
+    
+    admin edit user form validation updated code
+
+commit e7ed87f43aa294f292a363632b41574f92f1d5d4
+Merge: cdd4a57 e2343ef
+Author:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+AuthorDate: Tue May 6 00:05:56 2025 +0530
+Commit:     GitHub <noreply@github.com>
+CommitDate: Tue May 6 00:05:56 2025 +0530
+
+    Merge pull request #18 from aryanchoudhary3232/newbranch
+    
+    Newbranch with all fixes, being added to main
+
+commit e2343efa4fef8b5b694bd5b3e51ca97ceb92afe3
+Merge: e46ad42 ecb5a8c
+Author:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+AuthorDate: Tue May 6 00:03:16 2025 +0530
+Commit:     GitHub <noreply@github.com>
+CommitDate: Tue May 6 00:03:16 2025 +0530
+
+    Merge pull request #17 from aryanchoudhary3232/anchal
+    
+    Merge pull request #15 from aryanchoudhary3232/newbranch
+
+commit bedb5f5b0c7f79d1612585fbd347b03efeb950e2
+Merge: e089b7c ee06345
+Author:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+AuthorDate: Tue Mar 25 21:17:27 2025 +0530
+Commit:     GitHub <noreply@github.com>
+CommitDate: Tue Mar 25 21:17:27 2025 +0530
+
+    Merge pull request #4 from aryanchoudhary3232/arun_fixed
+    
+    admin added
+
+commit e089b7ce901604f470f9460d4e0bf2e1bfbf6041
+Merge: 351cad7 06565c1
+Author:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+AuthorDate: Tue Mar 25 03:13:42 2025 +0530
+Commit:     GitHub <noreply@github.com>
+CommitDate: Tue Mar 25 03:13:42 2025 +0530
+
+    Merge pull request #3 from aryanchoudhary3232/sqlite5
+    
+    Sqlite5
+
+commit 23cccdd097c22c30cc6c78191ccd43f0cb0d95fb
+Merge: bfe00a5 657bce7
+Author:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+AuthorDate: Mon Mar 24 14:39:07 2025 +0000
+Commit:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+CommitDate: Mon Mar 24 14:39:07 2025 +0000
+
+    Merge remote-tracking branch 'origin/fixed_footer' into sqlite5
+
+commit bfe00a56709a73050bba19ef1772aed254d5ab3b
+Merge: 86bdaac 52e0024
+Author:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+AuthorDate: Mon Mar 24 14:37:55 2025 +0000
+Commit:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+CommitDate: Mon Mar 24 14:37:55 2025 +0000
+
+    Merge remote-tracking branch 'origin/admin_fixed' into sqlite5
+
+commit 86bdaac2b66e97676ff987dac2c58ae0b23ec572
+Author:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+AuthorDate: Mon Mar 24 14:36:52 2025 +0000
+Commit:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+CommitDate: Mon Mar 24 14:36:52 2025 +0000
+
+    Update user progress and completed lessons in data.json; implement comment posting functionality in learn.ejs
+
+ data/data.json          | 15 +++++++--
+ views/courses/learn.ejs | 81 +++++++++++++++++++++++++++++++++++++++++++++++--
+ 2 files changed, 90 insertions(+), 6 deletions(-)
+
+commit 2e3fcf347b9434cac1a25da822c15ae2fe6cf40c
+Author:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+AuthorDate: Mon Mar 24 11:45:35 2025 +0000
+Commit:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+CommitDate: Mon Mar 24 11:45:35 2025 +0000
+
+    Update progress for user 3 and add new completed lesson in data.json
+
+ data/data.json          |   5 ++-
+ views/courses/learn.ejs | 110 ++++++++++++++++++++++++------------------------
+ 2 files changed, 58 insertions(+), 57 deletions(-)
+
+commit bf6ef8a538f6dd353d32a7660461d9f3aa749241
+Author:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+AuthorDate: Mon Mar 24 11:36:38 2025 +0000
+Commit:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+CommitDate: Mon Mar 24 11:36:38 2025 +0000
+
+    Add devcontainer configuration and update video file paths in data.json
+
+ data/data.json          |  80 ++++++++++++++++++++++++------------------------
+ public/video/video1.mp4 | Bin 0 -> 8426635 bytes
+ public/video/video2.mp4 | Bin 0 -> 3455785 bytes
+ public/video/video3.mp4 | Bin 0 -> 4514189 bytes
+ public/video/video4.mp4 | Bin 0 -> 14897168 bytes
+ 5 files changed, 40 insertions(+), 40 deletions(-)
+
+commit 7788c74090884b6e9f109660b164a3f05c8a3779
+Author:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+AuthorDate: Mon Mar 24 11:17:14 2025 +0000
+Commit:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+CommitDate: Mon Mar 24 11:17:14 2025 +0000
+
+    video playback issue fixed
+
+ data/data.json | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit e618e542d6fd5baf70c47d8ddafd833a1ea5ce71
+Author:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+AuthorDate: Mon Mar 24 11:14:01 2025 +0000
+Commit:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+CommitDate: Mon Mar 24 11:14:01 2025 +0000
+
+    Fix video controls in learn.ejs and update video file paths in data.json
+    
+    videos are still not playing
+
+ data/data.json          |   4 ++--
+ public/video/video.mp4  | Bin 0 -> 4010424 bytes
+ views/courses/learn.ejs |   2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 36275027cda7deabc862a4e04d94a4682b8ac9da
+Author:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+AuthorDate: Mon Mar 24 10:55:03 2025 +0000
+Commit:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+CommitDate: Mon Mar 24 10:55:03 2025 +0000
+
+    learn.ejs fixed but colours are incorrect
+
+ data/data.json          |  14 +-
+ views/courses/learn.ejs | 418 +++++++++++++++++++++++++-----------------------
+ 2 files changed, 225 insertions(+), 207 deletions(-)
+
+commit 0f6fa090f10fe0636b043eadb74dd48ac817f4d3
+Author:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+AuthorDate: Mon Mar 24 10:02:53 2025 +0000
+Commit:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+CommitDate: Mon Mar 24 10:02:53 2025 +0000
+
+    Update course data: remove completed courses and add new course entry
+
+ data/data.json                                     |  26 ++-
+ ... 22-50-34 Checkout - GameSir Official Store.png | Bin 0 -> 151517 bytes
+ views/instructor/course-content.ejs                | 202 +++++++++++----------
+ 3 files changed, 130 insertions(+), 98 deletions(-)
+
+commit 9d37b1cbb2deb011cf98ac21e7da853f1f1b5666
+Author:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+AuthorDate: Sun Mar 23 11:20:47 2025 +0000
+Commit:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+CommitDate: Sun Mar 23 11:20:47 2025 +0000
+
+    Refactor server start script, update main entry point, and enhance user profile update functionality
+
+ controllers/admin.controller.js |  75 ++++++-----
+ controllers/user.controller.js  |   8 +-
+ data/data.json                  | 283 ++++++++++++++++++++++++----------------
+ package-lock.json               | 238 ++++++++++++++++++---------------
+ package.json                    |   5 +-
+ routes/user.routes.js           |  46 ++++++-
+ views/admin/course-details.ejs  |   4 +-
+ views/admin/edit-course.ejs     | 119 +++++++++++++++++
+ views/admin/user-details.ejs    |   3 +-
+ 9 files changed, 526 insertions(+), 255 deletions(-)
+
+commit c7fbe0c72469357044fc491a6f118f51bc95b09b
+Merge: 38eedaf 1bacfd3
+Author:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+AuthorDate: Sun Mar 23 08:44:13 2025 +0000
+Commit:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+CommitDate: Sun Mar 23 08:44:13 2025 +0000
+
+    Merge remote-tracking branch 'origin/aryan' into sqlite2
+
+commit 38eedaf47e15935cb7ee079c576be82ffbf77084
+Merge: 1ed1152 a41a75d
+Author:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+AuthorDate: Sun Mar 23 08:41:53 2025 +0000
+Commit:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+CommitDate: Sun Mar 23 08:41:53 2025 +0000
+
+    Merge remote-tracking branch 'origin/profile_fixed' into sqlite2
+
+commit 1ed115250fd5334a738024c319f1397d971ee992
+Author:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+AuthorDate: Sun Mar 16 19:46:13 2025 +0000
+Commit:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+CommitDate: Sun Mar 16 19:46:13 2025 +0000
+
+    refactor cart functionality and add cart operations script
+
+ data/data.json               | 16 ++++++++++---
+ public/js/cart-operations.js | 56 ++++++++++++++++++++++++++++++++++++++++++++
+ views/cart/index.ejs         |  4 +++-
+ views/partials/scripts.ejs   |  3 +++
+ 4 files changed, 75 insertions(+), 4 deletions(-)
+
+commit b20197ef422234191247e83c922c6b8875f91861
+Author:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+AuthorDate: Sun Mar 16 18:55:37 2025 +0000
+Commit:     Anchal <155175388+Anchal-T@users.noreply.github.com>
+CommitDate: Sun Mar 16 18:55:37 2025 +0000
+
+    implement user authentication with signup, signin, and logout functionality using sqlite
+
+ app.js             |   33 ++
+ config/database.js |   38 ++
+ models/User.js     |   58 +++
+ package-lock.json  | 1427 ++++++++++++++++++++++++++++++++++++++++++++++++----
+ package.json       |    3 +-
+ public/js/auth.js  |   78 +++
+ routes/auth.js     |   81 +++
+ 7 files changed, 1608 insertions(+), 110 deletions(-)
