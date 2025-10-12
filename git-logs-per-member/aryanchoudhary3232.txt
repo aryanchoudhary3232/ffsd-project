@@ -1,0 +1,272 @@
+commit ca7139a60f6fb307c9caa566087522431196b025
+Merge: c23859a fd97375
+Author:     AryanC <160155837+aryanchoudhary3232@users.noreply.github.com>
+AuthorDate: Sat Oct 11 19:02:18 2025 +0530
+Commit:     GitHub <noreply@github.com>
+CommitDate: Sat Oct 11 19:02:18 2025 +0530
+
+    Merge pull request #29 from aryanchoudhary3232/aryan_latest
+    
+    cart operation error fixed
+
+commit fd97375c6854df0db9c12da979ae7f34bb1ef059
+Author:     Aryan Choudhary <aryanchoudhary3232@gmail.com>
+AuthorDate: Sat Oct 11 19:01:17 2025 +0530
+Commit:     Aryan Choudhary <aryanchoudhary3232@gmail.com>
+CommitDate: Sat Oct 11 19:01:17 2025 +0530
+
+    cart operation error fixed
+
+ controllers/instructor.controller.js |  3 +++
+ middleware/auth.middleware.js        | 37 ++++++++++++++++++++++--------------
+ views/instructor/course-content.ejs  |  2 +-
+ views/partials/scripts.ejs           |  1 +
+ 4 files changed, 28 insertions(+), 15 deletions(-)
+
+commit 33a1f17625a8bce22a21ab0df173aab1534cc2a6
+Author:     Aryan <aryanchoudhary3232@gmail.com>
+AuthorDate: Sun Sep 7 15:20:19 2025 +0530
+Commit:     Aryan <aryanchoudhary3232@gmail.com>
+CommitDate: Sun Sep 7 15:20:19 2025 +0530
+
+    ajax implemented
+
+ public/js/cart-operations.js |  67 +++--
+ views/courses/details.ejs    | 667 +++++++++++++++++++++++--------------------
+ views/courses/learn.ejs      | 299 +++++++++----------
+ views/partials/navbar.ejs    |   8 +-
+ 4 files changed, 541 insertions(+), 500 deletions(-)
+
+commit e46ad427c5a5dd8cadb5914fa44a227305676e02
+Merge: d3a6bdc a4f5b53
+Author:     Aryan Choudhary <aryanchoudhary3232@gmail.com>
+AuthorDate: Mon May 5 23:55:38 2025 +0530
+Commit:     Aryan Choudhary <aryanchoudhary3232@gmail.com>
+CommitDate: Mon May 5 23:55:38 2025 +0530
+
+    Merge branch 'newbranch' of https://github.com/aryanchoudhary3232/ffsd-project into newbranch
+
+commit a4f5b53c7ee1004f2e7fe8c417734885c3361f6c
+Merge: 687bc1f ca7fd2f
+Author:     AryanC <160155837+aryanchoudhary3232@users.noreply.github.com>
+AuthorDate: Mon May 5 23:57:49 2025 +0530
+Commit:     GitHub <noreply@github.com>
+CommitDate: Mon May 5 23:57:49 2025 +0530
+
+    Merge pull request #16 from aryanchoudhary3232/abcd
+    
+    Abcd
+
+commit ca7fd2f46d452ffdabb0c9c14661adbdd1ee81c0
+Merge: eef8e8a 687bc1f
+Author:     AryanC <160155837+aryanchoudhary3232@users.noreply.github.com>
+AuthorDate: Mon May 5 23:57:15 2025 +0530
+Commit:     GitHub <noreply@github.com>
+CommitDate: Mon May 5 23:57:15 2025 +0530
+
+    Merge branch 'newbranch' into abcd
+
+commit d3a6bdc0d28dee9985c59a8e5d4c578b1adc650a
+Author:     Aryan Choudhary <aryanchoudhary3232@gmail.com>
+AuthorDate: Mon May 5 23:55:25 2025 +0530
+Commit:     Aryan Choudhary <aryanchoudhary3232@gmail.com>
+CommitDate: Mon May 5 23:55:25 2025 +0530
+
+    grsgsrg
+
+ .../1746467846684-Screenshot 2025-04-29 111357.png    | Bin 0 -> 454228 bytes
+ public/uploads/1746467918796-video.mp4                | Bin 0 -> 4010424 bytes
+ public/uploads/1746467945883-video1.mp4               | Bin 0 -> 8426635 bytes
+ public/uploads/1746468013722-video2.mp4               | Bin 0 -> 3455785 bytes
+ 4 files changed, 0 insertions(+), 0 deletions(-)
+
+commit ecb5a8c0e3574bdb26d27f06ecba4fe5274d620b
+Merge: b03c326 687bc1f
+Author:     AryanC <160155837+aryanchoudhary3232@users.noreply.github.com>
+AuthorDate: Mon May 5 23:14:19 2025 +0530
+Commit:     GitHub <noreply@github.com>
+CommitDate: Mon May 5 23:14:19 2025 +0530
+
+    Merge pull request #15 from aryanchoudhary3232/newbranch
+    
+    fixed many things
+
+commit 687bc1ff1941aecc36506354c37a6df298abf3e8
+Author:     Aryan Choudhary <aryanchoudhary3232@gmail.com>
+AuthorDate: Mon May 5 23:07:37 2025 +0530
+Commit:     Aryan Choudhary <aryanchoudhary3232@gmail.com>
+CommitDate: Mon May 5 23:07:37 2025 +0530
+
+    fixed many things
+
+ views/cart/checkout.ejs | 75 ++++++++++++++++++++++++++++++++++++++++++++-----
+ 1 file changed, 68 insertions(+), 7 deletions(-)
+
+commit b03c3267eb6d6daadaec053684a0702f023fe45e
+Merge: 146e984 1aa7331
+Author:     AryanC <160155837+aryanchoudhary3232@users.noreply.github.com>
+AuthorDate: Mon May 5 22:37:32 2025 +0530
+Commit:     GitHub <noreply@github.com>
+CommitDate: Mon May 5 22:37:32 2025 +0530
+
+    Merge pull request #14 from aryanchoudhary3232/newbranch
+    
+    filter fixed, add to cart fixed in instructor
+
+commit 1aa73310b9be6dbff9e24e7a4d496359e15f79bc
+Author:     Aryan Choudhary <aryanchoudhary3232@gmail.com>
+AuthorDate: Mon May 5 22:32:04 2025 +0530
+Commit:     Aryan Choudhary <aryanchoudhary3232@gmail.com>
+CommitDate: Mon May 5 22:32:04 2025 +0530
+
+    filter fixed, add to cart fixed in instructor
+
+ controllers/course.controller.js                   |  10 +-
+ .../1746462180602-Screenshot 2025-04-29 022834.png | Bin 0 -> 418593 bytes
+ views/courses/details.ejs                          |  11 +-
+ views/courses/index.ejs                            |   4 +-
+ views/instructor/course-form.ejs                   | 226 ++++++++++++++++++++-
+ 5 files changed, 242 insertions(+), 9 deletions(-)
+
+commit ec2d8a18eb9d8e01d0575d6d685c7e14703a2fe6
+Merge: b70768f 3de4e7f
+Author:     AryanC <160155837+aryanchoudhary3232@users.noreply.github.com>
+AuthorDate: Mon May 5 00:29:06 2025 +0530
+Commit:     GitHub <noreply@github.com>
+CommitDate: Mon May 5 00:29:06 2025 +0530
+
+    Merge pull request #11 from aryanchoudhary3232/fullfixedadmin
+    
+    Fullfixedadmin
+
+commit b70768f18e48f751924703edf716ffaefed6d7c3
+Author:     Aryan Choudhary <aryanchoudhary3232@gmail.com>
+AuthorDate: Sun May 4 23:53:11 2025 +0530
+Commit:     Aryan Choudhary <aryanchoudhary3232@gmail.com>
+CommitDate: Sun May 4 23:53:11 2025 +0530
+
+    language option updated
+
+ config/database.js                                 |  23 +-
+ controllers/course.controller.js                   | 418 +++++++++++----------
+ controllers/instructor.controller.js               | 315 ++++++++++------
+ models/course.model.js                             |  14 +
+ package-lock.json                                  |   8 +-
+ package.json                                       |   2 +-
+ .../1746379646980-Screenshot 2025-04-28 101547.png | Bin 0 -> 341146 bytes
+ .../1746380226197-Screenshot 2025-04-28 101547.png | Bin 0 -> 341146 bytes
+ .../1746380973505-Screenshot 2025-04-28 101547.png | Bin 0 -> 341146 bytes
+ scripts/add-languages.js                           |  86 +++++
+ views/courses/details.ejs                          |   4 +
+ views/courses/index.ejs                            |  90 ++++-
+ views/instructor/course-content.ejs                |   1 +
+ views/instructor/course-form.ejs                   |  82 +++-
+ 14 files changed, 709 insertions(+), 334 deletions(-)
+
+commit 1bacfd337eee05f78afdcb9503f8fab2f518ef9e
+Author:     Aryan Choudhary <aryanchoudhary3232@gmail.com>
+AuthorDate: Sat Mar 22 10:37:15 2025 +0530
+Commit:     Aryan Choudhary <aryanchoudhary3232@gmail.com>
+CommitDate: Sat Mar 22 10:37:15 2025 +0530
+
+    video updated
+
+ data/data.json                                     |  36 +++++++++++++++++++--
+ .../uploads/1742234202316-IMG_20241203_153311.jpg  | Bin 0 -> 3832416 bytes
+ 2 files changed, 34 insertions(+), 2 deletions(-)
+
+commit c933bc166f3284d6db2c2b600ef2857da4af58dd
+Author:     Aryan Choudhary <aryanchoudhary3232@gmail.com>
+AuthorDate: Mon Mar 17 23:23:04 2025 +0530
+Commit:     Aryan Choudhary <aryanchoudhary3232@gmail.com>
+CommitDate: Mon Mar 17 23:23:04 2025 +0530
+
+    Add new images and update server port; refactor user and admin controllers for consistency
+
+ controllers/admin.controller.js                    |   4 +-
+ controllers/instructor.controller.js               | 290 ++++++++++++++--
+ controllers/user.controller.js                     |  99 +++---
+ data/data.json                                     | 235 ++++---------
+ .../uploads/1742197936268-IMG-20240816-WA0030.jpg  | Bin 0 -> 93024 bytes
+ .../uploads/1742232123306-IMG_20241203_145239.jpg  | Bin 0 -> 3726140 bytes
+ server.js                                          |   2 +-
+ views/instructor/course-content.ejs                | 386 ++++++++++++---------
+ 8 files changed, 614 insertions(+), 402 deletions(-)
+
+commit 351cad7df09483a17f604d246853d0f3c72a0d2e
+Merge: d27b1b6 b20197e
+Author:     AryanC <160155837+aryanchoudhary3232@users.noreply.github.com>
+AuthorDate: Mon Mar 17 23:22:19 2025 +0530
+Commit:     GitHub <noreply@github.com>
+CommitDate: Mon Mar 17 23:22:19 2025 +0530
+
+    Merge pull request #1 from aryanchoudhary3232/sqlite
+    
+    implement user authentication with signup, signin, and logout functio…
+
+commit ecd669aab5ee264e9a94902deeb632525706833e
+Author:     Aryan Choudhary <aryanchoudhary3232@gmail.com>
+AuthorDate: Fri Mar 14 00:19:26 2025 +0530
+Commit:     Aryan Choudhary <aryanchoudhary3232@gmail.com>
+CommitDate: Fri Mar 14 00:19:26 2025 +0530
+
+    first commit
+
+ .gitignore                           |   27 +
+ controllers/admin.controller.js      |  338 ++
+ controllers/auth.controller.js       |  143 +
+ controllers/cart.controller.js       |  125 +
+ controllers/course.controller.js     |  209 ++
+ controllers/instructor.controller.js |  412 +++
+ controllers/user.controller.js       |  121 +
+ data/data.json                       |  640 ++++
+ middleware/auth.middleware.js        |   33 +
+ models/cart.model.js                 |  116 +
+ models/course.model.js               |  225 ++
+ models/order.model.js                |  146 +
+ models/progress.model.js             |   95 +
+ models/user.model.js                 |  211 ++
+ package-lock.json                    | 6462 ++++++++++++++++++++++++++++++++++
+ package.json                         |   82 +
+ public/css/styles.css                |  208 ++
+ public/js/main.js                    |  157 +
+ public/placeholder-logo.png          |  Bin 0 -> 958 bytes
+ public/placeholder-logo.svg          |    1 +
+ public/placeholder-user.jpg          |  Bin 0 -> 2615 bytes
+ public/placeholder.jpg               |  Bin 0 -> 1596 bytes
+ public/placeholder.svg               |    1 +
+ routes/admin.routes.js               |   25 +
+ routes/auth.routes.js                |   20 +
+ routes/cart.routes.js                |   23 +
+ routes/course.routes.js              |   25 +
+ routes/instructor.routes.js          |   37 +
+ routes/user.routes.js                |   20 +
+ server.js                            |  120 +
+ views/admin/course-details.ejs       |  244 ++
+ views/admin/courses.ejs              |  213 ++
+ views/admin/dashboard.ejs            |  270 ++
+ views/admin/revenue.ejs              |  198 ++
+ views/admin/user-details.ejs         |  260 ++
+ views/admin/user-edit.ejs            |  164 +
+ views/admin/users.ejs                |  320 ++
+ views/auth/login.ejs                 |   48 +
+ views/auth/register.ejs              |   67 +
+ views/cart/checkout.ejs              |  158 +
+ views/cart/index.ejs                 |  115 +
+ views/courses/details.ejs            |  271 ++
+ views/courses/index.ejs              |  146 +
+ views/courses/learn.ejs              |  388 ++
+ views/dashboard/student.ejs          |  100 +
+ views/error.ejs                      |   27 +
+ views/index.ejs                      |  182 +
+ views/instructor/course-content.ejs  |  784 +++++
+ views/instructor/course-form.ejs     |  160 +
+ views/instructor/courses.ejs         |  170 +
+ views/instructor/dashboard.ejs       |  149 +
+ views/partials/Untitled-1.html       |   34 +
+ views/partials/footer.ejs            |   41 +
+ views/partials/head.ejs              |    7 +
+ views/partials/navbar.ejs            |   54 +
+ views/partials/scripts.ejs           |    4 +
+ views/user/profile.ejs               |  164 +
+ 57 files changed, 14760 insertions(+)
