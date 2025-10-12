@@ -232,31 +232,6 @@
           </div>
           
           <div class="flex flex-wrap justify-between items-center mb-8 gap-2">
-            <% 
-              let prevLesson = null;
-              let nextLesson = null;
-              const allLessons = [];
-              
-              // Safely collect all lessons
-              if (course.modules && course.modules.length > 0) {
-                course.modules.forEach(module => {
-                  if (module.lessons && module.lessons.length > 0) {
-                    module.lessons.forEach(lesson => {
-                      allLessons.push(lesson);
-                    });
-                  }
-                });
-              }
-              
-              const currentLessonId = currentLesson._id || currentLesson.id;
-              const currentIndex = allLessons.findIndex(l => (l._id || l.id) === currentLessonId);
-              if (currentIndex > 0) {
-                prevLesson = allLessons[currentIndex - 1];
-              }
-              if (currentIndex < allLessons.length - 1) {
-                nextLesson = allLessons[currentIndex + 1];
-              }
-            %>
             <% if (prevLesson) { %>
             <a 
               href="/courses/<%= courseId %>/learn?lesson=<%= getLessonId(prevLesson) %>" 
