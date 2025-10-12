@@ -160,7 +160,10 @@ const AdminController = {
         return res.redirect("/admin/users");
       }
 
-      res.render("admin/user-edit", { user });
+      // Get admin count to prevent removing the last admin
+      const adminCount = await User.countDocuments({ role: "admin" });
+
+      res.render("admin/user-edit", { user, adminCount });
     } catch (error) {
       console.error("Get Edit User Form error:", error);
       req.flash("error_msg", "Could not load user data.");
