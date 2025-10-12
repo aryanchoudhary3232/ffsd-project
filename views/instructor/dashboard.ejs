@@ -19,7 +19,7 @@
       </div>
       <div class="bg-gray-700 rounded-lg shadow-md p-6">
         <h2 class="text-lg font-semibold mb-2">Total Revenue</h2>
-        <p class="text-3xl font-bold">$<%= totalRevenue.toFixed(2) %></p>
+        <p class="text-3xl font-bold">₹<%= totalRevenue.toFixed(2) %></p>
       </div>
     </div>
     
@@ -55,7 +55,7 @@
                     <div class="text-sm text-gray-300"><%= course.students %></div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-300">$<%= (course.price * course.students).toFixed(2) %></div>
+                    <div class="text-sm text-gray-300">₹<%= (course.price * course.students).toFixed(2) %></div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex items-center">
@@ -118,7 +118,7 @@
                     <div class="text-sm text-gray-200"><%= order.courseTitle %></div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-200">$<%= order.amount.toFixed(2) %></div>
+                    <div class="text-sm text-gray-200">₹<%= order.amount.toFixed(2) %></div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm text-gray-300"><%= new Date(order.createdAt).toLocaleDateString() %></div>

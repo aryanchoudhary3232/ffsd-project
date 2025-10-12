@@ -31,7 +31,7 @@
                   <p class="text-sm text-gray-400">By <%= item.course.instructor %></p>
                 </div>
                 <div class="text-right">
-                  <div class="font-bold">$<%= item.course.price.toFixed(2) %></div>
+                  <div class="font-bold">₹<%= item.course.price.toFixed(2) %></div>
                 </div>
               </div>
             <% }); %>
@@ -115,11 +115,11 @@
           <div class="space-y-2 mb-4">
             <div class="flex justify-between">
               <span>Original Price:</span>
-              <span>$<%= total.toFixed(2) %></span>
+              <span>₹<%= total.toFixed(2) %></span>
             </div>
             <div class="flex justify-between font-bold text-lg pt-2 border-t border-gray-700">
               <span>Total:</span>
-              <span>$<%= total.toFixed(2) %></span>
+              <span>₹<%= total.toFixed(2) %></span>
             </div>
           </div>
           
