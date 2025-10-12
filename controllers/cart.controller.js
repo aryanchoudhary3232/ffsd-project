@@ -192,6 +192,31 @@ const CartController = {
     const userId = req.session.user.id;
     const { paymentMethod } = req.body;
 
+    // Validate payment details if credit card is selected
+    if (paymentMethod === 'credit_card') {
+      const { expiryDate } = req.body;
+      
+      // Validate expiry date format (MM/YYYY)
+      if (expiryDate) {
+        const expiryPattern = /^(0[1-9]|1[0-2])\/([0-9]{4})$/;
+        if (!expiryPattern.test(expiryDate)) {
+          req.flash("error_msg", "Invalid expiry date format. Please use MM/YYYY");
+          return res.redirect("/cart/checkout");
+        }
+        
+        // Check if card is not expired
+        const [month, year] = expiryDate.split('/');
+        const expiryDateObj = new Date(parseInt(year), parseInt(month) - 1);
+        const currentDate = new Date();
+        currentDate.setDate(1); // Set to first day of current month
+        
+        if (expiryDateObj < currentDate) {
+          req.flash("error_msg", "Card has expired. Please use a valid card");
+          return res.redirect("/cart/checkout");
+        }
+      }
+    }
+
     try {
         // Use CartModel.getCartWithCourses method
         const cartData = await CartModel.getCartWithCourses(userId);

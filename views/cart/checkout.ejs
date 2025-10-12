@@ -56,24 +56,25 @@
                   <div class="mt-4 pl-6 space-y-4">
                     <div>
                       <label for="card-number" class="block text-sm font-medium text-gray-300 mb-1">Card Number</label>
-                      <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19" pattern="[0-9]{4} [0-9]{4} [0-9]{4} [0-9]{4}" class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" onkeyup="formatCardNumber(this)">
+                      <input type="text" id="card-number" name="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" pattern="[0-9]{4} [0-9]{4} [0-9]{4} [0-9]{4}" class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" onkeyup="formatCardNumber(this)">
                       <p class="text-xs text-gray-400 mt-1">Enter 16 digits number</p>
                     </div>
                     
                     <div class="flex gap-4">
                       <div class="w-1/2">
                         <label for="expiry-date" class="block text-sm font-medium text-gray-300 mb-1">Expiry Date</label>
-                        <input type="month" id="expiry-date" class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" min="<%= new Date().toISOString().slice(0,7) %>">
+                        <input type="text" id="expiry-date" name="expiryDate" placeholder="MM/YYYY" maxlength="7" pattern="(0[1-9]|1[0-2])\/[0-9]{4}" class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" onkeyup="formatExpiryDate(this)" onkeypress="return onlyNumbersAndSlash(event)">
+                        <p class="text-xs text-gray-400 mt-1">Format: MM/YYYY</p>
                       </div>
                       <div class="w-1/2">
                         <label for="cvv" class="block text-sm font-medium text-gray-300 mb-1">CVV</label>
-                        <input type="text" id="cvv" placeholder="123" maxlength="3" pattern="[0-9]{3}" class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" onkeypress="return onlyNumbers(event)">
+                        <input type="text" id="cvv" name="cvv" placeholder="123" maxlength="3" pattern="[0-9]{3}" class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" onkeypress="return onlyNumbers(event)">
                       </div>
                     </div>
                     
                     <div>
                       <label for="card-name" class="block text-sm font-medium text-gray-300 mb-1">Name on Card</label>
-                      <input type="text" id="card-name" placeholder="John Doe" class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" onkeypress="return onlyAlphabets(event)" pattern="[A-Za-z ]+">
+                      <input type="text" id="card-name" name="cardName" placeholder="John Doe" class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" onkeypress="return onlyAlphabets(event)" pattern="[A-Za-z ]+">
                     </div>
                   </div>
                 </div>
@@ -149,17 +150,58 @@
   <%- include('../partials/scripts') %>
   <script>
     document.getElementById('checkout-form').addEventListener('submit', function(e) {
-      // In a real application, you would validate the form and process the payment.
-      // For demo purposes, we'll simply submit the form.
-      
-      // Uncomment the following line to prevent form submission for testing:
-      // e.preventDefault();
+      // Validate expiry date before submission
+      const expiryInput = document.getElementById('expiry-date');
+      if (expiryInput.value) {
+        const expiryPattern = /^(0[1-9]|1[0-2])\/([0-9]{4})$/;
+        if (!expiryPattern.test(expiryInput.value)) {
+          e.preventDefault();
+          alert('Please enter a valid expiry date in MM/YYYY format');
+          expiryInput.focus();
+          return false;
+        }
+        
+        // Check if the card is not expired
+        const [month, year] = expiryInput.value.split('/');
+        const expiryDate = new Date(parseInt(year), parseInt(month) - 1);
+        const currentDate = new Date();
+        currentDate.setDate(1); // Set to first day of current month for proper comparison
+        
+        if (expiryDate < currentDate) {
+          e.preventDefault();
+          alert('Card has expired. Please enter a valid expiry date');
+          expiryInput.focus();
+          return false;
+        }
+      }
       
       // Show loading state
       const submitButton = this.querySelector('button[type="submit"]');
       submitButton.disabled = true;
       submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
     });
+
+    // Format expiry date as MM/YYYY
+    function formatExpiryDate(input) {
+      let value = input.value.replace(/\D/g, ''); // Remove non-digits
+      
+      if (value.length >= 2) {
+        // Add slash after month
+        value = value.substring(0, 2) + '/' + value.substring(2, 6);
+      }
+      
+      input.value = value;
+    }
+
+    // Allow numbers and slash
+    function onlyNumbersAndSlash(e) {
+      const charCode = e.which ? e.which : e.keyCode;
+      // Allow numbers (48-57) and slash (47)
+      if ((charCode >= 48 && charCode <= 57) || charCode === 47) {
+        return true;
+      }
+      return false;
+    }
 
     // Format credit card number with spaces after every 4 digits
     function formatCardNumber(input) {
