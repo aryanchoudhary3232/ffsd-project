@@ -42,16 +42,23 @@ const AdminController = {
       // Since we don't have populate functionality, we need to manually fetch instructor data
       const recentCoursesWithInstructors = await Promise.all(
         recentCoursesData.map(async (course) => {
-          let instructor = null;
+          let instructorName = course.instructor; // Use existing instructor field first
+
+          // If no instructor field, try to fetch by instructorId
           if (
+            !instructorName &&
             course.instructorId &&
             AdminController.isValidObjectId(course.instructorId)
           ) {
-            instructor = await User.findById(course.instructorId);
+            const instructor = await User.findById(course.instructorId);
+            instructorName = instructor
+              ? instructor.username || instructor.name || instructor.email
+              : null;
           }
+
           return {
             ...course,
-            instructorId: instructor ? { name: instructor.username } : null,
+            instructor: instructorName || "Unknown Instructor",
           };
         })
       );
@@ -71,12 +78,7 @@ const AdminController = {
       }));
 
       // Since courses are already plain objects from our custom model, no need for toObject()
-      const recentCourses = recentCoursesWithInstructors.map((course) => ({
-        ...course,
-        instructor: course.instructorId
-          ? course.instructorId.username
-          : "Unknown Instructor",
-      }));
+      const recentCourses = recentCoursesWithInstructors;
 
       const userDistribution = {
         students: {
@@ -375,7 +377,9 @@ const AdminController = {
       }
 
       if (language !== "all") {
-        courses = courses.filter((course) => course.courseLanguage === language);
+        courses = courses.filter(
+          (course) => course.courseLanguage === language
+        );
       }
 
       // Apply sorting
@@ -539,8 +543,8 @@ const AdminController = {
       }
 
       // Ensure instructor is never undefined, provide default values if instructor not found
-      // idhar maine course  course.instructor add kiya hai 
-      // isko dekh lena 
+      // idhar maine course  course.instructor add kiya hai
+      // isko dekh lena
       const instructorName =
         instructor?.name ||
         instructor?.username ||
