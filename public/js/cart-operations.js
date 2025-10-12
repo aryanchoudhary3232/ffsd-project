@@ -38,7 +38,7 @@ $(document).ready(function() {
                   <p class="text-sm text-gray-500">Added on ${new Date(item.addedAt).toLocaleDateString()}</p>
                 </div>
                 <div class="md:w-1/4 flex flex-col justify-between items-end">
-                  <div class="text-xl font-bold">$${item.course.price.toFixed(2)}</div>
+                  <div class="text-xl font-bold">₹${item.course.price.toFixed(2)}</div>
                   <form action="/cart/remove" method="POST" class="mt-2 remove-from-cart-form">
                     <input type="hidden" name="courseId" value="${item.course._id}">
                     <button type="submit" class="text-red-400 hover:text-red-600">
@@ -52,8 +52,8 @@ $(document).ready(function() {
         }
 
         // Update totals
-        $('#order-original-price').text(`$${data.total.toFixed(2)}`);
-        $('#order-total-price').text(`$${data.total.toFixed(2)}`);
+        $('#order-original-price').text(`₹${data.total.toFixed(2)}`);
+        $('#order-total-price').text(`₹${data.total.toFixed(2)}`);
 
         // Update cart count
         $('#cart-items-heading').text(`${data.cartItems.length} Course${data.cartItems.length !== 1 ? 's' : ''} in Cart`);
