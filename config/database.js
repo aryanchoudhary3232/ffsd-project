@@ -9,7 +9,8 @@ if (!fs.existsSync(dataDir)) {
 }
 
 // MongoDB connection string with database name
-const mongoURI = "mongodb://localhost:27017/seekho-bharat";
+const mongoURI =
+  "mongodb+srv://aryan123:aryan123@cluster0.iodaduk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 // Connect to MongoDB
 mongoose

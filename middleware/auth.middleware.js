@@ -1,6 +1,5 @@
 // Authentication middleware
 const isAuthenticated = (req, res, next) => {
-  console.log(".........isAuthenticated");
 
   if (req.session.user) {
     console.log(".........isAuthenticated next");
@@ -24,10 +23,8 @@ const isAdmin = (req, res, next) => {
 
 // Instructor middleware
 const isInstructor = (req, res, next) => {
-  console.log(".........isInstructor");
 
   if (req.session.user && req.session.user.role === "instructor") {
-  console.log(".........isInstructor next");
 
     return next();
   }
