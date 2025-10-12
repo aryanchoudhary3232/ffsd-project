@@ -5,6 +5,8 @@ const {
   isAuthenticated,
   isInstructor,
 } = require("../middleware/auth.middleware");
+const multer = require("multer");
+const upload = multer({ dest: "public/uploads/" });
 
 // Instructor dashboard
 router.get(
@@ -41,6 +43,7 @@ router.get(
   "/courses/:id/edit",
   isAuthenticated,
   isInstructor,
+  upload.single("file"),
   InstructorController.getEditCourseForm
 );
 router.post(
