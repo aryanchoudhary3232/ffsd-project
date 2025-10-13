@@ -22,7 +22,99 @@ router.get(
   isAdmin,
   AdminController.getAdminDashboard
 );
+
+// API endpoint for dashboard data (for fetch requests)
+router.get(
+  "/api/dashboard",
+  isAuthenticated,
+  isAdmin,
+  AdminController.getDashboardAPI
+);
+
 router.get("/users", isAuthenticated, isAdmin, AdminController.getUsers);
+
+// API endpoint for users data (for fetch requests)
+router.get("/api/users", isAuthenticated, isAdmin, AdminController.getUsersAPI);
+
+// API endpoint for courses data (for fetch requests)
+router.get(
+  "/api/courses",
+  isAuthenticated,
+  isAdmin,
+  AdminController.getCoursesAPI
+);
+
+// API endpoint for course details (for fetch requests)
+router.get(
+  "/api/courses/:id/details",
+  isAuthenticated,
+  isAdmin,
+  AdminController.getCourseDetailsAPI
+);
+
+// API endpoint for course edit form data (for fetch requests)
+router.get(
+  "/api/courses/:id/edit",
+  isAuthenticated,
+  isAdmin,
+  AdminController.getEditCourseFormAPI
+);
+
+// API endpoint for new course form data (for fetch requests)
+router.get(
+  "/api/courses/new",
+  isAuthenticated,
+  isAdmin,
+  AdminController.getNewCourseFormAPI
+);
+
+// API endpoint for user details (for fetch requests)
+router.get(
+  "/api/users/:id",
+  isAuthenticated,
+  isAdmin,
+  AdminController.getUserDetailsAPI
+);
+
+// API endpoint for user edit form data (for fetch requests)
+router.get(
+  "/api/users/:id/edit",
+  isAuthenticated,
+  isAdmin,
+  AdminController.getEditUserFormAPI
+);
+
+// Admin profile routes
+router.get(
+  "/profile",
+  isAuthenticated,
+  isAdmin,
+  AdminController.getAdminProfile
+);
+
+// API endpoint for admin profile data (for fetch requests)
+router.get(
+  "/api/profile",
+  isAuthenticated,
+  isAdmin,
+  AdminController.getAdminProfileAPI
+);
+
+// Admin profile update route
+router.put(
+  "/profile",
+  isAuthenticated,
+  isAdmin,
+  AdminController.updateAdminProfile
+);
+
+// API endpoint for revenue data (for fetch requests)
+router.get(
+  "/api/revenue",
+  isAuthenticated,
+  isAdmin,
+  AdminController.getRevenueAPI
+);
 
 // Add new route for user details
 router.get(
