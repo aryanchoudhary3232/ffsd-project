@@ -224,7 +224,7 @@ const CourseModel = {
     const { courses } = getCollections();
 
     // Create a regex that matches the start of the word (case-insensitive)
-    const regex = new RegExp(`^${query}`, "i");
+    const regex = new RegExp(query, "i");
 
     return await courses
       .find({

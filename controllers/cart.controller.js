@@ -130,7 +130,7 @@ const CartController = {
         const result = await CartModel.removeFromCart(userId, courseId);
         
         // Check if it's an AJAX request
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        if (req.xhr || (req.headers.accept && req.headers.accept.includes('json'))) {
           // Get updated cart count
           const cart = await CartModel.getCartWithCourses(userId);
           const cartCount = cart.items.length;
@@ -144,7 +144,7 @@ const CartController = {
       console.error("Remove From Cart error:", error);
       
       // Check if it's an AJAX request
-      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+      if (req.xhr || (req.headers.accept && req.headers.accept.includes('json'))) {
         res.status(500).json({ success: false, message: error.message || "Error removing from cart" });
       } else {
         // Regular form submission - redirect with error message
