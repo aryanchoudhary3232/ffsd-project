@@ -10,7 +10,10 @@ router.get("/", CourseController.getAllCourses);
 // Filter and search courses (used by fetch)
 router.post("/filter", CourseController.filterCourses);
 
+// API endpoint for course details (JSON)
+router.get("/api/:id", CourseController.getCourseDetailsAPI);
 
+// Course details page (HTML render)
 router.get("/:id", CourseController.getCourseDetails);
 
 // Course Learning

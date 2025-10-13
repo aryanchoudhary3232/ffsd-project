@@ -110,15 +110,14 @@ function renderRecommendedCourses(courses) {
 
     courses.forEach(course => {
         const courseId = getCourseId(course);
-        const link = courseId ? `/courses/${courseId}` : '#';
-        grid.appendChild(createCourseCard(course, 'View Course', link));
+        grid.appendChild(createCourseCard(course, 'View Course', null, true));
     });
 
     container.innerHTML = '';
     container.appendChild(grid);
 }
 
-function createCourseCard(course, buttonText, buttonLink = null) {
+function createCourseCard(course, buttonText, buttonLink = null, useModal = false) {
     const card = document.createElement('div');
     card.className = 'bg-gray-800 text-white rounded-lg shadow-md overflow-hidden';
 
@@ -142,9 +141,15 @@ function createCourseCard(course, buttonText, buttonLink = null) {
                     </div>
                 </div>
             ` : ''}
-            <a href="${link}" class="block w-full text-center bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700 ${courseId ? '' : 'opacity-50 cursor-not-allowed'}" ${courseId ? '' : 'tabindex="-1" aria-disabled="true"'}>
-                ${buttonText}
-            </a>
+            ${useModal ? `
+                <button onclick="viewCourseDetails('${courseId}')" class="block w-full text-center bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700 ${courseId ? '' : 'opacity-50 cursor-not-allowed'}" ${courseId ? '' : 'disabled'}>
+                    ${buttonText}
+                </button>
+            ` : `
+                <a href="${link}" class="block w-full text-center bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700 ${courseId ? '' : 'opacity-50 cursor-not-allowed'}" ${courseId ? '' : 'tabindex="-1" aria-disabled="true"'}>
+                    ${buttonText}
+                </a>
+            `}
         </div>
     `;
 
@@ -174,3 +179,172 @@ function getCourseId(course) {
         return null;
     }
 }
+
+// View course details in modal using fetch
+async function viewCourseDetails(courseId) {
+    const modal = document.getElementById('course-details-modal');
+    const modalContent = document.getElementById('course-modal-content');
+    
+    // Show modal with loading state
+    modal.classList.remove('hidden');
+    modalContent.innerHTML = `
+        <div class="text-center py-8">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+            <p class="mt-2 text-gray-400">Loading course details...</p>
+        </div>
+    `;
+
+    try {
+        const response = await fetch(`/courses/api/${courseId}`);
+        
+        if (!response.ok) {
+            throw new Error('Failed to load course details');
+        }
+
+        const data = await response.json();
+        
+        if (data.success) {
+            displayCourseDetails(data);
+        } else {
+            throw new Error(data.message || 'Failed to load course details');
+        }
+    } catch (error) {
+        console.error('Error loading course details:', error);
+        modalContent.innerHTML = `
+            <div class="text-center py-8">
+                <i class="fas fa-exclamation-circle text-red-500 text-4xl mb-4"></i>
+                <p class="text-red-400">${error.message}</p>
+                <button onclick="closeCourseModal()" class="mt-4 bg-gray-700 text-white px-6 py-2 rounded-md hover:bg-gray-600">
+                    Close
+                </button>
+            </div>
+        `;
+    }
+}
+
+// Display course details in modal
+function displayCourseDetails(data) {
+    const { course, isEnrolled, progress } = data;
+    const modalContent = document.getElementById('course-modal-content');
+    
+    // Calculate module and lesson counts
+    const moduleCount = course.modules ? course.modules.length : 0;
+    const lessonCount = course.modules ? course.modules.reduce((total, module) => 
+        total + (module.lessons ? module.lessons.length : 0), 0) : 0;
+    const videoCount = course.modules ? course.modules.reduce((total, module) => 
+        total + (module.lessons ? module.lessons.filter(l => l.type === 'video').length : 0), 0) : 0;
+    const resourceCount = course.modules ? course.modules.reduce((total, module) => 
+        total + (module.lessons ? module.lessons.filter(l => l.type === 'pdf').length : 0), 0) : 0;
+    
+    modalContent.innerHTML = `
+        <div class="space-y-6">
+            <!-- Course Header -->
+            <div>
+                <img src="${course.thumbnail}" alt="${course.title}" class="w-full h-64 object-cover rounded-lg mb-4">
+                <h2 class="text-3xl font-bold mb-2">${course.title}</h2>
+                <p class="text-gray-400 mb-4">${course.description}</p>
+                <div class="flex items-center gap-4 text-sm text-gray-400">
+                    <span><i class="fas fa-user mr-1"></i>${course.instructor}</span>
+                    <span><i class="fas fa-users mr-1"></i>${course.students} students</span>
+                    <span><i class="fas fa-star text-yellow-500 mr-1"></i>${course.rating} rating</span>
+                    <span class="bg-blue-600 text-white px-2 py-1 rounded">${course.category}</span>
+                </div>
+            </div>
+
+            <!-- Course Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-gray-800 p-4 rounded-lg text-center">
+                    <i class="fas fa-book text-blue-500 text-2xl mb-2"></i>
+                    <p class="text-2xl font-bold">${moduleCount}</p>
+                    <p class="text-sm text-gray-400">Modules</p>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg text-center">
+                    <i class="fas fa-play-circle text-green-500 text-2xl mb-2"></i>
+                    <p class="text-2xl font-bold">${videoCount}</p>
+                    <p class="text-sm text-gray-400">Videos</p>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg text-center">
+                    <i class="fas fa-file-pdf text-red-500 text-2xl mb-2"></i>
+                    <p class="text-2xl font-bold">${resourceCount}</p>
+                    <p class="text-sm text-gray-400">Resources</p>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg text-center">
+                    <i class="fas fa-clock text-purple-500 text-2xl mb-2"></i>
+                    <p class="text-2xl font-bold">${lessonCount}</p>
+                    <p class="text-sm text-gray-400">Lessons</p>
+                </div>
+            </div>
+
+            <!-- Course Modules -->
+            <div>
+                <h3 class="text-xl font-bold mb-4">Course Content</h3>
+                <div class="space-y-2 max-h-96 overflow-y-auto">
+                    ${course.modules && course.modules.length > 0 ? course.modules.map((module, index) => `
+                        <div class="bg-gray-800 rounded-lg overflow-hidden">
+                            <button onclick="toggleModuleContent(${index})" class="w-full p-4 flex justify-between items-center hover:bg-gray-700 transition-colors">
+                                <h4 class="font-semibold text-left">${module.title}</h4>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm text-gray-400">${module.lessons ? module.lessons.length : 0} lessons</span>
+                                    <i class="fas fa-chevron-down module-icon-${index}"></i>
+                                </div>
+                            </button>
+                            <div class="hidden module-content-${index} p-4 pt-0 space-y-2">
+                                ${module.lessons && module.lessons.length > 0 ? module.lessons.map(lesson => `
+                                    <div class="flex items-center gap-2 text-sm text-gray-300 pl-4">
+                                        ${lesson.type === 'video' ? '<i class="fas fa-play-circle text-blue-500"></i>' : 
+                                          lesson.type === 'pdf' ? '<i class="fas fa-file-pdf text-red-500"></i>' : 
+                                          '<i class="fas fa-file-alt text-gray-500"></i>'}
+                                        <span>${lesson.title}</span>
+                                    </div>
+                                `).join('') : '<p class="text-sm text-gray-400 pl-4">No lessons yet</p>'}
+                            </div>
+                        </div>
+                    `).join('') : '<p class="text-gray-400">No modules added yet</p>'}
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-4">
+                ${isEnrolled ? `
+                    <a href="/courses/${course._id}/learn" class="flex-1 bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors text-center font-semibold">
+                        <i class="fas fa-play mr-2"></i>Continue Learning
+                    </a>
+                ` : `
+                    <a href="/courses/${course._id}" class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors text-center font-semibold">
+                        <i class="fas fa-info-circle mr-2"></i>View Full Details & Enroll
+                    </a>
+                `}
+                <button onclick="closeCourseModal()" class="bg-gray-700 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-colors font-semibold">
+                    Close
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+// Close course modal
+function closeCourseModal() {
+    const modal = document.getElementById('course-details-modal');
+    modal.classList.add('hidden');
+}
+
+// Toggle module content in modal
+function toggleModuleContent(index) {
+    const content = document.querySelector(`.module-content-${index}`);
+    const icon = document.querySelector(`.module-icon-${index}`);
+    
+    content.classList.toggle('hidden');
+    
+    if (content.classList.contains('hidden')) {
+        icon.classList.remove('fa-chevron-up');
+        icon.classList.add('fa-chevron-down');
+    } else {
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-up');
+    }
+}
+
+// Make functions globally accessible
+window.viewCourseDetails = viewCourseDetails;
+window.closeCourseModal = closeCourseModal;
+window.toggleModuleContent = toggleModuleContent;

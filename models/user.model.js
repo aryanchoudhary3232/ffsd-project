@@ -167,13 +167,37 @@ const UserModel = {
 
     const user = await usersCollection.findOne({ _id: userObjectId }, { projection: { enrolledCourses: 1 } });
 
+    console.log('getUserEnrolledCourses - User found:', user ? 'Yes' : 'No');
+    console.log('getUserEnrolledCourses - Enrolled courses:', user?.enrolledCourses);
+
     if (!user || !user.enrolledCourses || user.enrolledCourses.length === 0) {
+      console.log('getUserEnrolledCourses - No enrolled courses found');
       return [];
     }
 
-    const courses = await coursesCollection.find({ _id: { $in: user.enrolledCourses } }).toArray();
+    // Convert enrolledCourses strings to ObjectIds for MongoDB query
+    const enrolledCourseIds = user.enrolledCourses.map(id => {
+      try {
+        return new ObjectId(id);
+      } catch (error) {
+        console.error('Invalid course ID:', id);
+        return null;
+      }
+    }).filter(id => id !== null);
 
-    const progressRecords = await progressCollection.find({ userId: userObjectId, courseId: { $in: user.enrolledCourses } }).toArray();
+    console.log('getUserEnrolledCourses - Converted course IDs:', enrolledCourseIds);
+
+    if (enrolledCourseIds.length === 0) {
+      console.log('getUserEnrolledCourses - No valid course IDs');
+      return [];
+    }
+
+    const courses = await coursesCollection.find({ _id: { $in: enrolledCourseIds } }).toArray();
+    console.log('getUserEnrolledCourses - Courses found:', courses.length);
+
+    const progressRecords = await progressCollection.find({ userId: userObjectId, courseId: { $in: enrolledCourseIds } }).toArray();
+    console.log('getUserEnrolledCourses - Progress records found:', progressRecords.length);
+    
     const progressMap = progressRecords.reduce((map, p) => {
         map[p.courseId.toString()] = p;
         return map;
