@@ -1,6 +1,7 @@
 const User = require("../models/User");
-const Course = require("../models/course.model");
-const Progress = require("../models/progress.model");
+const UserModel = require("../models/user.model");
+const CourseModel = require("../models/course.model");
+const ProgressModel = require("../models/progress.model");
 const bcrypt = require("bcryptjs");
 
 const UserController = {
@@ -9,48 +10,40 @@ const UserController = {
       return res.redirect("/login");
     }
 
+    // Just render the view, data will be fetched via API
+    res.render("dashboard/student");
+  },
+
+  getStudentDashboardData: async (req, res) => {
+    if (!req.session.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
     try {
-        const userId = req.session.user.id;
-        // const userId = id;
-        const user = await User.findById(userId).populate('enrolledCourses');
-        
-        if (!user) {
-            req.flash("error_msg", "User not found");
-            return res.redirect("/login");
-        }
+      const userId = req.session.user.id;
 
-        const progressRecords = await Progress.find({ userId: userId });
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
 
-        const enrolledCoursesWithProgress = user.enrolledCourses.map(course => {
-            const progress = progressRecords.find(p => p.courseId.equals(course._id));
-            return {
-                ...course.toObject(),
-                progress: progress ? progress.progress : 0
-            };
-        });
+      const enrolledCoursesWithProgress = await UserModel.getUserEnrolledCourses(userId);
 
-        const overallProgress = progressRecords.length > 0
-            ? Math.round(progressRecords.reduce((sum, p) => sum + p.progress, 0) / progressRecords.length)
-            : 0;
-            
-        const progressStats = {
-            completedCourses: progressRecords.filter(p => p.progress === 100).length,
-            inProgressCourses: progressRecords.filter(p => p.progress > 0 && p.progress < 100).length,
-            averageProgress: overallProgress
-        };
+      const progressStats = await ProgressModel.getUserOverallProgress(userId);
 
-        const enrolledIds = user.enrolledCourses.map((course) => course._id);
-        const recommendedCourses = await Course.find({ _id: { $nin: enrolledIds } }).limit(3);
+      const enrolledIds = enrolledCoursesWithProgress
+        .map((course) => course && course._id)
+        .filter(Boolean);
+      const recommendedCourses = await CourseModel.getCoursesExcludingIds(enrolledIds, 3);
 
-        res.render("dashboard/student", {
-          enrolledCourses: enrolledCoursesWithProgress,
-          progress: progressStats,
-          recommendedCourses,
-        });
+      res.json({
+        enrolledCourses: enrolledCoursesWithProgress,
+        progress: progressStats,
+        recommendedCourses,
+      });
     } catch (error) {
-        console.error("Student Dashboard error:", error);
-        req.flash("error_msg", "Could not load dashboard.");
-        res.redirect('/');
+      console.error("Student Dashboard error:", error);
+      res.status(500).json({ error: "Could not load dashboard data" });
     }
   },
 

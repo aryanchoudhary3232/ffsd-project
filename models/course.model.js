@@ -10,12 +10,39 @@ const getCollections = () => {
   };
 };
 
+const toObjectId = (value) => {
+  if (!value) return null;
+
+  if (value instanceof ObjectId) {
+    return value;
+  }
+
+  const candidate = typeof value === "object" && typeof value.toString === "function"
+    ? value.toString()
+    : value;
+
+  if (typeof candidate === "string" && ObjectId.isValid(candidate)) {
+    return new ObjectId(candidate);
+  }
+  return null;
+};
+
 // Course model
 const CourseModel = {
   // Get all courses
   getAllCourses: async () => {
     const { courses } = getCollections();
     return await courses.find({}).toArray();
+  },
+
+  getCoursesExcludingIds: async (excludeIds = [], limit = 3) => {
+    const { courses } = getCollections();
+    const normalizedIds = excludeIds
+      .map((id) => toObjectId(id))
+      .filter((id) => id !== null);
+
+    const query = normalizedIds.length > 0 ? { _id: { $nin: normalizedIds } } : {};
+    return await courses.find(query).limit(limit).toArray();
   },
 
   // Get course by ID
