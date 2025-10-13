@@ -127,18 +127,6 @@ app.get("/api/featured-courses", async (req, res) => {
   }
 });
 
-// API endpoint for featured courses
-app.get("/api/featured-courses", async (req, res) => {
-  try {
-    const CourseModel = require("./models/course.model");
-    const featuredCourses = await CourseModel.getFeaturedCourses();
-    res.json({ success: true, courses: featuredCourses });
-  } catch (error) {
-    console.error("Error fetching featured courses:", error);
-    res.status(500).json({ success: false, message: "Error loading courses" });
-  }
-});
-
 // About Us Page
 app.get("/about", (req, res) => {
   res.render("about_us");
