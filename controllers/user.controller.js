@@ -10,7 +10,6 @@ const UserController = {
       return res.redirect("/login");
     }
 
-    // Just render the view, data will be fetched via API
     res.render("dashboard/student");
   },
 
@@ -27,9 +26,13 @@ const UserController = {
         return res.status(404).json({ error: "User not found" });
       }
 
+      console.log('Dashboard - User enrolled courses:', user.enrolledCourses);
+
       const enrolledCoursesWithProgress = await UserModel.getUserEnrolledCourses(userId);
+      console.log('Dashboard - Courses with progress:', enrolledCoursesWithProgress.length);
 
       const progressStats = await ProgressModel.getUserOverallProgress(userId);
+      console.log('Dashboard - Progress stats:', progressStats);
 
       const enrolledIds = enrolledCoursesWithProgress
         .map((course) => course && course._id)
