@@ -112,24 +112,18 @@ app.use("/cart", cartRoutes);
 
 // Home page
 app.get("/", async (req, res) => {
-  try {
-    // Check if this is an AJAX request for featured courses data
-    if (req.xhr || req.headers.accept?.indexOf("json") > -1) {
-      const CourseModel = require("./models/course.model");
-      const featuredCourses = await CourseModel.getFeaturedCourses();
-      return res.json({ success: true, courses: featuredCourses });
-    }
+  res.render("index", { featuredCourses: [] });
+});
 
-    // For initial page load, render with empty array (will be populated by fetch)
-    res.render("index", { featuredCourses: [] });
+// API endpoint for featured courses
+app.get("/api/featured-courses", async (req, res) => {
+  try {
+    const CourseModel = require("./models/course.model");
+    const featuredCourses = await CourseModel.getFeaturedCourses();
+    res.json({ success: true, data: featuredCourses });
   } catch (error) {
     console.error("Error fetching featured courses:", error);
-    if (req.xhr || req.headers.accept?.indexOf("json") > -1) {
-      return res
-        .status(500)
-        .json({ success: false, message: "Error loading courses" });
-    }
-    res.render("index", { featuredCourses: [] });
+    res.status(500).json({ success: false, error: "Failed to fetch courses" });
   }
 });
 
@@ -166,10 +160,12 @@ app.post("/contact-us/submit", async (req, res) => {
 
   // Basic validation
   if (!name || !email || !subject || !message) {
-    if (isAjax) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Please fill in all fields" });
+    // Check if it's an API request (fetch)
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Please fill in all fields" 
+      });
     }
     req.flash("error_msg", "Please fill in all fields");
     return res.redirect("/contact-us");
@@ -178,10 +174,10 @@ app.post("/contact-us/submit", async (req, res) => {
   // Email validation using simple regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
-    if (isAjax) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide a valid email address",
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Please provide a valid email address" 
       });
     }
     req.flash("error_msg", "Please provide a valid email address");
@@ -198,10 +194,11 @@ app.post("/contact-us/submit", async (req, res) => {
     // const newContactMessage = new Contact({ name, email, subject, message });
     // await newContactMessage.save();
 
-    if (isAjax) {
-      return res.json({
-        success: true,
-        message: "Thank you for your message. We'll be in touch soon!",
+    // Check if it's an API request (fetch)
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.json({ 
+        success: true, 
+        message: "Thank you for your message. We'll be in touch soon!" 
       });
     }
 
@@ -216,13 +213,14 @@ app.post("/contact-us/submit", async (req, res) => {
     res.redirect("/contact-us");
   } catch (error) {
     console.error("Error handling contact form:", error);
-    if (isAjax) {
-      return res.status(500).json({
-        success: false,
-        message:
-          "There was a problem submitting your message. Please try again later.",
+    
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.status(500).json({ 
+        success: false, 
+        error: "There was a problem submitting your message. Please try again later." 
       });
     }
+    
     req.flash(
       "error_msg",
       "There was a problem submitting your message. Please try again later."

@@ -104,9 +104,11 @@
       const emailInput = document.getElementById("email");
       const nameError = document.getElementById("name-error");
       const emailError = document.getElementById("email-error");
+      const submitButton = form.querySelector('button[type="submit"]');
 
       form.addEventListener("submit", async function (event) {
-        event.preventDefault(); // Always prevent default form submission
+        event.preventDefault(); // Always prevent default to handle with fetch
+        
         let valid = true;
 
         // Full Name Validation (Only letters and spaces)

@@ -21,7 +21,7 @@
     <!-- Total Revenue -->
     <div class="bg-gray-800 rounded-lg shadow-md p-6 mb-8">
       <h2 class="text-lg font-semibold mb-2">Total Revenue</h2>
-      <p class="text-3xl font-bold">$<%= totalRevenue %></p>
+      <p class="text-3xl font-bold">₹<%= totalRevenue %></p>
     </div>
 
     <!-- Monthly Revenue Breakdown -->
@@ -40,7 +40,7 @@
               <% monthlyRevenue.forEach(function(data) { %>
                 <tr>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300"><%= data.month %></td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">$<%= data.revenue %></td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">₹<%= data.revenue %></td>
                 </tr>
               <% }); %>
             </tbody>

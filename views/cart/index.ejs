@@ -45,10 +45,10 @@
                     <p class="text-sm text-gray-500">Added on <%= new Date(item.addedAt).toLocaleDateString() %></p>
                   </div>
                   <div class="md:w-1/4 flex flex-col justify-between items-end">
-                    <div class="text-xl font-bold">$<%= item.course.price.toFixed(2) %></div>
+                    <div class="text-xl font-bold">₹<%= item.course.price.toFixed(2) %></div>
                     <form action="/cart/remove" method="POST" class="mt-2 remove-from-cart-form">
                       <input type="hidden" name="courseId" value="<%= item.course._id %>">
-                      <button type="submit" class="text-red-400 hover:text-red-600">
+                      <button class="remove-from-cart-btn" type="submit" class="text-red-400 hover:text-red-600">
                         <i class="fas fa-trash-alt mr-1"></i> Remove
                       </button>
                     </form>
@@ -80,11 +80,11 @@
                 <div class="space-y-2 mb-4">
           <div class="flex justify-between">
             <span>Original Price:</span>
-            <span id="order-original-price">$<%= total.toFixed(2) %></span>
+            <span id="order-original-price">₹<%= total.toFixed(2) %></span>
           </div>
           <div class="flex justify-between font-bold text-lg pt-2 border-t border-gray-700">
             <span>Total:</span>
-            <span id="order-total-price">$<%= total.toFixed(2) %></span>
+            <span id="order-total-price">₹<%= total.toFixed(2) %></span>
           </div>
         </div>
             
@@ -113,5 +113,80 @@
   <%- include('../partials/scripts') %>
   
   <!-- No need for inline script anymore as it's been moved to cart-operations.js -->
+
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('submit', async (e) => {
+    if (!e.target.matches('.remove-from-cart-form')) return;
+    e.preventDefault();
+
+    const form = e.target;
+    const courseId = form.querySelector('input[name="courseId"]').value;
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalText = submitButton.textContent;
+    submitButton.disabled = true;
+    submitButton.textContent = 'Removing...';
+
+    try {
+      const res = await fetch('/cart/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ courseId }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        if (window.updateCartCount) window.updateCartCount();
+
+        // Remove the course DOM element
+        const itemDiv = form.closest('.p-4');
+        itemDiv.style.transition = 'opacity 0.3s';
+        itemDiv.style.opacity = '0';
+        setTimeout(() => {
+          itemDiv.remove();
+
+          // Update counts and totals
+          const cartItems = document.querySelectorAll('#cart-items-list .p-4');
+          if (cartItems.length > 0) {
+            document.getElementById('cart-items-heading').textContent =
+              `${cartItems.length} Course${cartItems.length > 1 ? 's' : ''} in Cart`;
+
+            let total = 0;
+            document.querySelectorAll('#cart-items-list .text-xl.font-bold')
+              .forEach(el => total += parseFloat(el.textContent.replace('₹', '')));
+            document.getElementById('order-original-price').textContent = `₹${total.toFixed(2)}`;
+            document.getElementById('order-total-price').textContent = `₹${total.toFixed(2)}`;
+          } else {
+            // Empty state
+            document.getElementById('cart-items-wrapper').innerHTML = `
+              <div class="bg-gray-800 rounded-lg shadow-md p-8 text-center" id="cart-empty-state">
+                <div class="text-gray-500 mb-4">
+                  <i class="fas fa-shopping-cart text-6xl"></i>
+                </div>
+                <h2 class="text-xl font-bold mb-2">Your cart is empty</h2>
+                <p class="text-gray-500 mb-6">Looks like you haven't added any courses to your cart yet.</p>
+                <a href="/courses" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors">
+                  Browse Courses
+                </a>
+              </div>
+            `;
+            document.getElementById('order-summary').innerHTML =
+              '<p class="text-gray-500 text-center">Add courses to your cart to see the order summary.</p>';
+          }
+        }, 300);
+      } else {
+        alert(data.message || 'Failed to remove course from cart.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error removing course from cart.');
+    } finally {
+      submitButton.disabled = false;
+      submitButton.textContent = originalText;
+    }
+  });
+});
+</script>
+
 </body>
 </html>

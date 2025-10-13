@@ -62,7 +62,7 @@
 
         <!-- Price -->
         <div>
-          <label for="price" class="block text-sm font-medium text-gray-300">Price ($)</label>
+          <label for="price" class="block text-sm font-medium text-gray-300">Price (₹)</label>
           <input 
             type="number" 
             id="price" 
@@ -257,7 +257,7 @@
           showError(priceInput, 'Price must be a positive number');
           isValid = false;
         } else if (Number(priceInput.value) > 9999.99) {
-          showError(priceInput, 'Price cannot exceed $9,999.99');
+          showError(priceInput, 'Price cannot exceed ₹9,999.99');
           isValid = false;
         } else {
           clearError(priceInput);

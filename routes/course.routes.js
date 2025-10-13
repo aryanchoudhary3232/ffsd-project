@@ -6,6 +6,11 @@ const { isAuthenticated } = require("../middleware/auth.middleware");
 
 // Course listings
 router.get("/", CourseController.getAllCourses);
+
+// Filter and search courses (used by fetch)
+router.post("/filter", CourseController.filterCourses);
+
+
 router.get("/:id", CourseController.getCourseDetails);
 
 // Course Learning

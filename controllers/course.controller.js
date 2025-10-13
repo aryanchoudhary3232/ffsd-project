@@ -100,6 +100,70 @@ const CourseController = {
     }
   },
 
+
+  filterCourses: async (req, res) => {
+    const { search, category, language, sort } = req.body;
+
+    try {
+      let courses;
+
+      // Handle search query
+      if (search) {
+        courses = await CourseModel.searchCourses(search);
+      } else if (category && category !== "all") {
+        courses = await CourseModel.getCoursesByCategory(category);
+      } else if (language && language !== "all") {
+        courses = await CourseModel.getCoursesByLanguage(language);
+      } else {
+        courses = await CourseModel.getAllCourses();
+      }
+
+      // Combine filters
+      if (category && category !== "all") {
+        courses = courses.filter((c) => c.category === category);
+      }
+      if (language && language !== "all") {
+        courses = courses.filter((c) => c.courseLanguage === language);
+      }
+
+      // Sorting
+      if (sort) {
+        switch (sort) {
+          case "price-low":
+            courses = courses.sort((a, b) => a.price - b.price);
+            break;
+          case "price-high":
+            courses = courses.sort((a, b) => b.price - a.price);
+            break;
+          case "rating":
+            courses = courses.sort((a, b) => b.rating - a.rating);
+            break;
+          case "newest":
+            courses = courses.sort(
+              (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+            );
+            break;
+        }
+      }
+
+      // Render partial HTML
+      res.render("courses/course-cards", { courses, search }, (err, html) => {
+        if (err) {
+          console.error("Render error:", err);
+          return res.json({ success: false, message: "Render failed" });
+        }
+        res.json({ success: true, html });
+      });
+    } catch (error) {
+      console.error("Filter Courses error:", error);
+      res.json({
+        success: false,
+        message: error.message || "Failed to filter courses",
+      });
+    }
+  },
+
+
   // Get course details
   getCourseDetails: async (req, res) => {
     const courseId = req.params.id;
@@ -191,12 +255,23 @@ const CourseController = {
       }
 
       // Check if enrolled
-      if (
-        !user.enrolledCourses ||
-        !user.enrolledCourses.some(
-          (enrolledCourseId) => enrolledCourseId.toString() === courseId
-        )
-      ) {
+      console.log('Checking enrollment for:', { 
+        userId, 
+        courseId, 
+        enrolledCourses: user.enrolledCourses 
+      });
+      
+      const normalizedCourseId = courseId.toString();
+      const isEnrolled = user.enrolledCourses && user.enrolledCourses.some(
+        (enrolledCourseId) => {
+          const normalizedEnrolledId = enrolledCourseId.toString();
+          return normalizedEnrolledId === normalizedCourseId;
+        }
+      );
+      
+      console.log('Enrollment check result:', isEnrolled);
+      
+      if (!isEnrolled) {
         req.flash("error_msg", "You are not enrolled in this course");
         return res.redirect(`/courses/${courseId}`);
       }
@@ -204,50 +279,88 @@ const CourseController = {
       // Get progress
       const userProgress = await ProgressModel.getProgress(userId, courseId);
 
+      // Normalise modules/lessons structure to avoid undefined access in views
+      const normalisedModules = Array.isArray(course.modules)
+        ? course.modules
+            .filter(Boolean)
+            .map((module) => ({
+              ...module,
+              lessons: Array.isArray(module.lessons)
+                ? module.lessons.filter(Boolean)
+                : [],
+            }))
+        : [];
+
+      const normaliseId = (value) => {
+        if (!value) return "";
+        if (typeof value === "string") return value;
+        if (typeof value.toHexString === "function") return value.toHexString();
+        if (typeof value.toString === "function") return value.toString();
+        return String(value);
+      };
+
       // Determine current lesson
       let currentLesson = null;
       let currentModule = null;
-      const lessonId = req.query.lesson;
+      const lessonId = req.query.lesson ? req.query.lesson.toString() : "";
 
-      if (lessonId && course.modules) {
-        for (const module of course.modules) {
-          // Ensure lessons array exists and find the lesson by _id or id
-          const lesson = module.lessons?.find((l) => {
-            const lessonIdToCheck = l._id || l.id;
-            return lessonIdToCheck && lessonIdToCheck.toString() === lessonId;
+      if (lessonId) {
+        for (const module of normalisedModules) {
+          const match = module.lessons.find((lesson) => {
+            const lessonIdentifier = normaliseId(lesson._id || lesson.id);
+            return lessonIdentifier && lessonIdentifier === lessonId;
           });
-          if (lesson) {
-            currentLesson = lesson;
+
+          if (match) {
+            currentLesson = match;
             currentModule = module;
             break;
           }
         }
       }
 
-      // Default to first lesson if not found or no lessonId provided
-      if (
-        !currentLesson &&
-        course.modules &&
-        course.modules.length > 0 &&
-        course.modules[0].lessons &&
-        course.modules[0].lessons.length > 0
-      ) {
-        currentModule = course.modules[0];
-        currentLesson = currentModule.lessons[0];
-      } else if (!currentLesson) {
-        // Handle case where course has no modules or lessons
+      if (!currentLesson) {
+        for (const module of normalisedModules) {
+          if (module.lessons.length > 0) {
+            currentModule = module;
+            currentLesson = module.lessons[0];
+            break;
+          }
+        }
+      }
+
+      if (!currentLesson) {
         req.flash("error_msg", "Course content not available yet.");
         return res.redirect(`/courses/${courseId}`);
       }
 
-      const completedLessons = userProgress.completedLessons || [];
+      const completedLessons = (userProgress.completedLessons || [])
+        .map((lesson) => {
+          if (!lesson) return "";
+          if (typeof lesson === "string") return lesson;
+          if (typeof lesson.toHexString === "function") return lesson.toHexString();
+          if (typeof lesson.toString === "function") return lesson.toString();
+          return String(lesson);
+        })
+        .filter(Boolean);
+      const progressPercent =
+        typeof userProgress.progress === "number" && !Number.isNaN(userProgress.progress)
+          ? userProgress.progress
+          : 0;
+
+      const courseIdString =
+        course._id && typeof course._id.toHexString === "function"
+          ? course._id.toHexString()
+          : courseId.toString();
 
       res.render("courses/learn", {
-        course,
+        course: { ...course, modules: normalisedModules },
         currentModule,
         currentLesson,
-        progress: userProgress.progress,
-        completedLessons: completedLessons,
+        progress: progressPercent,
+        completedLessons,
+        courseId: courseIdString,
+        currentLessonId: normaliseId(currentLesson._id || currentLesson.id),
       });
     } catch (error) {
       console.error("Course Learning Page error:", error);
@@ -338,10 +451,10 @@ const CourseController = {
       console.log("Lesson exists, proceeding to mark as complete");
 
       // Calculate total lessons from the fetched course
-      const totalLessons = course.modules.reduce(
-        (total, module) => total + (module.lessons?.length || 0),
-        0
-      );
+      const totalLessons = (course.modules || []).reduce((total, module) => {
+        const lessons = Array.isArray(module.lessons) ? module.lessons : [];
+        return total + lessons.length;
+      }, 0);
 
       console.log("Total lessons in course:", totalLessons);
 

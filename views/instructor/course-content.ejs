@@ -131,7 +131,7 @@
 
             <div class="flex justify-between items-center">
               <div>
-                <span class="font-bold text-xl">$<%= course.price.toFixed(2) %></span>
+                <span class="font-bold text-xl">₹<%= course.price.toFixed(2) %></span>
               </div>
               <div class="flex gap-2">
                 <a href="/instructor/courses/<%= course._id %>/edit" class="bg-gray-700 text-gray-300 px-4 py-2 rounded-md hover:bg-gray-600 transition-colors">
@@ -362,8 +362,8 @@
           const lessonId = this.getAttribute('data-lesson-id');
           if (confirm('Are you sure you want to delete this lesson? This action cannot be undone.')) {
             // Send delete request
-            fetch(`/instructor/courses/<%= course._id %>/modules/${moduleId}/lessons/${lessonId}?_method=DELETE`, {
-                method: 'POST',
+            fetch(`/instructor/courses/<%= course._id %>/modules/${moduleId}/lessons/${lessonId}`, {
+                method: 'DELETE',
                 headers: {
                   'Content-Type': 'application/json',
                 },
@@ -807,7 +807,7 @@
                             })
                             .catch(error => {
                               console.error("Error during lesson deletion:", error);
-                              alert('An error occurred while deleting the lesson');
+                              alert('An error occurred while deleting the lesson 2');
                             });
                         }
                       });

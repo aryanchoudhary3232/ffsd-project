@@ -150,31 +150,26 @@ const CartController = {
     const userId = req.session.user.id;
 
     try {
-      // Use CartModel.removeFromCart method
-      const result = await CartModel.removeFromCart(userId, courseId);
-
-      // Check if it's an AJAX request
-      if (req.xhr || req.headers.accept.indexOf("json") > -1) {
-        // Get updated cart count
-        const cart = await CartModel.getCartWithCourses(userId);
-        const cartCount = cart.items.length;
-        res.json({ success: true, cartCount });
-      } else {
-        // Regular form submission - redirect to cart with success message
-        req.flash("success_msg", "Course removed from cart successfully!");
-        res.redirect("/cart");
-      }
+        // Use CartModel.removeFromCart method
+        const result = await CartModel.removeFromCart(userId, courseId);
+        
+        // Check if it's an AJAX request
+        if (req.xhr || (req.headers.accept && req.headers.accept.includes('json'))) {
+          // Get updated cart count
+          const cart = await CartModel.getCartWithCourses(userId);
+          const cartCount = cart.items.length;
+          res.json({ success: true, cartCount });
+        } else {
+          // Regular form submission - redirect to cart with success message
+          req.flash("success_msg", "Course removed from cart successfully!");
+          res.redirect("/cart");
+        }
     } catch (error) {
       console.error("Remove From Cart error:", error);
 
       // Check if it's an AJAX request
-      if (req.xhr || req.headers.accept.indexOf("json") > -1) {
-        res
-          .status(500)
-          .json({
-            success: false,
-            message: error.message || "Error removing from cart",
-          });
+      if (req.xhr || (req.headers.accept && req.headers.accept.includes('json'))) {
+        res.status(500).json({ success: false, message: error.message || "Error removing from cart" });
       } else {
         // Regular form submission - redirect with error message
         req.flash(

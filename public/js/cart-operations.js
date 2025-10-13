@@ -19,8 +19,48 @@ document.addEventListener("DOMContentLoaded", function () {
         },
       });
 
+<<<<<<< HEAD
       if (!response.ok) {
         throw new Error("Failed to fetch cart data");
+=======
+        if (data.cartItems.length > 0) {
+          data.cartItems.forEach(function(item) {
+            cartItemsContainer.append(`
+              <div class="p-4 flex flex-col md:flex-row gap-4">
+                <div class="md:w-1/4">
+                  <img src="${item.course.thumbnail}" alt="${item.course.title}" class="w-full h-32 object-cover rounded-md">
+                </div>
+                <div class="md:w-2/4">
+                  <h3 class="text-lg font-semibold mb-1">${item.course.title}</h3>
+                  <p class="text-gray-400 mb-2">By ${item.course.instructor}</p>
+                  <div class="flex items-center mb-2">
+                    <span class="text-yellow-500 mr-1">★</span>
+                    <span>${item.course.rating}</span>
+                    <span class="text-gray-500 ml-1">(${item.course.students} students)</span>
+                  </div>
+                  <p class="text-sm text-gray-500">Added on ${new Date(item.addedAt).toLocaleDateString()}</p>
+                </div>
+                <div class="md:w-1/4 flex flex-col justify-between items-end">
+                  <div class="text-xl font-bold">₹${item.course.price.toFixed(2)}</div>
+                  <form action="/cart/remove" method="POST" class="mt-2 remove-from-cart-form">
+                    <input type="hidden" name="courseId" value="${item.course._id}">
+                    <button type="submit" class="text-red-400 hover:text-red-600">
+                      <i class="fas fa-trash-alt mr-1"></i> Remove
+                    </button>
+                  </form>
+                </div>
+              </div>
+            `);
+          });
+        }
+
+        // Update totals
+        $('#order-original-price').text(`₹${data.total.toFixed(2)}`);
+        $('#order-total-price').text(`₹${data.total.toFixed(2)}`);
+
+        // Update cart count
+        $('#cart-items-heading').text(`${data.cartItems.length} Course${data.cartItems.length !== 1 ? 's' : ''} in Cart`);
+>>>>>>> origin/main
       }
 
       const data = await response.json();
@@ -172,7 +212,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const data = await response.json();
 
         if (data.success) {
+<<<<<<< HEAD
           await refreshCartUI();
+=======
+          refreshCartUI();
+          if (window.updateCartCount) window.updateCartCount();
+>>>>>>> origin/main
         } else {
           alert(data.message || "Failed to remove course from cart");
         }

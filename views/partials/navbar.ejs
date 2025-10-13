@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Update cart count
-  async function updateCartCount() {
+  window.updateCartCount = async function updateCartCount() {
     try {
       const res = await fetch("/cart/count");
       if (!res.ok) throw new Error("Network error");

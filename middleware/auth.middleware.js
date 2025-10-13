@@ -1,9 +1,7 @@
 // Authentication middleware
 const isAuthenticated = (req, res, next) => {
-  console.log(".........isAuthenticated");
 
   if (req.session.user) {
-
     return next();
   }
 

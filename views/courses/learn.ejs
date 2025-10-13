@@ -1,7 +1,41 @@
 <%- include('../partials/head', { title: 'Learning: ' + course.title + ' - SeekoBharat' }) %>
 <body class="bg-gray-900 text-white">
   <div class="flex flex-col h-screen">
-    <!-- Header -->
+    <% 
+      const getLessonId = (lesson) => {
+        if (!lesson) return "";
+        const rawId = lesson._id || lesson.id;
+        if (!rawId) return "";
+        if (typeof rawId === "string") return rawId;
+        if (typeof rawId.toHexString === "function") return rawId.toHexString();
+        if (typeof rawId.toString === "function") return rawId.toString();
+        return String(rawId);
+      };
+      const modules = Array.isArray(course.modules) ? course.modules : [];
+      const fallbackLessonId = getLessonId(currentLesson);
+      const activeLessonId = (typeof currentLessonId !== "undefined" && currentLessonId)
+        ? currentLessonId
+        : fallbackLessonId;
+      const activeLessonCompleted = completedLessons.includes(activeLessonId);
+      const allLessonsWithIds = [];
+      modules.forEach((module) => {
+        const moduleLessons = Array.isArray(module.lessons) ? module.lessons : [];
+        moduleLessons.forEach((lesson) => {
+          allLessonsWithIds.push({
+            lesson,
+            lessonId: getLessonId(lesson)
+          });
+        });
+      });
+      const currentIndex = allLessonsWithIds.findIndex(entry => entry.lessonId === activeLessonId);
+      const prevLesson = currentIndex > 0 ? allLessonsWithIds[currentIndex - 1].lesson : null;
+      const nextLesson = currentIndex > -1 && currentIndex < allLessonsWithIds.length - 1
+        ? allLessonsWithIds[currentIndex + 1].lesson
+        : null;
+      const modulesCount = modules.length;
+      const lessonsCount = allLessonsWithIds.length;
+      const lessonFile = currentLesson.file || currentLesson.url || currentLesson.resourceUrl || "";
+    %>
     <header class="bg-gray-800 border-b border-gray-700">
       <div class="container mx-auto px-4 py-3 flex justify-between items-center">
         <div class="flex items-center">
@@ -14,7 +48,7 @@
           <div class="hidden md:block">
             <div class="flex items-center">
               <div class="w-48 bg-gray-600 rounded-full h-2.5 mr-2">
-                <div class="bg-purple-500 h-2.5 rounded-full" style="width: <%= progress %>%"></div>
+                <div class="bg-purple-500 h-2.5 rounded-full progress-bar-fill" data-progress="<%= progress %>"></div>
               </div>
               <span class="text-sm font-medium"><%= progress %>%</span>
             </div>
@@ -101,26 +135,25 @@
         </div>
       </div>
 
-      <!-- Main Content -->
       <div class="flex-1 overflow-y-auto">
         <div class="container mx-auto px-4 py-6 max-w-4xl">
           <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden mb-6">
             <% if (currentLesson.type === 'video') { %>
             <div class="aspect-video bg-black flex items-center justify-center">
-              <% if (currentLesson.file) { %>
+              <% if (lessonFile) { %>
               <video 
                 controls 
                 id="lesson-video" 
                 class="w-full h-full" 
-                poster="/img/video-poster.jpg"
+                poster="<%= currentLesson.poster || '/img/video-poster.jpg' %>"
               >
-                <source src="<%= currentLesson.file %>" type="video/mp4">
+                <source src="<%= lessonFile %>" type="video/mp4">
                 Your browser does not support the video tag.
               </video>
               <% } else { %>
               <div class="text-white text-center p-8">
                 <i class="fas fa-film text-5xl mb-4"></i>
-                <p class="text-xl">Video placeholder</p>
+                <p class="text-xl">Video coming soon</p>
               </div>
               <% } %>
             </div>
@@ -131,9 +164,9 @@
                 <h3 class="text-xl font-semibold mb-2"><%= currentLesson.title %></h3>
                 <p class="text-gray-300 mb-4">PDF document</p>
                 <a 
-                  href="<%= currentLesson.file || '#' %>" 
+                  href="<%= lessonFile || '#' %>" 
                   class="inline-flex items-center bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-colors"
-                  <%= currentLesson.file ? 'download' : '' %>
+                  <%= lessonFile ? 'download' : '' %>
                 >
                   <i class="fas fa-download mr-2"></i> Download
                 </a>
@@ -154,77 +187,54 @@
               </div>
             </div>
             <% } else { %>
-            <div class="aspect-video bg-gray-700 flex items-center justify-center p-8">
-              <div class="text-center">
-                <i class="fas fa-file-alt text-gray-400 text-5xl mb-4"></i>
-                <h3 class="text-xl font-semibold mb-2"><%= currentLesson.title %></h3>
-                <p class="text-gray-300 mb-4">Assignment</p>
-                <a 
-                  href="<%= currentLesson.file || '#' %>" 
-                  class="inline-flex items-center bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-colors"
-                  <%= currentLesson.file ? 'download' : '' %>
-                >
-                  <i class="fas fa-download mr-2"></i> Download
-                </a>
-              </div>
+            <div class="bg-gray-700 p-6">
+              <h3 class="text-xl font-semibold mb-4"><%= currentLesson.title %></h3>
+              <% if (currentLesson.description) { %>
+              <p class="text-gray-300 mb-4"><%= currentLesson.description %></p>
+              <% } %>
+              <% if (lessonFile) { %>
+              <a 
+                href="<%= lessonFile %>" 
+                class="inline-flex items-center bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-colors"
+                <%= currentLesson.type === 'assignment' ? '' : 'download' %>
+              >
+                <i class="fas fa-download mr-2"></i> Download Resource
+              </a>
+              <% } %>
             </div>
             <% } %>
 
             <div class="p-6">
               <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold"><%= currentLesson.title %></h2>
-                <% if (completedLessons.includes(currentLesson._id || currentLesson.id)) { %>
+                <% if (activeLessonCompleted) { %>
                 <span class="inline-flex items-center text-green-400">
                   <i class="fas fa-check-circle mr-1"></i> Completed
                 </span>
                 <% } %>
               </div>
-              
-              <div class="prose max-w-none prose-invert">
-                <p>This lesson covers important concepts and techniques.</p>
-                <% if (currentLesson.type === 'video') { %>
-                <h3>Video Transcript</h3>
-                <p>Transcript here.</p>
-                <% } %>
-                <h3>Key Takeaways</h3>
-                <ul>
-                  <li>Core concepts</li>
-                  <li>Practical techniques</li>
-                  <li>Building on previous knowledge</li>
-                </ul>
-              </div>
+
+              <% if (currentLesson.summary) { %>
+              <p class="text-gray-300 mb-4"><%= currentLesson.summary %></p>
+              <% } else if (currentLesson.description) { %>
+              <p class="text-gray-300 mb-4"><%= currentLesson.description %></p>
+              <% } %>
+
+              <% if (Array.isArray(currentLesson.highlights) && currentLesson.highlights.length) { %>
+              <h3 class="text-lg font-semibold mb-2">Key Takeaways</h3>
+              <ul class="list-disc list-inside text-gray-300 space-y-1">
+                <% currentLesson.highlights.forEach(function(highlight) { %>
+                <li><%= highlight %></li>
+                <% }); %>
+              </ul>
+              <% } %>
             </div>
           </div>
           
           <div class="flex flex-wrap justify-between items-center mb-8 gap-2">
-            <% 
-              let prevLesson = null;
-              let nextLesson = null;
-              const allLessons = [];
-              
-              // Safely collect all lessons
-              if (course.modules && course.modules.length > 0) {
-                course.modules.forEach(module => {
-                  if (module.lessons && module.lessons.length > 0) {
-                    module.lessons.forEach(lesson => {
-                      allLessons.push(lesson);
-                    });
-                  }
-                });
-              }
-              
-              const currentLessonId = currentLesson._id || currentLesson.id;
-              const currentIndex = allLessons.findIndex(l => (l._id || l.id) === currentLessonId);
-              if (currentIndex > 0) {
-                prevLesson = allLessons[currentIndex - 1];
-              }
-              if (currentIndex < allLessons.length - 1) {
-                nextLesson = allLessons[currentIndex + 1];
-              }
-            %>
             <% if (prevLesson) { %>
             <a 
-              href="/courses/<%= course._id %>/learn?lesson=<%= prevLesson._id || prevLesson.id %>" 
+              href="/courses/<%= courseId %>/learn?lesson=<%= getLessonId(prevLesson) %>" 
               class="inline-flex items-center bg-gray-700 border border-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors"
             >
               <i class="fas fa-arrow-left mr-2"></i> Previous Lesson
@@ -233,7 +243,7 @@
             <div></div>
             <% } %>
             <div class="flex flex-wrap gap-2">
-              <% if (!completedLessons.includes(currentLesson._id || currentLesson.id)) { %>
+              <% if (!activeLessonCompleted) { %>
               <button 
                 id="complete-lesson-btn"
                 class="inline-flex items-center bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-colors"
@@ -241,10 +251,17 @@
               >
                 <i class="fas fa-check mr-2"></i> Mark as Complete
               </button>
+              <% } else { %>
+              <button 
+                class="inline-flex items-center bg-green-500 text-white px-4 py-2 rounded-md cursor-default"
+                disabled
+              >
+                <i class="fas fa-check mr-2"></i> Completed
+              </button>
               <% } %>
               <% if (nextLesson) { %>
               <a 
-                href="/courses/<%= course._id %>/learn?lesson=<%= nextLesson._id || nextLesson.id %>" 
+                href="/courses/<%= courseId %>/learn?lesson=<%= getLessonId(nextLesson) %>" 
                 class="inline-flex items-center bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-colors"
               >
                 Next Lesson <i class="fas fa-arrow-right ml-2"></i>
@@ -256,7 +273,6 @@
           <div class="bg-gray-800 rounded-lg shadow-md p-6 mb-8">
             <h3 class="text-xl font-bold mb-4">Discussion</h3>
             <div id="comments-container" class="space-y-4 mb-6 discussion-container">
-              <!-- Comments will be loaded dynamically -->
               <div class="text-center p-4 loading-spinner">
                 <i class="fas fa-spinner fa-spin text-purple-500 text-2xl"></i>
               </div>
@@ -284,17 +300,19 @@
           </div>
         </div>
       </div>
-      <!-- Mobile Sidebar Overlay -->
       <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"></div>
     </div>
   </div>
 
-
   <%- include('../partials/scripts') %>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   
   <script>
     // Prevent cart operations from running on the learning page
     window.isLearningPage = true;
+    
+    // Define courseId from server-side variable
+    const courseId = '<%= courseId %>';
     
     // Determine the correct lesson ID (prefer _id, fallback to id)
     const lessonIdentifier = '<%= typeof currentLesson._id !== "undefined" ? currentLesson._id : currentLesson.id %>';
@@ -307,55 +325,39 @@
       }
     }
     console.log('Lesson ID:', lessonId);
-
-    // Determine the correct course ID (should always be _id)
-    const courseIdentifier = '<%= course._id %>';
-    // Clean the identifier if it's an ObjectId string representation
-    let courseId = String(courseIdentifier);
-    if (courseId.includes('"$oid"')) {
-      const match = courseId.match(/\{\\"\\$oid\\":\\"(.+)\\"\}/);
-      if (match) {
-        courseId = match[1];
-      }
-    }
     console.log('Course ID:', courseId);
 
-    document.addEventListener('DOMContentLoaded', function() {
-      // Sidebar toggle functionality
-      const sidebarToggle = document.getElementById('sidebar-toggle');
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('sidebar-overlay');
-      
-      if (sidebarToggle && sidebar && overlay) {
-        sidebarToggle.addEventListener('click', function() {
-          // Toggle sidebar visibility with transform
-          if (sidebar.classList.contains('-translate-x-full')) {
-            sidebar.classList.remove('-translate-x-full');
-            overlay.classList.remove('hidden');
-            document.body.classList.add('overflow-hidden');
-          } else {
-            sidebar.classList.add('-translate-x-full');
-            overlay.classList.add('hidden');
-            document.body.classList.remove('overflow-hidden');
-          }
-        });
+    $(document).ready(function() {
+      $('#sidebar-toggle').on('click', function() {
+        const $sidebar = $('#sidebar');
+        const $overlay = $('#sidebar-overlay');
+        
+        // Toggle sidebar visibility with transform
+        if ($sidebar.hasClass('-translate-x-full')) {
+          $sidebar.removeClass('-translate-x-full');
+          $overlay.removeClass('hidden');
+          $('body').addClass('overflow-hidden');
+        } else {
+          $sidebar.addClass('-translate-x-full');
+          $overlay.addClass('hidden');
+          $('body').removeClass('overflow-hidden');
+        }
+      });
 
         overlay.addEventListener('click', function() {
           sidebarToggle.click();
         });
       }
 
-      // Load comments when the page loads
       loadComments();
-      
-      // Attach event listener to the Post Comment button
-      const postCommentBtn = document.getElementById('post-comment-btn');
-      if (postCommentBtn) {
-        postCommentBtn.addEventListener('click', postComment);
-      }
+      $('#post-comment-btn').on('click', postComment);
 
-      // Video event handlers
-      const video = document.getElementById('lesson-video');
+      $('.progress-bar-fill').each(function() {
+        const percent = Number($(this).data('progress')) || 0;
+        $(this).css('width', `${percent}%`);
+      });
+
+      const video = $('#lesson-video')[0];
       if (video) {
         let hasMarkedComplete = false;
         video.addEventListener('timeupdate', function() {
@@ -387,15 +389,7 @@
       completeBtn.disabled = true;
       completeBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
       
-      // Use the pre-calculated courseId and lessonId
-      console.log('Using course ID:', courseId);
-      console.log('Using lesson ID:', lessonId);
-      
-      // Use the endpoint format that matches the backend controller
       const apiUrl = `/courses/${courseId}/lessons/${lessonId}/complete`;
-      console.log('Complete API URL:', apiUrl);
-      
-      // Validate that we have both IDs before making the request
       if (!courseId || !lessonId) {
         console.error('Missing required IDs:', { courseId, lessonId });
         completeBtn.innerHTML = '<i class="fas fa-times-circle mr-2"></i> Error';
@@ -461,7 +455,6 @@
     }
 
     function startQuiz() {
-      // Use the pre-calculated courseId and lessonId
       window.location.href = `/courses/${courseId}/quiz/${lessonId}`;
     }
 
@@ -547,7 +540,6 @@
       
       const commentText = commentTextarea.value.trim();
 
-      // If the textarea is empty, show an error toast and exit
       if (!commentText) {
         showToast('Please enter a comment.', 'error');
         return;
