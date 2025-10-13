@@ -87,6 +87,70 @@ const CourseController = {
     }
   },
 
+
+  filterCourses: async (req, res) => {
+    const { search, category, language, sort } = req.body;
+
+    try {
+      let courses;
+
+      // Handle search query
+      if (search) {
+        courses = await CourseModel.searchCourses(search);
+      } else if (category && category !== "all") {
+        courses = await CourseModel.getCoursesByCategory(category);
+      } else if (language && language !== "all") {
+        courses = await CourseModel.getCoursesByLanguage(language);
+      } else {
+        courses = await CourseModel.getAllCourses();
+      }
+
+      // Combine filters
+      if (category && category !== "all") {
+        courses = courses.filter((c) => c.category === category);
+      }
+      if (language && language !== "all") {
+        courses = courses.filter((c) => c.courseLanguage === language);
+      }
+
+      // Sorting
+      if (sort) {
+        switch (sort) {
+          case "price-low":
+            courses = courses.sort((a, b) => a.price - b.price);
+            break;
+          case "price-high":
+            courses = courses.sort((a, b) => b.price - a.price);
+            break;
+          case "rating":
+            courses = courses.sort((a, b) => b.rating - a.rating);
+            break;
+          case "newest":
+            courses = courses.sort(
+              (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+            );
+            break;
+        }
+      }
+
+      // Render partial HTML
+      res.render("courses/course-cards", { courses, search }, (err, html) => {
+        if (err) {
+          console.error("Render error:", err);
+          return res.json({ success: false, message: "Render failed" });
+        }
+        res.json({ success: true, html });
+      });
+    } catch (error) {
+      console.error("Filter Courses error:", error);
+      res.json({
+        success: false,
+        message: error.message || "Failed to filter courses",
+      });
+    }
+  },
+
+
   // Get course details
   getCourseDetails: async (req, res) => {
     const courseId = req.params.id;
