@@ -335,14 +335,9 @@ const CourseController = {
           ? course._id.toHexString()
           : courseId.toString();
 
-      res.render("courses/learn", {
-        course: { ...course, modules: normalisedModules },
-        currentModule,
-        currentLesson,
-        progress: progressPercent,
-        completedLessons,
-        courseId: courseIdString,
-        currentLessonId: normaliseId(currentLesson._id || currentLesson.id),
+      // Render the dynamic learning page that uses fetch
+      res.render("courses/learn-dynamic", {
+        courseId: courseIdString
       });
     } catch (error) {
       console.error("Course Learning Page error:", error);
@@ -643,6 +638,143 @@ const CourseController = {
       res.status(500).json({
         success: false,
         message: "Could not load course details."
+      });
+    }
+  },
+
+  // Get course learning data as JSON (API endpoint)
+  getCourseLearningDataAPI: async (req, res) => {
+    if (!req.session.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Please login to access course content"
+      });
+    }
+
+    const courseId = req.params.id;
+    const userId = req.session.user.id;
+    const lessonId = req.query.lesson;
+
+    try {
+      const course = await CourseModel.getCourseById(courseId);
+      const user = await User.findById(userId);
+
+      if (!course || !user) {
+        return res.status(404).json({
+          success: false,
+          message: "Course or user not found"
+        });
+      }
+
+      // Check if enrolled
+      const normalizedCourseId = courseId.toString();
+      const isEnrolled = user.enrolledCourses && user.enrolledCourses.some(
+        (enrolledCourseId) => enrolledCourseId.toString() === normalizedCourseId
+      );
+
+      if (!isEnrolled) {
+        return res.status(403).json({
+          success: false,
+          message: "You are not enrolled in this course"
+        });
+      }
+
+      // Get progress
+      const userProgress = await ProgressModel.getProgress(userId, courseId);
+
+      // Normalise modules/lessons structure
+      const normalisedModules = Array.isArray(course.modules)
+        ? course.modules
+            .filter(Boolean)
+            .map((module) => ({
+              ...module,
+              lessons: Array.isArray(module.lessons)
+                ? module.lessons.filter(Boolean)
+                : [],
+            }))
+        : [];
+
+      const normaliseId = (value) => {
+        if (!value) return "";
+        if (typeof value === "string") return value;
+        if (typeof value.toHexString === "function") return value.toHexString();
+        if (typeof value.toString === "function") return value.toString();
+        return String(value);
+      };
+
+      // Determine current lesson
+      let currentLesson = null;
+      let currentModule = null;
+
+      if (lessonId) {
+        for (const module of normalisedModules) {
+          const match = module.lessons.find((lesson) => {
+            const lessonIdentifier = normaliseId(lesson._id || lesson.id);
+            return lessonIdentifier && lessonIdentifier === lessonId;
+          });
+
+          if (match) {
+            currentLesson = match;
+            currentModule = module;
+            break;
+          }
+        }
+      }
+
+      if (!currentLesson) {
+        for (const module of normalisedModules) {
+          if (module.lessons.length > 0) {
+            currentModule = module;
+            currentLesson = module.lessons[0];
+            break;
+          }
+        }
+      }
+
+      if (!currentLesson) {
+        return res.status(404).json({
+          success: false,
+          message: "Course content not available yet"
+        });
+      }
+
+      const completedLessons = (userProgress.completedLessons || [])
+        .map((lesson) => {
+          if (!lesson) return "";
+          if (typeof lesson === "string") return lesson;
+          if (typeof lesson.toHexString === "function") return lesson.toHexString();
+          if (typeof lesson.toString === "function") return lesson.toString();
+          return String(lesson);
+        })
+        .filter(Boolean);
+
+      const progressPercent =
+        typeof userProgress.progress === "number" && !Number.isNaN(userProgress.progress)
+          ? userProgress.progress
+          : 0;
+
+      // Return course learning data as JSON
+      res.json({
+        success: true,
+        course: {
+          _id: normaliseId(course._id),
+          title: course.title,
+          modules: normalisedModules
+        },
+        currentModule,
+        currentLesson: {
+          ...currentLesson,
+          _id: normaliseId(currentLesson._id || currentLesson.id)
+        },
+        progress: progressPercent,
+        completedLessons,
+        courseId: normaliseId(course._id)
+      });
+    } catch (error) {
+      console.error("Get Course Learning Data API error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Could not load course content"
       });
     }
   },

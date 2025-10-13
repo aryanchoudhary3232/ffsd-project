@@ -1,0 +1,113 @@
+<%- include('../partials/head', { title: 'Learning Course - SeekoBharat' }) %>
+<body class="bg-gray-900 text-white">
+  <div class="flex flex-col h-screen">
+    <header class="bg-gray-800 border-b border-gray-700">
+      <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center">
+          <a href="/dashboard" class="text-white hover:text-gray-300 mr-4">
+            <i class="fas fa-arrow-left"></i>
+          </a>
+          <h1 id="course-title" class="text-xl font-bold truncate max-w-md">Loading...</h1>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="hidden md:block">
+            <div class="flex items-center">
+              <div class="w-48 bg-gray-600 rounded-full h-2.5 mr-2">
+                <div id="progress-bar" class="bg-purple-500 h-2.5 rounded-full" style="width: 0%"></div>
+              </div>
+              <span id="progress-text" class="text-sm font-medium">0%</span>
+            </div>
+          </div>
+          <button id="sidebar-toggle" class="md:hidden text-gray-300 hover:text-gray-100">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="flex flex-1 overflow-hidden relative">
+      <!-- Sidebar -->
+      <div id="sidebar" class="md:relative md:w-80 bg-gray-800 border-r border-gray-700 overflow-y-auto h-full md:h-auto fixed z-50 w-3/4 left-0 top-0 -translate-x-full md:translate-x-0 transition-transform duration-300">
+        <div class="p-4 border-b border-gray-700">
+          <h2 class="font-bold text-lg">Course Content</h2>
+          <div id="course-stats" class="flex items-center text-sm text-gray-400 mt-1">
+            <span>Loading...</span>
+          </div>
+        </div>
+
+        <div id="modules-container" class="divide-y divide-gray-700">
+          <!-- Skeleton loader -->
+          <div class="p-4 animate-pulse">
+            <div class="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
+            <div class="h-3 bg-gray-700 rounded w-1/2"></div>
+          </div>
+          <div class="p-4 animate-pulse">
+            <div class="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
+            <div class="h-3 bg-gray-700 rounded w-1/2"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="flex-1 overflow-y-auto">
+        <div class="container mx-auto px-4 py-6 max-w-4xl">
+          <div id="lesson-content" class="bg-gray-800 rounded-lg shadow-md overflow-hidden mb-6">
+            <!-- Loading state -->
+            <div class="aspect-video bg-gray-700 flex items-center justify-center">
+              <div class="text-center">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
+                <p>Loading lesson...</p>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="h-8 bg-gray-700 rounded w-3/4 mb-4 animate-pulse"></div>
+              <div class="h-4 bg-gray-700 rounded w-full mb-2 animate-pulse"></div>
+              <div class="h-4 bg-gray-700 rounded w-5/6 animate-pulse"></div>
+            </div>
+          </div>
+          
+          <div id="lesson-navigation" class="flex flex-wrap justify-between items-center mb-8 gap-2">
+            <!-- Navigation buttons will be inserted here -->
+          </div>
+
+          <!-- Comments Section -->
+          <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden mb-6">
+            <div class="p-6 border-b border-gray-700">
+              <h3 class="text-xl font-bold">Comments</h3>
+            </div>
+
+            <div class="p-6">
+              <div class="mb-6">
+                <textarea 
+                  id="comment-input" 
+                  rows="3" 
+                  class="w-full bg-gray-700 text-white border border-gray-600 rounded-md p-3 focus:outline-none focus:border-purple-500"
+                  placeholder="Add a comment..."
+                ></textarea>
+                <button 
+                  id="submit-comment-btn"
+                  class="mt-2 bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 transition-colors"
+                  onclick="submitComment()"
+                >
+                  Post Comment
+                </button>
+              </div>
+
+              <div id="comments-container">
+                <!-- Comments will be loaded here -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overlay for mobile sidebar -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
+  </div>
+
+  <%- include('../partials/footer') %>
+  <%- include('../partials/scripts') %>
+  <script src="/js/course-learn.js"></script>
+</body>
+</html>
