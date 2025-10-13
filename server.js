@@ -127,6 +127,18 @@ app.get("/api/featured-courses", async (req, res) => {
   }
 });
 
+// API endpoint for featured courses
+app.get("/api/featured-courses", async (req, res) => {
+  try {
+    const CourseModel = require("./models/course.model");
+    const featuredCourses = await CourseModel.getFeaturedCourses();
+    res.json({ success: true, courses: featuredCourses });
+  } catch (error) {
+    console.error("Error fetching featured courses:", error);
+    res.status(500).json({ success: false, message: "Error loading courses" });
+  }
+});
+
 // About Us Page
 app.get("/about", (req, res) => {
   res.render("about_us");
@@ -142,6 +154,9 @@ app.post("/contact-us/submit", async (req, res) => {
   // Make async for DB operations
   // Extract form data
   const { name, email, subject, message } = req.body;
+
+  // Check if request is AJAX/fetch
+  const isAjax = req.xhr || req.headers.accept?.indexOf("json") > -1;
 
   // Basic validation
   if (!name || !email || !subject || !message) {

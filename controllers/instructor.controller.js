@@ -26,7 +26,14 @@ const upload = multer({ storage: storage });
 // Instructor controller
 const InstructorController = {
   getInstructorDashboard: async (req, res) => {
+    const isAjax = req.xhr || req.headers.accept?.indexOf("json") > -1;
+
     if (!req.session.user || req.session.user.role !== "instructor") {
+      if (isAjax) {
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+      }
       return res.redirect("/login");
     }
 
@@ -81,14 +88,33 @@ const InstructorController = {
 
       recentOrders = await Promise.all(enhancedOrdersPromises);
 
+      // Return JSON for AJAX requests
+      if (isAjax) {
+        return res.json({
+          success: true,
+          data: {
+            courses: instructorCourses,
+            totalStudents,
+            totalRevenue,
+            recentOrders,
+          },
+        });
+      }
+
+      // Render template for normal requests (with empty data - will be loaded by fetch)
       res.render("instructor/dashboard", {
-        courses: instructorCourses,
-        totalStudents,
-        totalRevenue,
-        recentOrders,
+        courses: [],
+        totalStudents: 0,
+        totalRevenue: 0,
+        recentOrders: [],
       });
     } catch (error) {
       console.error("Instructor Dashboard error:", error);
+      if (isAjax) {
+        return res
+          .status(500)
+          .json({ success: false, message: "Could not load dashboard data." });
+      }
       req.flash("error_msg", "Could not load dashboard.");
       res.redirect("/");
     }
@@ -177,12 +203,27 @@ const InstructorController = {
   },
 
   createCourse: (req, res) => {
+    const isAjax = req.xhr || req.headers.accept?.indexOf("json") > -1;
+
     if (!req.session.user || req.session.user.role !== "instructor") {
+      if (isAjax) {
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+      }
       return res.redirect("/login");
     }
 
     upload.single("thumbnail")(req, res, async (err) => {
       if (err) {
+        if (isAjax) {
+          return res
+            .status(400)
+            .json({
+              success: false,
+              message: "Error uploading file: " + err.message,
+            });
+        }
         req.flash("error_msg", "Error uploading file: " + err.message);
         return res.redirect("/instructor/courses/new");
       }
@@ -194,12 +235,21 @@ const InstructorController = {
         // Fetch instructor user data to get the name
         const instructor = await User.findById(instructorId);
         if (!instructor) {
+          if (isAjax) {
+            return res
+              .status(404)
+              .json({ success: false, message: "Instructor not found" });
+          }
           req.flash("error_msg", "Instructor not found");
           return res.redirect("/instructor/courses/new");
         }
 
         // Use instructor's name or username or email
-        const instructorName = instructor.username || instructor.name || instructor.email || "Instructor";
+        const instructorName =
+          instructor.username ||
+          instructor.name ||
+          instructor.email ||
+          "Instructor";
 
         const newCourseData = {
           title,
@@ -220,6 +270,15 @@ const InstructorController = {
 
         const newCourse = await Course.createCourse(newCourseData);
 
+        if (isAjax) {
+          return res.json({
+            success: true,
+            message: "Course created successfully. Add content now.",
+            redirectUrl: `/instructor/courses/${newCourse._id}/content`,
+            courseId: newCourse._id,
+          });
+        }
+
         req.flash(
           "success_msg",
           "Course created successfully. Add content now."
@@ -227,6 +286,14 @@ const InstructorController = {
         res.redirect(`/instructor/courses/${newCourse._id}/content`);
       } catch (error) {
         console.error("Create Course error:", error);
+        if (isAjax) {
+          return res
+            .status(500)
+            .json({
+              success: false,
+              message: error.message || "Error creating course",
+            });
+        }
         req.flash("error_msg", error.message || "Error creating course");
         res.redirect("/instructor/courses/new");
       }
@@ -263,7 +330,14 @@ const InstructorController = {
   },
 
   updateCourse: (req, res) => {
+    const isAjax = req.xhr || req.headers.accept?.indexOf("json") > -1;
+
     if (!req.session.user || req.session.user.role !== "instructor") {
+      if (isAjax) {
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+      }
       return res.redirect("/login");
     }
 
@@ -272,6 +346,14 @@ const InstructorController = {
 
     upload.single("thumbnail")(req, res, async (err) => {
       if (err) {
+        if (isAjax) {
+          return res
+            .status(400)
+            .json({
+              success: false,
+              message: "Error uploading file: " + err.message,
+            });
+        }
         req.flash("error_msg", "Error uploading file: " + err.message);
         return res.redirect(`/instructor/courses/${courseId}/edit`);
       }
@@ -284,6 +366,15 @@ const InstructorController = {
         const instructor = await User.findById(instructorId);
 
         if (!course || course.instructorId.toString() !== instructorId) {
+          if (isAjax) {
+            return res
+              .status(403)
+              .json({
+                success: false,
+                message:
+                  "Course not found or you do not have permission to edit it",
+              });
+          }
           req.flash(
             "error_msg",
             "Course not found or you do not have permission to edit it"
@@ -292,13 +383,19 @@ const InstructorController = {
         }
 
         // Use instructor's name or username or email
-        const instructorName = instructor ? (instructor.username || instructor.name || instructor.email || "Instructor") : "Instructor";
+        const instructorName = instructor
+          ? instructor.username ||
+            instructor.name ||
+            instructor.email ||
+            "Instructor"
+          : "Instructor";
 
         const updates = {
           title,
           description,
           category,
-          courseLanguage: language || course.courseLanguage || course.language || "English",
+          courseLanguage:
+            language || course.courseLanguage || course.language || "English",
           price: Number.parseFloat(price) || 0,
           status: status || course.status,
           instructor: instructorName, // Always update instructor name
@@ -311,10 +408,26 @@ const InstructorController = {
 
         await Course.updateCourse(courseId, updates);
 
+        if (isAjax) {
+          return res.json({
+            success: true,
+            message: "Course updated successfully",
+            redirectUrl: "/instructor/courses",
+          });
+        }
+
         req.flash("success_msg", "Course updated successfully");
         res.redirect("/instructor/courses");
       } catch (error) {
         console.error("Update Course error:", error);
+        if (isAjax) {
+          return res
+            .status(500)
+            .json({
+              success: false,
+              message: error.message || "Error updating course",
+            });
+        }
         req.flash("error_msg", error.message || "Error updating course");
         res.redirect(`/instructor/courses/${courseId}/edit`);
       }
@@ -622,7 +735,7 @@ const InstructorController = {
   },
 
   updateLesson: (req, res) => {
-        console.log('.........updateLesson')
+    console.log(".........updateLesson");
 
     if (!req.session.user || req.session.user.role !== "instructor") {
       return res.status(401).json({ success: false, message: "Unauthorized" });
@@ -716,7 +829,7 @@ const InstructorController = {
       } catch (error) {
         console.error("Update Lesson error:", error);
         const errorMsg = error.message || "Error updating lesson";
-        console.log('.........', errorMsg)
+        console.log(".........", errorMsg);
         if (req.xhr || req.headers.accept.includes("json")) {
           return res.status(500).json({ success: false, message: errorMsg });
         }

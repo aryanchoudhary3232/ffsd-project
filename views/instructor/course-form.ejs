@@ -18,15 +18,9 @@
 
     <form 
       id="courseForm"
-      action="<%= isEdit ? `/instructor/courses/${course._id}` : '/instructor/courses/new' %>" 
-      method="POST" 
-      enctype="multipart/form-data" 
       class="bg-gray-800 p-6 rounded-lg"
       novalidate
     >
-      <% if (isEdit) { %>
-        <input type="hidden" name="_method" value="PUT">
-      <% } %>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Title -->
         <div>
@@ -221,8 +215,10 @@
         element.classList.remove('border-red-500');
       }
       
-      // Form submission handler
-      form.addEventListener('submit', function(event) {
+      // Form submission handler with fetch
+      form.addEventListener('submit', async function(event) {
+        event.preventDefault(); // Always prevent default
+        
         let isValid = true;
         
         // Clear all previous errors
@@ -308,14 +304,91 @@
         }
         
         if (!isValid) {
-          event.preventDefault();
           // Scroll to the first error
           const firstError = document.querySelector('.error-message:not(.hidden)');
           if (firstError) {
             firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
+          return;
+        }
+        
+        // Submit form via fetch
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.textContent;
+        
+        try {
+          submitButton.disabled = true;
+          submitButton.textContent = isEditMode ? 'Updating...' : 'Creating...';
+          
+          // Prepare FormData
+          const formData = new FormData(form);
+          
+          // Determine URL and method
+          const url = isEditMode 
+            ? `/instructor/courses/<%= isEdit ? course._id : '' %>`
+            : '/instructor/courses/new';
+          
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json'
+            },
+            body: formData
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            showSuccessMessage(data.message);
+            
+            // Redirect after a short delay
+            setTimeout(() => {
+              window.location.href = data.redirectUrl;
+            }, 1000);
+          } else {
+            showErrorMessage(data.message || 'An error occurred');
+            submitButton.disabled = false;
+            submitButton.textContent = originalButtonText;
+          }
+        } catch (error) {
+          console.error('Error submitting form:', error);
+          showErrorMessage('An error occurred while saving the course. Please try again.');
+          submitButton.disabled = false;
+          submitButton.textContent = originalButtonText;
         }
       });
+      
+      // Helper function to show success message
+      function showSuccessMessage(message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'bg-green-800 border border-green-600 text-green-300 px-4 py-3 rounded mb-4';
+        alertDiv.textContent = message;
+        
+        const container = document.querySelector('.container');
+        const heading = container.querySelector('h1');
+        heading.insertAdjacentElement('afterend', alertDiv);
+        
+        // Auto-remove after 3 seconds
+        setTimeout(() => {
+          alertDiv.style.transition = 'opacity 0.3s ease-out';
+          alertDiv.style.opacity = '0';
+          setTimeout(() => alertDiv.remove(), 300);
+        }, 3000);
+      }
+      
+      // Helper function to show error message
+      function showErrorMessage(message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'bg-red-800 border border-red-600 text-red-300 px-4 py-3 rounded mb-4';
+        alertDiv.textContent = message;
+        
+        const container = document.querySelector('.container');
+        const heading = container.querySelector('h1');
+        heading.insertAdjacentElement('afterend', alertDiv);
+        
+        // Scroll to message
+        alertDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       
       // Real-time validation on input
       titleInput.addEventListener('input', function() {

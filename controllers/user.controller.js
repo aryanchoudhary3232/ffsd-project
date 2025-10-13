@@ -56,30 +56,38 @@ const UserController = {
     }
 
     try {
-        const userId = req.session.user.id;
-        const user = await User.findById(userId);
+      const userId = req.session.user.id;
+      const user = await User.findById(userId);
 
-        if (!user) {
-          req.flash("error_msg", "User not found");
-          return res.redirect("/");
-        }
+      if (!user) {
+        req.flash("error_msg", "User not found");
+        return res.redirect("/");
+      }
 
-        const adminCount = await User.countDocuments({ role: 'admin' });
-        res.render("user/profile", { user, adminCount });
+      const adminCount = await User.countDocuments({ role: "admin" });
+      res.render("user/profile", { user, adminCount });
     } catch (error) {
-        console.error("Get Profile error:", error);
-        req.flash("error_msg", "Could not load profile.");
-        res.redirect('/');
+      console.error("Get Profile error:", error);
+      req.flash("error_msg", "Could not load profile.");
+      res.redirect("/");
     }
   },
 
   updateUserProfile: async (req, res) => {
+    const isAjax = req.xhr || req.headers.accept?.indexOf("json") > -1;
+
     if (!req.session.user) {
+      if (isAjax) {
+        return res
+          .status(401)
+          .json({ success: false, message: "Please login to update profile" });
+      }
       return res.redirect("/login");
     }
 
     const userId = req.session.user.id;
-    const { name, email, currentPassword, newPassword, confirmPassword } = req.body;
+    const { name, email, currentPassword, newPassword, confirmPassword } =
+      req.body;
     const updates = {};
 
     // Validation functions
@@ -139,6 +147,9 @@ const UserController = {
     // Validate name
     const nameError = validateName(name);
     if (nameError) {
+      if (isAjax) {
+        return res.status(400).json({ success: false, message: nameError });
+      }
       req.flash("error_msg", nameError);
       return res.redirect("/user/profile");
     }
@@ -146,6 +157,9 @@ const UserController = {
     // Validate email
     const emailError = validateEmail(email);
     if (emailError) {
+      if (isAjax) {
+        return res.status(400).json({ success: false, message: emailError });
+      }
       req.flash("error_msg", emailError);
       return res.redirect("/user/profile");
     }
@@ -153,7 +167,7 @@ const UserController = {
     // Set updates after validation
     const trimmedName = name.trim();
     const trimmedEmail = email.trim().toLowerCase();
-    
+
     updates.name = trimmedName;
     updates.username = trimmedName;
     updates.email = trimmedEmail;
@@ -161,39 +175,84 @@ const UserController = {
     try {
       const user = await User.findById(userId);
       if (!user) {
-          req.flash("error_msg", "User not found.");
-          return res.redirect("/user/profile");
+        if (isAjax) {
+          return res
+            .status(404)
+            .json({ success: false, message: "User not found." });
+        }
+        req.flash("error_msg", "User not found.");
+        return res.redirect("/user/profile");
       }
 
       // Check if email is already taken by another user
       if (updates.email !== user.email) {
-        const existingUser = await User.findOne({ email: updates.email, _id: { $ne: userId } });
+        const existingUser = await User.findOne({
+          email: updates.email,
+          _id: { $ne: userId },
+        });
         if (existingUser) {
+          if (isAjax) {
+            return res
+              .status(400)
+              .json({
+                success: false,
+                message: "Email is already in use by another account",
+              });
+          }
           req.flash("error_msg", "Email is already in use by another account");
           return res.redirect("/user/profile");
         }
       }
 
       // Password validation and update
-      if (newPassword && newPassword.trim() !== '') {
+      if (newPassword && newPassword.trim() !== "") {
         const passwordError = validatePassword(newPassword);
         if (passwordError) {
+          if (isAjax) {
+            return res
+              .status(400)
+              .json({ success: false, message: passwordError });
+          }
           req.flash("error_msg", passwordError);
           return res.redirect("/user/profile");
         }
 
         if (newPassword !== confirmPassword) {
+          if (isAjax) {
+            return res
+              .status(400)
+              .json({ success: false, message: "New passwords do not match" });
+          }
           req.flash("error_msg", "New passwords do not match");
           return res.redirect("/user/profile");
         }
 
         if (!currentPassword) {
-          req.flash("error_msg", "Current password is required to change password");
+          if (isAjax) {
+            return res
+              .status(400)
+              .json({
+                success: false,
+                message: "Current password is required to change password",
+              });
+          }
+          req.flash(
+            "error_msg",
+            "Current password is required to change password"
+          );
           return res.redirect("/user/profile");
         }
 
         const isMatch = await bcrypt.compare(currentPassword, user.password);
         if (!isMatch) {
+          if (isAjax) {
+            return res
+              .status(400)
+              .json({
+                success: false,
+                message: "Current password is incorrect",
+              });
+          }
           req.flash("error_msg", "Current password is incorrect");
           return res.redirect("/user/profile");
         }
@@ -202,19 +261,40 @@ const UserController = {
         updates.password = await bcrypt.hash(newPassword, salt);
       }
 
-      const updatedUser = await User.findByIdAndUpdate(userId, updates, { new: true });
+      const updatedUser = await User.findByIdAndUpdate(userId, updates, {
+        new: true,
+      });
 
       req.session.user = {
         ...req.session.user,
         name: updatedUser.name || updatedUser.username,
         username: updatedUser.username || updatedUser.name,
-        email: updatedUser.email
+        email: updatedUser.email,
       };
+
+      if (isAjax) {
+        return res.json({
+          success: true,
+          message: "Profile updated successfully",
+          user: {
+            name: updatedUser.name || updatedUser.username,
+            email: updatedUser.email,
+          },
+        });
+      }
 
       req.flash("success_msg", "Profile updated successfully");
       res.redirect("/user/profile");
     } catch (error) {
       console.error("Profile update error:", error);
+      if (isAjax) {
+        return res
+          .status(500)
+          .json({
+            success: false,
+            message: error.message || "Error updating profile",
+          });
+      }
       req.flash("error_msg", error.message || "Error updating profile");
       res.redirect("/user/profile");
     }
@@ -236,10 +316,10 @@ const UserController = {
     try {
       const user = await User.findById(userId);
       if (!user) {
-          req.flash("error_msg", "User not found.");
-          return res.redirect("/user/profile");
+        req.flash("error_msg", "User not found.");
+        return res.redirect("/user/profile");
       }
-      
+
       const isMatch = await bcrypt.compare(currentPassword, user.password);
       if (!isMatch) {
         req.flash("error_msg", "Current password is incorrect");
@@ -265,29 +345,33 @@ const UserController = {
     }
 
     try {
-        const userId = req.session.user.id;
-        const user = await User.findById(userId).populate('enrolledCourses');
-        
-        if (!user) {
-            req.flash("error_msg", "User not found.");
-            return res.redirect('/dashboard');
-        }
+      const userId = req.session.user.id;
+      const user = await User.findById(userId).populate("enrolledCourses");
 
-        const progressRecords = await Progress.find({ userId: userId });
+      if (!user) {
+        req.flash("error_msg", "User not found.");
+        return res.redirect("/dashboard");
+      }
 
-        const enrolledCoursesWithProgress = user.enrolledCourses.map(course => {
-            const progress = progressRecords.find(p => p.courseId.equals(course._id));
-            return {
-                ...course.toObject(),
-                progress: progress ? progress.progress : 0
-            };
-        });
+      const progressRecords = await Progress.find({ userId: userId });
 
-        res.render("user/courses", { enrolledCourses: enrolledCoursesWithProgress });
+      const enrolledCoursesWithProgress = user.enrolledCourses.map((course) => {
+        const progress = progressRecords.find((p) =>
+          p.courseId.equals(course._id)
+        );
+        return {
+          ...course.toObject(),
+          progress: progress ? progress.progress : 0,
+        };
+      });
+
+      res.render("user/courses", {
+        enrolledCourses: enrolledCoursesWithProgress,
+      });
     } catch (error) {
-        console.error("Get User Courses error:", error);
-        req.flash("error_msg", "Could not load courses.");
-        res.redirect('/dashboard');
+      console.error("Get User Courses error:", error);
+      req.flash("error_msg", "Could not load courses.");
+      res.redirect("/dashboard");
     }
   },
 
@@ -297,8 +381,8 @@ const UserController = {
     try {
       const deletedUser = await User.findByIdAndDelete(userIdToDelete);
       if (!deletedUser) {
-          req.flash("error_msg", "User not found");
-          return res.redirect("/admin/users");
+        req.flash("error_msg", "User not found");
+        return res.redirect("/admin/users");
       }
 
       req.flash("success_msg", "User deleted successfully");
@@ -308,7 +392,7 @@ const UserController = {
       req.flash("error_msg", error.message || "Error deleting user");
       res.redirect("/admin/users");
     }
-  }
+  },
 };
 
 module.exports = UserController;

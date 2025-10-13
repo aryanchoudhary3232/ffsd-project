@@ -506,7 +506,10 @@
           registerBtn.classList.add('opacity-50', 'cursor-not-allowed');
         }
       }
-
+es.status(400).json({ 
+        success: false, 
+        error: "Please fill in all fields" 
+      });
       // Check form validity on input
       nameInput.addEventListener('input', checkFormValidity);
       emailInput.addEventListener('input', checkFormValidity);

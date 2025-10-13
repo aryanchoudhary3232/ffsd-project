@@ -133,90 +133,76 @@
           return; // Stop if validation fails
         }
 
-        // Collect form data
-        const formData = {
-          name: nameInput.value.trim(),
-          email: emailInput.value.trim(),
-          subject: document.getElementById("subject").value.trim(),
-          message: document.getElementById("message").value.trim()
-        };
-
-        // Disable submit button and show loading state
+        // Submit form via fetch
+        const submitButton = form.querySelector('button[type="submit"]');
         const originalButtonText = submitButton.textContent;
-        submitButton.disabled = true;
-        submitButton.textContent = 'Sending...';
-
+        
         try {
-          // Submit form using fetch
+          // Disable button and show loading state
+          submitButton.disabled = true;
+          submitButton.textContent = 'Sending...';
+
+          const formData = new FormData(form);
           const response = await fetch('/contact-us/submit', {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
             },
-            body: JSON.stringify(formData)
+            body: JSON.stringify({
+              name: formData.get('name'),
+              email: formData.get('email'),
+              subject: formData.get('subject'),
+              message: formData.get('message')
+            })
           });
 
-          const result = await response.json();
+          const data = await response.json();
 
-          // Remove any existing alert messages
-          const existingAlerts = document.querySelectorAll('.alert-message');
-          existingAlerts.forEach(alert => alert.remove());
-
-          if (result.success) {
+          if (data.success) {
             // Show success message
-            const successAlert = document.createElement('div');
-            successAlert.className = 'alert-message bg-green-500 text-white px-4 py-3 rounded relative mb-6';
-            successAlert.innerHTML = `<p>${result.message}</p>`;
-            form.parentElement.insertBefore(successAlert, form);
-            
+            showMessage(data.message, 'success');
             // Reset form
             form.reset();
-
-            // Scroll to message
-            successAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-            // Remove message after 5 seconds
-            setTimeout(() => {
-              successAlert.remove();
-            }, 5000);
           } else {
             // Show error message
-            const errorAlert = document.createElement('div');
-            errorAlert.className = 'alert-message bg-red-500 text-white px-4 py-3 rounded relative mb-6';
-            errorAlert.innerHTML = `<p>${result.error || 'An error occurred. Please try again.'}</p>`;
-            form.parentElement.insertBefore(errorAlert, form);
-
-            // Scroll to message
-            errorAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-            // Remove message after 5 seconds
-            setTimeout(() => {
-              errorAlert.remove();
-            }, 5000);
+            showMessage(data.message, 'error');
           }
         } catch (error) {
-          console.error('Error submitting form:', error);
-          
-          // Show error message
-          const errorAlert = document.createElement('div');
-          errorAlert.className = 'alert-message bg-red-500 text-white px-4 py-3 rounded relative mb-6';
-          errorAlert.innerHTML = '<p>Network error. Please check your connection and try again.</p>';
-          form.parentElement.insertBefore(errorAlert, form);
-
-          // Scroll to message
-          errorAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-          // Remove message after 5 seconds
-          setTimeout(() => {
-            errorAlert.remove();
-          }, 5000);
+          console.error('Error submitting contact form:', error);
+          showMessage('There was a problem submitting your message. Please try again later.', 'error');
         } finally {
-          // Re-enable submit button
+          // Re-enable button
           submitButton.disabled = false;
           submitButton.textContent = originalButtonText;
         }
       });
+
+      // Helper function to show messages
+      function showMessage(message, type) {
+        // Remove any existing message
+        const existingMessage = document.querySelector('.contact-message');
+        if (existingMessage) {
+          existingMessage.remove();
+        }
+
+        // Create message element
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `contact-message p-4 mb-4 rounded-lg ${
+          type === 'success' 
+            ? 'bg-green-100 text-green-700 border border-green-400' 
+            : 'bg-red-100 text-red-700 border border-red-400'
+        }`;
+        messageDiv.textContent = message;
+
+        // Insert before form
+        form.parentNode.insertBefore(messageDiv, form);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+          messageDiv.remove();
+        }, 5000);
+      }
     });
   </script>
 

@@ -1,4 +1,4 @@
-const User = require("../models/User"); 
+const User = require("../models/User");
 const ProgressModel = require("../models/progress.model");
 const CourseModel = require("../models/course.model");
 const bcrypt = require("bcryptjs");
@@ -13,6 +13,7 @@ const AuthController = {
 
   login: async (req, res) => {
     const { email, password } = req.body;
+    const isAjax = req.xhr || req.headers.accept?.indexOf("json") > -1;
 
     try {
       const user = await User.findOne({ email });
@@ -97,6 +98,7 @@ const AuthController = {
 
   register: async (req, res) => {
     const { name, email, password, confirmPassword, role } = req.body;
+    const isAjax = req.xhr || req.headers.accept?.indexOf("json") > -1;
 
     const errors = [];
     if (!name || !email || !password || !confirmPassword) {
@@ -144,7 +146,7 @@ const AuthController = {
         email,
         password,
         role: role || "student",
-        joinDate: new Date()
+        joinDate: new Date(),
       });
 
       user = await newUser.save();
@@ -210,45 +212,50 @@ const AuthController = {
     }
 
     try {
-        const user = await User.findById(req.session.user.id);
+      const user = await User.findById(req.session.user.id);
 
-        if (!user) {
-          req.session.destroy();
-          req.flash("error_msg", "User not found. Please log in again.");
-          return res.redirect("/login");
-        }
+      if (!user) {
+        req.session.destroy();
+        req.flash("error_msg", "User not found. Please log in again.");
+        return res.redirect("/login");
+      }
 
-        if (user.role === "admin") {
-          return res.redirect("/admin/dashboard");
-        } else if (user.role === "instructor") {
-          return res.redirect("/instructor/dashboard");
-        } else {
-          const enrolledCourseIds = user.enrolledCourses || [];
-          
-          const progressStats = await ProgressModel.getUserOverallProgress(user._id);
-          
-          const enrolledCoursesWithProgress = [];
-          
-          for (const courseId of enrolledCourseIds) {
-            const course = await CourseModel.getCourseById(courseId);
-            if (course) {
-              const progressData = await ProgressModel.getProgress(user._id, courseId);
-              enrolledCoursesWithProgress.push({
-                ...course,
-                progress: progressData ? progressData.progress : 0
-              });
-            }
+      if (user.role === "admin") {
+        return res.redirect("/admin/dashboard");
+      } else if (user.role === "instructor") {
+        return res.redirect("/instructor/dashboard");
+      } else {
+        const enrolledCourseIds = user.enrolledCourses || [];
+
+        const progressStats = await ProgressModel.getUserOverallProgress(
+          user._id
+        );
+
+        const enrolledCoursesWithProgress = [];
+
+        for (const courseId of enrolledCourseIds) {
+          const course = await CourseModel.getCourseById(courseId);
+          if (course) {
+            const progressData = await ProgressModel.getProgress(
+              user._id,
+              courseId
+            );
+            enrolledCoursesWithProgress.push({
+              ...course,
+              progress: progressData ? progressData.progress : 0,
+            });
           }
-
-          return res.render("dashboard/student", {
-            enrolledCourses: enrolledCoursesWithProgress,
-            progress: progressStats,
-          });
         }
+
+        return res.render("dashboard/student", {
+          enrolledCourses: enrolledCoursesWithProgress,
+          progress: progressStats,
+        });
+      }
     } catch (error) {
-        console.error("Dashboard error:", error);
-        req.flash("error_msg", "Could not load dashboard.");
-        res.redirect('/login');
+      console.error("Dashboard error:", error);
+      req.flash("error_msg", "Could not load dashboard.");
+      res.redirect("/login");
     }
   },
 };
