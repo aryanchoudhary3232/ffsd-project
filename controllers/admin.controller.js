@@ -1349,18 +1349,26 @@ const AdminController = {
 
     const courseId = req.params.id;
 
+    // Validate ObjectId
+    if (!AdminController.isValidObjectId(courseId)) {
+      if (isAjax) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid course ID" });
+      }
+      req.flash("error_msg", "Invalid course ID");
+      return res.redirect("/admin/courses");
+    }
+
     try {
-      const deleted = await Course.deleteCoSeekhoBharat;
-      urse(courseId);
+      const deleted = await Course.findByIdAndDelete(courseId);
 
       if (!deleted) {
         if (isAjax) {
-          return res
-            .status(404)
-            .json({
-              success: false,
-              message: "Course not found or could not be deleted",
-            });
+          return res.status(404).json({
+            success: false,
+            message: "Course not found or could not be deleted",
+          });
         }
         req.flash("error_msg", "Course not found or could not be deleted");
         return res.redirect("/admin/courses");
@@ -1378,12 +1386,10 @@ const AdminController = {
     } catch (error) {
       console.error("Admin Delete Course error:", error);
       if (isAjax) {
-        return res
-          .status(500)
-          .json({
-            success: false,
-            message: error.message || "Error deleting course.",
-          });
+        return res.status(500).json({
+          success: false,
+          message: error.message || "Error deleting course.",
+        });
       }
       req.flash("error_msg", error.message || "Error deleting course.");
       res.redirect("/admin/courses");

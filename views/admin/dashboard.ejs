@@ -332,7 +332,7 @@
                 <img class="h-10 w-10 rounded-full object-cover" 
                      src="${course.thumbnail || '/img/placeholder.svg'}" 
                      alt="${course.title}"
-                     onerror="this.src='/img/placeholder.svg'">
+                     onerror="if(this.src!=='http://localhost:5000/img/placeholder.svg') this.src='/img/placeholder.svg'; else this.style.display='none';">
               </div>
               <div class="ml-4">
                 <div class="text-sm font-medium text-gray-100">${course.title}</div>

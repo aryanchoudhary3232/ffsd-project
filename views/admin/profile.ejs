@@ -229,7 +229,9 @@
         
         try {
             console.log('Fetching admin profile data...');
-            const response = await fetch('/admin/api/profile');
+            const response = await fetch('/admin/api/profile', {
+                credentials: 'include'
+            });
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -447,6 +449,7 @@
 
             const response = await fetch('/admin/profile', {
                 method: 'PUT',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
