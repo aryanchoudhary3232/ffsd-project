@@ -122,6 +122,7 @@
         
         const response = await fetch('/admin/api/revenue', {
           method: 'GET',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest'

@@ -17,9 +17,10 @@ const toObjectId = (value) => {
     return value;
   }
 
-  const candidate = typeof value === "object" && typeof value.toString === "function"
-    ? value.toString()
-    : value;
+  const candidate =
+    typeof value === "object" && typeof value.toString === "function"
+      ? value.toString()
+      : value;
 
   if (typeof candidate === "string" && ObjectId.isValid(candidate)) {
     return new ObjectId(candidate);
@@ -41,7 +42,8 @@ const CourseModel = {
       .map((id) => toObjectId(id))
       .filter((id) => id !== null);
 
-    const query = normalizedIds.length > 0 ? { _id: { $nin: normalizedIds } } : {};
+    const query =
+      normalizedIds.length > 0 ? { _id: { $nin: normalizedIds } } : {};
     return await courses.find(query).limit(limit).toArray();
   },
 
@@ -92,7 +94,8 @@ const CourseModel = {
       title: courseData.title,
       description: courseData.description,
       category: courseData.category,
-      courseLanguage: courseData.courseLanguage || courseData.language || "English",
+      courseLanguage:
+        courseData.courseLanguage || courseData.language || "English",
       price: Number.parseFloat(courseData.price),
       instructorId: String(courseData.instructorId),
       instructor: courseData.instructor,
@@ -335,50 +338,92 @@ const CourseModel = {
   // Update course enrollment - update student count and instructor info
   updateCourseEnrollment: async (courseId) => {
     const { courses, users } = getCollections();
-    
+
     // Validate and convert to ObjectId
     if (!courseId || !ObjectId.isValid(courseId)) {
       throw new Error("Invalid course ID format");
     }
     const courseObjId = new ObjectId(courseId);
-    
+
     // Get current course
     const course = await courses.findOne({ _id: courseObjId });
     if (!course) {
       throw new Error("Course not found");
     }
-    
+
     // Calculate current student count by querying users collection
     const studentCount = await users.countDocuments({
-      enrolledCourses: courseId.toString()
+      enrolledCourses: courseId.toString(),
     });
-    
+
     // Update instructor info if it's missing
     let instructorInfo = course.instructor;
     if (!instructorInfo && course.instructorId) {
       try {
-        const instructor = await users.findOne({ _id: new ObjectId(course.instructorId) });
+        const instructor = await users.findOne({
+          _id: new ObjectId(course.instructorId),
+        });
         if (instructor) {
-          instructorInfo = instructor.username || instructor.email || "Instructor";
+          instructorInfo =
+            instructor.username || instructor.email || "Instructor";
         }
       } catch (error) {
-        console.error(`Error fetching instructor for course ${courseId}:`, error);
+        console.error(
+          `Error fetching instructor for course ${courseId}:`,
+          error
+        );
       }
     }
-    
+
     // Update the course document
     await courses.updateOne(
       { _id: courseObjId },
-      { 
-        $set: { 
+      {
+        $set: {
           students: studentCount,
           instructor: instructorInfo,
-          updatedAt: new Date()
-        } 
+          updatedAt: new Date(),
+        },
       }
     );
-    
+
     return await courses.findOne({ _id: courseObjId });
+  },
+
+  // Delete course by ID
+  findByIdAndDelete: async (id) => {
+    try {
+      const { courses } = getCollections();
+      const courseObjId = toObjectId(id);
+
+      if (!courseObjId) {
+        throw new Error("Invalid course ID format");
+      }
+
+      // First, find the course to return it
+      const course = await courses.findOne({ _id: courseObjId });
+
+      if (!course) {
+        return null;
+      }
+
+      // Delete the course
+      const result = await courses.deleteOne({ _id: courseObjId });
+
+      if (result.deletedCount === 1) {
+        return course; // Return the deleted course
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error("Error deleting course:", error);
+      throw error;
+    }
+  },
+
+  // Alternative delete method (same functionality)
+  deleteById: async (id) => {
+    return await CourseModel.findByIdAndDelete(id);
   },
 };
 
