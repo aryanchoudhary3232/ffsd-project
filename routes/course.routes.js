@@ -13,6 +13,9 @@ router.post("/filter", CourseController.filterCourses);
 // API endpoint for course details (JSON)
 router.get("/api/:id", CourseController.getCourseDetailsAPI);
 
+// API endpoint for course learning data (JSON)
+router.get("/api/:id/learn", isAuthenticated, CourseController.getCourseLearningDataAPI);
+
 // Course details page (HTML render)
 router.get("/:id", CourseController.getCourseDetails);
 
