@@ -104,8 +104,11 @@
       const emailInput = document.getElementById("email");
       const nameError = document.getElementById("name-error");
       const emailError = document.getElementById("email-error");
+      const submitButton = form.querySelector('button[type="submit"]');
 
-      form.addEventListener("submit", function (event) {
+      form.addEventListener("submit", async function (event) {
+        event.preventDefault(); // Always prevent default to handle with fetch
+        
         let valid = true;
 
         // Full Name Validation (Only letters and spaces)
@@ -127,7 +130,91 @@
         }
 
         if (!valid) {
-          event.preventDefault(); // Prevent form submission if validation fails
+          return; // Stop if validation fails
+        }
+
+        // Collect form data
+        const formData = {
+          name: nameInput.value.trim(),
+          email: emailInput.value.trim(),
+          subject: document.getElementById("subject").value.trim(),
+          message: document.getElementById("message").value.trim()
+        };
+
+        // Disable submit button and show loading state
+        const originalButtonText = submitButton.textContent;
+        submitButton.disabled = true;
+        submitButton.textContent = 'Sending...';
+
+        try {
+          // Submit form using fetch
+          const response = await fetch('/contact-us/submit', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify(formData)
+          });
+
+          const result = await response.json();
+
+          // Remove any existing alert messages
+          const existingAlerts = document.querySelectorAll('.alert-message');
+          existingAlerts.forEach(alert => alert.remove());
+
+          if (result.success) {
+            // Show success message
+            const successAlert = document.createElement('div');
+            successAlert.className = 'alert-message bg-green-500 text-white px-4 py-3 rounded relative mb-6';
+            successAlert.innerHTML = `<p>${result.message}</p>`;
+            form.parentElement.insertBefore(successAlert, form);
+            
+            // Reset form
+            form.reset();
+
+            // Scroll to message
+            successAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Remove message after 5 seconds
+            setTimeout(() => {
+              successAlert.remove();
+            }, 5000);
+          } else {
+            // Show error message
+            const errorAlert = document.createElement('div');
+            errorAlert.className = 'alert-message bg-red-500 text-white px-4 py-3 rounded relative mb-6';
+            errorAlert.innerHTML = `<p>${result.error || 'An error occurred. Please try again.'}</p>`;
+            form.parentElement.insertBefore(errorAlert, form);
+
+            // Scroll to message
+            errorAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Remove message after 5 seconds
+            setTimeout(() => {
+              errorAlert.remove();
+            }, 5000);
+          }
+        } catch (error) {
+          console.error('Error submitting form:', error);
+          
+          // Show error message
+          const errorAlert = document.createElement('div');
+          errorAlert.className = 'alert-message bg-red-500 text-white px-4 py-3 rounded relative mb-6';
+          errorAlert.innerHTML = '<p>Network error. Please check your connection and try again.</p>';
+          form.parentElement.insertBefore(errorAlert, form);
+
+          // Scroll to message
+          errorAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+          // Remove message after 5 seconds
+          setTimeout(() => {
+            errorAlert.remove();
+          }, 5000);
+        } finally {
+          // Re-enable submit button
+          submitButton.disabled = false;
+          submitButton.textContent = originalButtonText;
         }
       });
     });
