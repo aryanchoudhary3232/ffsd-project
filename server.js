@@ -112,13 +112,18 @@ app.use("/cart", cartRoutes);
 
 // Home page
 app.get("/", async (req, res) => {
+  res.render("index", { featuredCourses: [] });
+});
+
+// API endpoint for featured courses
+app.get("/api/featured-courses", async (req, res) => {
   try {
     const CourseModel = require("./models/course.model");
     const featuredCourses = await CourseModel.getFeaturedCourses();
-    res.render("index", { featuredCourses });
+    res.json({ success: true, data: featuredCourses });
   } catch (error) {
     console.error("Error fetching featured courses:", error);
-    res.render("index", { featuredCourses: [] });
+    res.status(500).json({ success: false, error: "Failed to fetch courses" });
   }
 });
 
@@ -140,6 +145,13 @@ app.post("/contact-us/submit", async (req, res) => {
 
   // Basic validation
   if (!name || !email || !subject || !message) {
+    // Check if it's an API request (fetch)
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Please fill in all fields" 
+      });
+    }
     req.flash("error_msg", "Please fill in all fields");
     return res.redirect("/contact-us");
   }
@@ -147,6 +159,12 @@ app.post("/contact-us/submit", async (req, res) => {
   // Email validation using simple regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Please provide a valid email address" 
+      });
+    }
     req.flash("error_msg", "Please provide a valid email address");
     return res.redirect("/contact-us");
   }
@@ -161,6 +179,14 @@ app.post("/contact-us/submit", async (req, res) => {
     // const newContactMessage = new Contact({ name, email, subject, message });
     // await newContactMessage.save();
 
+    // Check if it's an API request (fetch)
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.json({ 
+        success: true, 
+        message: "Thank you for your message. We'll be in touch soon!" 
+      });
+    }
+
     // Flash success messages
     req.flash(
       "success_msg",
@@ -172,6 +198,14 @@ app.post("/contact-us/submit", async (req, res) => {
     res.redirect("/contact-us");
   } catch (error) {
     console.error("Error handling contact form:", error);
+    
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.status(500).json({ 
+        success: false, 
+        error: "There was a problem submitting your message. Please try again later." 
+      });
+    }
+    
     req.flash(
       "error_msg",
       "There was a problem submitting your message. Please try again later."
