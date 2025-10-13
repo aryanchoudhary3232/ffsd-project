@@ -1,0 +1,542 @@
+<%- include('../partials/head', { title: 'Admin Profile - LearnHub' }) %>
+<body class="bg-black text-white">
+  <%- include('../partials/navbar') %>
+
+  <div class="container mx-auto px-4 py-8">
+    <!-- Header with back link -->
+    <div class="flex items-center mb-6">
+      <a href="/admin/dashboard" class="text-gray-400 hover:text-gray-200 mr-4">
+        <i class="fas fa-arrow-left"></i>
+      </a>
+      <div class="flex items-center">
+        <div class="flex-shrink-0 w-16 h-16 bg-red-700 rounded-full flex items-center justify-center mr-4">
+          <i class="fas fa-user-shield text-red-300 text-xl"></i>
+        </div>
+        <div>
+          <h1 id="profile-title" class="text-2xl font-bold">Admin Profile</h1>
+          <p id="profile-subtitle" class="text-gray-400">Administrator Dashboard</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-gray-800 p-6 rounded-lg">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+        <p class="text-white mt-2">Loading profile...</p>
+      </div>
+    </div>
+
+    <!-- Alert Container -->
+    <div id="alert-container" class="mb-4"></div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left Column: Admin Statistics -->
+      <div class="lg:col-span-1">
+        <div class="bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+          <h2 class="text-lg font-semibold mb-4 text-gray-100">Admin Statistics</h2>
+          <div class="space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="text-gray-400">Total Users:</span>
+              <span id="total-users" class="font-bold text-blue-400">-</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-400">Total Courses:</span>
+              <span id="total-courses" class="font-bold text-green-400">-</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-400">Total Orders:</span>
+              <span id="total-orders" class="font-bold text-yellow-400">-</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-400">Total Revenue:</span>
+              <span id="total-revenue" class="font-bold text-purple-400">-</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-400">Account Age:</span>
+              <span id="account-age" class="font-bold text-gray-300">-</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Completion -->
+        <div class="bg-gray-800 rounded-lg shadow-md p-6">
+          <h2 class="text-lg font-semibold mb-4 text-gray-100">Profile Completion</h2>
+          <div class="w-full bg-gray-700 rounded-full h-2">
+            <div id="profile-progress" class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+          <p id="profile-completion-text" class="text-sm text-gray-400 mt-2">0% Complete</p>
+        </div>
+      </div>
+      
+      <!-- Right Column: Profile Form -->
+      <div class="lg:col-span-2">
+        <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden">
+          <div class="p-4 border-b border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-100">Profile Information</h2>
+          </div>
+          
+          <div class="p-6">
+            <form id="profile-form">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Full Name -->
+                <div>
+                  <label for="name" class="block text-sm font-medium text-gray-300 mb-1">Full Name *</label>
+                  <input 
+                    type="text" 
+                    id="name" 
+                    name="name" 
+                    required
+                    minlength="2"
+                    maxlength="50"
+                    pattern="[a-zA-Z\s'-]+"
+                    title="Name can only contain letters, spaces, apostrophes, and hyphens"
+                    class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
+                  >
+                  <div id="name-error" class="text-red-400 text-sm mt-1 hidden"></div>
+                  <p class="text-gray-400 text-xs mt-1">Only letters, spaces, apostrophes, and hyphens allowed</p>
+                </div>
+
+                <!-- Email -->
+                <div>
+                  <label for="email" class="block text-sm font-medium text-gray-300 mb-1">Email Address *</label>
+                  <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    required
+                    maxlength="100"
+                    class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
+                  >
+                  <div id="email-error" class="text-red-400 text-sm mt-1 hidden"></div>
+                </div>
+              </div>
+
+              <!-- Bio -->
+              <div class="mb-6">
+                <label for="bio" class="block text-sm font-medium text-gray-300 mb-1">Bio</label>
+                <textarea 
+                  id="bio" 
+                  name="bio" 
+                  rows="4"
+                  maxlength="500"
+                  placeholder="Tell us about yourself..."
+                  class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
+                ></textarea>
+                <p class="text-gray-400 text-xs mt-1">Maximum 500 characters</p>
+              </div>
+
+              <!-- Role Display -->
+              <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-300 mb-1">Role</label>
+                <div class="w-full px-3 py-2 bg-gray-600 border border-gray-600 rounded-md text-white cursor-not-allowed">
+                  <span class="flex items-center">
+                    <i class="fas fa-user-shield mr-2 text-red-400"></i>
+                    Administrator
+                  </span>
+                </div>
+                <p class="text-gray-400 text-xs mt-1">Role cannot be changed</p>
+              </div>
+
+              <!-- Password Change Section -->
+              <div class="border-t border-gray-700 pt-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-100 mb-4">Change Password</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label for="currentPassword" class="block text-sm font-medium text-gray-300 mb-1">Current Password</label>
+                    <input 
+                      type="password" 
+                      id="currentPassword" 
+                      name="currentPassword" 
+                      class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
+                    >
+                    <div id="currentPassword-error" class="text-red-400 text-sm mt-1 hidden"></div>
+                  </div>
+
+                  <div>
+                    <label for="newPassword" class="block text-sm font-medium text-gray-300 mb-1">New Password</label>
+                    <input 
+                      type="password" 
+                      id="newPassword" 
+                      name="newPassword" 
+                      minlength="6"
+                      class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
+                    >
+                    <div id="newPassword-error" class="text-red-400 text-sm mt-1 hidden"></div>
+                    <p class="text-gray-400 text-xs mt-1">Minimum 6 characters</p>
+                  </div>
+
+                  <div>
+                    <label for="confirmPassword" class="block text-sm font-medium text-gray-300 mb-1">Confirm Password</label>
+                    <input 
+                      type="password" 
+                      id="confirmPassword" 
+                      name="confirmPassword" 
+                      class="w-full px-3 py-2 bg-gray-700 border border-gray-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-white"
+                    >
+                    <div id="confirmPassword-error" class="text-red-400 text-sm mt-1 hidden"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex justify-end space-x-4">
+                <button 
+                  type="button" 
+                  id="cancel-button"
+                  class="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  id="save-button"
+                  class="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span id="save-text">Save Changes</span>
+                  <span id="save-spinner" class="hidden">
+                    <i class="fas fa-spinner fa-spin mr-2"></i>Saving...
+                  </span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../partials/footer') %>
+  <%- include('../partials/scripts') %>
+  
+  <script>
+    let currentUser = null;
+    let statistics = null;
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const alertContainer = document.getElementById('alert-container');
+    const profileForm = document.getElementById('profile-form');
+    const cancelButton = document.getElementById('cancel-button');
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+        loadProfileData();
+        setupEventListeners();
+    });
+
+    // Load admin profile data via fetch API
+    async function loadProfileData() {
+        showLoading(true);
+        
+        try {
+            console.log('Fetching admin profile data...');
+            const response = await fetch('/admin/api/profile');
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                currentUser = data.data.user;
+                statistics = data.data.statistics;
+                
+                updateProfileDisplay();
+                updateStatistics();
+                populateForm();
+            } else {
+                showAlert('Error loading profile: ' + (data.message || 'Unknown error'), 'error');
+            }
+        } catch (error) {
+            console.error('Error loading profile:', error);
+            showAlert('Error loading profile: ' + error.message, 'error');
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    // Update profile display
+    function updateProfileDisplay() {
+        if (!currentUser) return;
+
+        document.getElementById('profile-title').textContent = `${currentUser.name || currentUser.username} Profile`;
+        document.getElementById('profile-subtitle').textContent = currentUser.email;
+        
+        // Update profile completion
+        const completion = currentUser.metadata?.profileCompletion || 0;
+        document.getElementById('profile-progress').style.width = `${completion}%`;
+        document.getElementById('profile-completion-text').textContent = `${completion}% Complete`;
+    }
+
+    // Update statistics
+    function updateStatistics() {
+        if (!statistics) return;
+
+        document.getElementById('total-users').textContent = statistics.totalUsers.toLocaleString();
+        document.getElementById('total-courses').textContent = statistics.totalCourses.toLocaleString();
+        document.getElementById('total-orders').textContent = statistics.totalOrders.toLocaleString();
+        document.getElementById('total-revenue').textContent = `₹${statistics.totalRevenue.toLocaleString()}`;
+        document.getElementById('account-age').textContent = `${statistics.accountAge} days`;
+    }
+
+    // Populate form with user data
+    function populateForm() {
+        if (!currentUser) return;
+
+        document.getElementById('name').value = currentUser.name || currentUser.username || '';
+        document.getElementById('email').value = currentUser.email || '';
+        document.getElementById('bio').value = currentUser.bio || '';
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+        // Form submission
+        profileForm.addEventListener('submit', handleFormSubmit);
+        
+        // Cancel button
+        cancelButton.addEventListener('click', function() {
+            window.location.href = '/admin/dashboard';
+        });
+
+        // Real-time validation
+        setupRealTimeValidation();
+    }
+
+    // Setup real-time validation
+    function setupRealTimeValidation() {
+        const nameField = document.getElementById('name');
+        const emailField = document.getElementById('email');
+        const currentPasswordField = document.getElementById('currentPassword');
+        const newPasswordField = document.getElementById('newPassword');
+        const confirmPasswordField = document.getElementById('confirmPassword');
+
+        // Name validation
+        nameField.addEventListener('blur', validateName);
+        nameField.addEventListener('input', validateName);
+
+        // Email validation
+        emailField.addEventListener('blur', validateEmail);
+        emailField.addEventListener('input', validateEmail);
+
+        // Password validation
+        newPasswordField.addEventListener('input', function() {
+            validatePassword();
+            if (confirmPasswordField.value) {
+                validatePasswordMatch();
+            }
+        });
+
+        confirmPasswordField.addEventListener('input', validatePasswordMatch);
+    }
+
+    // Validation functions
+    function validateName() {
+        const nameField = document.getElementById('name');
+        const nameValue = nameField.value.trim();
+
+        if (!nameValue) {
+            showFieldError('name-error', 'Full name is required');
+            return false;
+        }
+
+        if (!/^[a-zA-Z\s'-]+$/.test(nameValue)) {
+            showFieldError('name-error', 'Name can only contain letters, spaces, apostrophes, and hyphens');
+            return false;
+        }
+
+        hideFieldError('name-error');
+        return true;
+    }
+
+    function validateEmail() {
+        const emailField = document.getElementById('email');
+        const emailValue = emailField.value.trim();
+
+        if (!emailValue) {
+            showFieldError('email-error', 'Email is required');
+            return false;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailValue)) {
+            showFieldError('email-error', 'Please enter a valid email address');
+            return false;
+        }
+
+        hideFieldError('email-error');
+        return true;
+    }
+
+    function validatePassword() {
+        const newPasswordField = document.getElementById('newPassword');
+        const newPasswordValue = newPasswordField.value;
+
+        if (newPasswordValue && newPasswordValue.length < 6) {
+            showFieldError('newPassword-error', 'Password must be at least 6 characters long');
+            return false;
+        }
+
+        hideFieldError('newPassword-error');
+        return true;
+    }
+
+    function validatePasswordMatch() {
+        const newPasswordField = document.getElementById('newPassword');
+        const confirmPasswordField = document.getElementById('confirmPassword');
+
+        if (newPasswordField.value && confirmPasswordField.value && newPasswordField.value !== confirmPasswordField.value) {
+            showFieldError('confirmPassword-error', 'Passwords do not match');
+            return false;
+        }
+
+        hideFieldError('confirmPassword-error');
+        return true;
+    }
+
+    // Handle form submission
+    async function handleFormSubmit(e) {
+        e.preventDefault();
+
+        // Validate all fields
+        const isNameValid = validateName();
+        const isEmailValid = validateEmail();
+        const isPasswordValid = validatePassword();
+        const isPasswordMatchValid = validatePasswordMatch();
+
+        if (!isNameValid || !isEmailValid || !isPasswordValid || !isPasswordMatchValid) {
+            showAlert('Please fix the validation errors before submitting', 'error');
+            return;
+        }
+
+        // Check if password fields are provided together
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if ((currentPassword || newPassword || confirmPassword)) {
+            if (!currentPassword) {
+                showFieldError('currentPassword-error', 'Current password is required');
+                return;
+            }
+            if (!newPassword) {
+                showFieldError('newPassword-error', 'New password is required');
+                return;
+            }
+            if (!confirmPassword) {
+                showFieldError('confirmPassword-error', 'Confirm password is required');
+                return;
+            }
+        }
+
+        // Show loading state
+        toggleSaveButton(true);
+
+        try {
+            const formData = new FormData(profileForm);
+            const profileData = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                bio: formData.get('bio')
+            };
+
+            // Only include password fields if they're provided
+            if (currentPassword && newPassword) {
+                profileData.currentPassword = currentPassword;
+                profileData.newPassword = newPassword;
+            }
+
+            const response = await fetch('/admin/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(profileData)
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || `HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            console.log('Profile updated successfully:', result);
+            showAlert('Profile updated successfully!', 'success');
+            
+            // Clear password fields
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            
+            // Reload profile data to get updated information
+            setTimeout(() => {
+                loadProfileData();
+            }, 1000);
+            
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            showAlert(error.message || 'Failed to update profile. Please try again.', 'error');
+        } finally {
+            toggleSaveButton(false);
+        }
+    }
+
+    // Helper functions
+    function showFieldError(errorId, message) {
+        const errorElement = document.getElementById(errorId);
+        if (errorElement) {
+            errorElement.textContent = message;
+            errorElement.classList.remove('hidden');
+        }
+    }
+
+    function hideFieldError(errorId) {
+        const errorElement = document.getElementById(errorId);
+        if (errorElement) {
+            errorElement.classList.add('hidden');
+        }
+    }
+
+    function toggleSaveButton(loading) {
+        const saveButton = document.getElementById('save-button');
+        const saveText = document.getElementById('save-text');
+        const saveSpinner = document.getElementById('save-spinner');
+
+        if (loading) {
+            saveButton.disabled = true;
+            saveText.classList.add('hidden');
+            saveSpinner.classList.remove('hidden');
+        } else {
+            saveButton.disabled = false;
+            saveText.classList.remove('hidden');
+            saveSpinner.classList.add('hidden');
+        }
+    }
+
+    function showLoading(show) {
+        if (loadingOverlay) {
+            loadingOverlay.style.display = show ? 'flex' : 'none';
+        }
+    }
+
+    function showAlert(message, type = 'info') {
+        const alertClass = type === 'error' ? 'bg-red-800 border-red-600 text-red-300' : 
+                          type === 'success' ? 'bg-green-800 border-green-600 text-green-300' : 
+                          'bg-blue-800 border-blue-600 text-blue-300';
+        
+        alertContainer.innerHTML = `
+            <div class="${alertClass} border px-4 py-3 rounded mb-4">
+                ${message}
+            </div>
+        `;
+        
+        // Auto-hide after 5 seconds for success messages
+        if (type === 'success') {
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+    }
+  </script>
+</body>
+</html>

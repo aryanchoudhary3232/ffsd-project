@@ -17,10 +17,20 @@
       </div>
     <% } %>
 
+    <!-- Loading Spinner -->
+    <div id="loading-spinner" class="flex justify-center items-center py-8">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+      <span class="ml-3 text-gray-300">Loading users...</span>
+    </div>
+
     <!-- Users List -->
-    <div class="bg-gray-800 rounded-lg shadow-md overflow-hidden">
+    <div id="users-container" class="bg-gray-800 rounded-lg shadow-md overflow-hidden" style="display: none;">
       <div class="p-4 border-b border-gray-700">
-        <h2 class="text-lg font-semibold text-gray-100">Users (<%= users.length %>)</h2>
+        <h2 class="text-lg font-semibold text-gray-100">Users (<span id="users-count">0</span>)</h2>
+        <div class="mt-2 text-xs text-gray-400">
+          <span>Last updated: <span id="last-updated">--</span></span>
+          <span class="ml-4">Request ID: <span id="request-id">--</span></span>
+        </div>
       </div>
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-700">
@@ -33,40 +43,199 @@
               <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody class="bg-gray-800 divide-y divide-gray-700">
-            <% users.forEach(function(user) { %>
-              <tr>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center">
-                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-700 flex items-center justify-center">
-                      <span class="text-gray-400 font-medium"><%= user.username.charAt(0) %></span>
-                    </div>
-                    <div class="ml-4">
-                      <div class="text-sm font-medium text-gray-100"><%= user.username %></div>
-                    </div>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300"><%= user.email %></td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300"><%= user.role %></td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300"><%= new Date(user.joinDate).toLocaleDateString() %></td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <a href="/admin/users/<%= user._id %>" class="text-indigo-400 hover:text-indigo-200 mr-3">View</a>
-                  <!-- Add more actions like Edit/Delete if needed later -->
-                </td>
-              </tr>
-            <% }) %>
+          <tbody id="users-table-body" class="bg-gray-800 divide-y divide-gray-700">
+            <!-- Users will be populated dynamically -->
           </tbody>
         </table>
       </div>
-      <% if (users.length === 0) { %>
-        <div class="p-8 text-center">
-          <p class="text-gray-400">No users found.</p>
-        </div>
-      <% } %>
+      <div id="no-users-message" class="p-8 text-center" style="display: none;">
+        <p class="text-gray-400">No users found.</p>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-container" class="bg-red-800 border border-red-600 text-red-300 px-4 py-3 rounded mb-4" style="display: none;">
+      <p id="error-message">Failed to load users. Please try again.</p>
+      <button id="retry-button" class="mt-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm">
+        Retry
+      </button>
     </div>
   </div>
 
   <%- include('../partials/footer') %>
   <%- include('../partials/scripts') %>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // DOM Elements
+      const loadingSpinner = document.getElementById('loading-spinner');
+      const usersContainer = document.getElementById('users-container');
+      const errorContainer = document.getElementById('error-container');
+      const errorMessage = document.getElementById('error-message');
+      const retryButton = document.getElementById('retry-button');
+      const usersCount = document.getElementById('users-count');
+      const lastUpdated = document.getElementById('last-updated');
+      const requestId = document.getElementById('request-id');
+      const usersTableBody = document.getElementById('users-table-body');
+      const noUsersMessage = document.getElementById('no-users-message');
+
+      // Fetch users data from API
+      async function fetchUsers() {
+        try {
+          // Show loading state
+          loadingSpinner.style.display = 'flex';
+          usersContainer.style.display = 'none';
+          errorContainer.style.display = 'none';
+
+          // Make API request with detailed headers
+          const response = await fetch('/admin/api/users', {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest',
+              'Accept': 'application/json',
+              'Cache-Control': 'no-cache'
+            },
+            credentials: 'include' // Include cookies for session
+          });
+
+          // Log response details for debugging
+          console.log('Response Status:', response.status);
+          console.log('Response Headers:', [...response.headers.entries()]);
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          const data = await response.json();
+          console.log('API Response Data:', data);
+
+          if (data.success) {
+            displayUsers(data.data.users, data.data, data.meta);
+          } else {
+            throw new Error(data.message || 'Failed to fetch users');
+          }
+
+        } catch (error) {
+          console.error('Fetch Users Error:', error);
+          showError(error.message);
+        } finally {
+          // Hide loading spinner
+          loadingSpinner.style.display = 'none';
+        }
+      }
+
+      // Display users in the table
+      function displayUsers(users, data, meta) {
+        // Update metadata
+        usersCount.textContent = data.totalCount;
+        lastUpdated.textContent = new Date(data.timestamp).toLocaleString();
+        requestId.textContent = meta.requestId;
+
+        // Clear existing rows
+        usersTableBody.innerHTML = '';
+
+        if (users.length === 0) {
+          noUsersMessage.style.display = 'block';
+        } else {
+          noUsersMessage.style.display = 'none';
+          
+          // Create table rows for each user
+          users.forEach(user => {
+            const row = createUserRow(user);
+            usersTableBody.appendChild(row);
+          });
+        }
+
+        // Show users container
+        usersContainer.style.display = 'block';
+      }
+
+      // Create a table row for a user
+      function createUserRow(user) {
+        const tr = document.createElement('tr');
+        tr.classList.add('hover:bg-gray-700', 'transition-colors');
+        
+        // Get first character for avatar
+        const firstChar = user.username ? user.username.charAt(0).toUpperCase() : 'U';
+        
+        // Format join date
+        const joinDate = user.joinDate ? new Date(user.joinDate).toLocaleDateString() : 'N/A';
+
+        tr.innerHTML = `
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-700 flex items-center justify-center">
+                <span class="text-gray-400 font-medium">${firstChar}</span>
+              </div>
+              <div class="ml-4">
+                <div class="text-sm font-medium text-gray-100">${escapeHtml(user.username)}</div>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${escapeHtml(user.email)}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+            <span class="px-2 py-1 text-xs rounded-full ${getRoleBadgeClass(user.role)}">
+              ${escapeHtml(user.role)}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${joinDate}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+            <a href="/admin/users/${user._id}" class="text-indigo-400 hover:text-indigo-200 mr-3 transition-colors">
+              View
+            </a>
+          </td>
+        `;
+
+        return tr;
+      }
+
+      // Get role badge styling
+      function getRoleBadgeClass(role) {
+        switch (role) {
+          case 'admin':
+            return 'bg-red-900 text-red-200';
+          case 'instructor':
+            return 'bg-blue-900 text-blue-200';
+          case 'student':
+            return 'bg-green-900 text-green-200';
+          default:
+            return 'bg-gray-900 text-gray-200';
+        }
+      }
+
+      // Escape HTML to prevent XSS
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // Show error message
+      function showError(message) {
+        errorMessage.textContent = message;
+        errorContainer.style.display = 'block';
+        usersContainer.style.display = 'none';
+      }
+
+      // Retry button functionality
+      retryButton.addEventListener('click', fetchUsers);
+
+      // Auto-refresh every 30 seconds (optional)
+      let autoRefreshInterval = setInterval(fetchUsers, 30000);
+
+      // Stop auto-refresh when page is not visible
+      document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+          clearInterval(autoRefreshInterval);
+        } else {
+          autoRefreshInterval = setInterval(fetchUsers, 30000);
+        }
+      });
+
+      // Initial load
+      fetchUsers();
+    });
+  </script>
 </body>
 </html>

@@ -1,172 +1,582 @@
-<%- include('../partials/head', { title: course ? 'Edit Course - LearnHub' : 'Add New Course - LearnHub' }) %>
+<%- include('../partials/head', { title: 'Edit Course - LearnHub' }) %>
 <body class="bg-black text-white">
   <%- include('../partials/navbar') %>
 
   <div class="container mx-auto px-4 py-8">
     <!-- Header -->
     <div class="flex items-center mb-6">
-      <a href="/admin/courses<%= course ? '/' + course._id : '' %>" class="text-gray-400 hover:text-gray-200 mr-4">
+      <a href="/admin/courses" class="text-gray-400 hover:text-gray-200 mr-4" id="back-link">
         <i class="fas fa-arrow-left"></i>
       </a>
-      <h1 class="text-2xl font-bold"><%= course ? 'Edit Course' : 'Add New Course' %></h1>
+      <h1 class="text-2xl font-bold" id="page-title">Edit Course</h1>
     </div>
     
-    <!-- Alerts -->
-    <% if(success_msg && success_msg.length > 0) { %>
-      <div class="bg-green-800 border border-green-600 text-green-300 px-4 py-3 rounded mb-4">
-        <%= success_msg %>
-      </div>
-    <% } %>
-    <% if(error_msg && error_msg.length > 0) { %>
-      <div class="bg-red-800 border border-red-600 text-red-300 px-4 py-3 rounded mb-4">
-        <%= error_msg %>
-      </div>
-    <% } %>
+    <!-- Loading State -->
+    <div id="loading" class="text-center py-16">
+      <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto"></div>
+      <p class="text-gray-400 mt-4">Loading course data...</p>
+    </div>
     
-    <div class="bg-gray-800 rounded-lg shadow-md p-6">
-      <form action="<%= course ? '/admin/courses/' + course._id + '?_method=PUT' : '/admin/courses' %>" method="POST" enctype="multipart/form-data">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Left Column -->
-          <div>
-            <div class="mb-4">
-              <label for="title" class="block text-gray-300 mb-2">Course Title</label>
-              <input 
-                type="text" 
-                id="title" 
-                name="title" 
-                value="<%= course ? course.title : '' %>" 
-                required 
-                pattern="[A-Za-z\s]+"
-                title="Course title can only contain letters and spaces"
-                oninput="this.value = this.value.replace(/[^A-Za-z\s]/g, '')"
-                class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
+    <!-- Error State -->
+    <div id="error" class="hidden bg-red-800 border border-red-600 text-red-300 px-4 py-3 rounded mb-4">
+      <div class="flex items-center">
+        <i class="fas fa-exclamation-triangle mr-2"></i>
+        <span id="error-message">An error occurred while loading course data.</span>
+      </div>
+      <button onclick="loadCourseData()" class="ml-auto bg-red-600 text-red-200 px-3 py-1 rounded text-sm hover:bg-red-700">
+        Retry
+      </button>
+    </div>
+    
+    <!-- Success Message -->
+    <div id="success" class="hidden bg-green-800 border border-green-600 text-green-300 px-4 py-3 rounded mb-4">
+      <div class="flex items-center">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span id="success-message"></span>
+      </div>
+    </div>
+    
+    <!-- Content Container -->
+    <div id="content" class="hidden">
+      <div class="bg-gray-800 rounded-lg shadow-md p-6">
+        <form id="course-form" enctype="multipart/form-data">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Left Column -->
+            <div>
+              <div class="mb-4">
+                <label for="title" class="block text-gray-300 mb-2">Course Title</label>
+                <input 
+                  type="text" 
+                  id="title" 
+                  name="title" 
+                  required 
+                  pattern="[A-Za-z\s]+"
+                  title="Course title can only contain letters and spaces"
+                  oninput="this.value = this.value.replace(/[^A-Za-z\s]/g, '')"
+                  class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                <div id="title-error" class="text-red-400 text-sm mt-1 hidden"></div>
+              </div>
+              
+              <div class="mb-4">
+                <label for="category" class="block text-gray-300 mb-2">Category</label>
+                <select id="category" name="category" required
+                  class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">Select a category</option>
+                  <option value="Web Development">Web Development</option>
+                  <option value="Mobile Development">Mobile Development</option>
+                  <option value="Data Science">Data Science</option>
+                  <option value="Machine Learning">Machine Learning</option>
+                  <option value="Game Development">Game Development</option>
+                  <option value="Business">Business</option>
+                  <option value="Design">Design</option>
+                  <option value="Other">Other</option>
+                </select>
+                <div id="category-error" class="text-red-400 text-sm mt-1 hidden"></div>
+              </div>
+              
+              <div class="mb-4">
+                <label for="price" class="block text-gray-300 mb-2">Price (₹)</label>
+                <input type="number" id="price" name="price" min="0" step="0.01" required
+                  class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <div id="price-error" class="text-red-400 text-sm mt-1 hidden"></div>
+              </div>
+              
+              <div class="mb-4">
+                <label for="instructor" class="block text-gray-300 mb-2">Instructor</label>
+                <select id="instructor" name="instructorId"
+                  class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="">Select an instructor (Optional)</option>
+                  <!-- Options will be populated dynamically -->
+                </select>
+                <div id="instructor-error" class="text-red-400 text-sm mt-1 hidden"></div>
+              </div>
+              
+              <div class="mb-4">
+                <label for="status" class="block text-gray-300 mb-2">Status</label>
+                <select id="status" name="status" required
+                  class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="draft">Draft</option>
+                  <option value="published">Published</option>
+                </select>
+                <div id="status-error" class="text-red-400 text-sm mt-1 hidden"></div>
+              </div>
+              
+              <div class="mb-4">
+                <label class="block text-gray-300 mb-2">Featured Course</label>
+                <label class="inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="featured" name="featured" class="sr-only peer">
+                  <div class="relative w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-500 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                  <span class="ml-2 text-sm font-medium text-gray-100">Feature on Homepage</span>
+                </label>
+              </div>
             </div>
             
-            <div class="mb-4">
-              <label for="category" class="block text-gray-300 mb-2">Category</label>
-              <select id="category" name="category" required
-                class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">Select a category</option>
-                <option value="Web Development" <%= course && course.category === 'Web Development' ? 'selected' : '' %>>Web Development</option>
-                <option value="Mobile Development" <%= course && course.category === 'Mobile Development' ? 'selected' : '' %>>Mobile Development</option>
-                <option value="Data Science" <%= course && course.category === 'Data Science' ? 'selected' : '' %>>Data Science</option>
-                <option value="Machine Learning" <%= course && course.category === 'Machine Learning' ? 'selected' : '' %>>Machine Learning</option>
-                <option value="Game Development" <%= course && course.category === 'Game Development' ? 'selected' : '' %>>Game Development</option>
-                <option value="Business" <%= course && course.category === 'Business' ? 'selected' : '' %>>Business</option>
-                <option value="Design" <%= course && course.category === 'Design' ? 'selected' : '' %>>Design</option>
-                <option value="Other" <%= course && course.category === 'Other' ? 'selected' : '' %>>Other</option>
-              </select>
-            </div>
-            
-            <div class="mb-4">
-              <label for="price" class="block text-gray-300 mb-2">Price (₹)</label>
-              <input type="number" id="price" name="price" value="<%= course ? course.price : '0' %>" min="0" step="0.01" required
-                class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-            
-            <div class="mb-4">
-              <label for="status" class="block text-gray-300 mb-2">Status</label>
-              <select id="status" name="status" required
-                class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="draft" <%= course && course.status === 'draft' ? 'selected' : '' %>>Draft</option>
-                <option value="published" <%= course && course.status === 'published' ? 'selected' : '' %>>Published</option>
-              </select>
-            </div>
-            
-            <div class="mb-4">
-              <label class="block text-gray-300 mb-2">Featured Course</label>
-              <label class="inline-flex items-center cursor-pointer">
-                <input type="checkbox" name="featured" <%= course && course.featured ? 'checked' : '' %> class="sr-only peer">
-                <div class="relative w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-500 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
-                <span class="ml-2 text-sm font-medium text-gray-100">Feature on Homepage</span>
-              </label>
+            <!-- Right Column -->
+            <div>
+              <div class="mb-4">
+                <label for="thumbnail" class="block text-gray-300 mb-2">Thumbnail Image</label>
+                <div id="current-thumbnail" class="mb-2 hidden">
+                  <img id="thumbnail-preview" class="w-full h-40 object-cover rounded-md mb-2">
+                  <p class="text-sm text-gray-400">Current thumbnail</p>
+                </div>
+                <input type="file" id="thumbnail" name="thumbnail" accept="image/*"
+                  class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <p class="text-sm text-gray-400 mt-1" id="thumbnail-help">Leave empty to keep current thumbnail</p>
+                <div id="thumbnail-error" class="text-red-400 text-sm mt-1 hidden"></div>
+              </div>
+              
+              <div class="mb-4">
+                <label for="description" class="block text-gray-300 mb-2">Course Description</label>
+                <textarea id="description" name="description" rows="6" required
+                  class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                <div id="description-error" class="text-red-400 text-sm mt-1 hidden"></div>
+              </div>
             </div>
           </div>
           
-          <!-- Right Column -->
-          <div>
-            <div class="mb-4">
-              <label for="thumbnail" class="block text-gray-300 mb-2">Thumbnail Image</label>
-              <% if (course && course.thumbnail) { %>
-                <div class="mb-2">
-                  <img src="<%= course.thumbnail %>" alt="Course thumbnail" class="w-full h-40 object-cover rounded-md mb-2">
-                  <p class="text-sm text-gray-400">Current thumbnail</p>
-                </div>
-              <% } %>
-              <input type="file" id="thumbnail" name="thumbnail" accept="image/*"
-                class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <p class="text-sm text-gray-400 mt-1"><%= course ? 'Leave empty to keep current thumbnail' : 'Upload a thumbnail for the course' %></p>
-            </div>
-            
-            <div class="mb-4">
-              <label for="description" class="block text-gray-300 mb-2">Course Description</label>
-              <textarea id="description" name="description" rows="6" required
-                class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"><%= course ? course.description : '' %></textarea>
-            </div>
+          <div class="border-t border-gray-700 mt-6 pt-6">
+            <h2 class="text-lg font-semibold mb-4">Course Content</h2>
+            <p class="text-gray-400 mb-4">To manage course modules and lessons, please save your changes and use the content editor on the course details page.</p>
           </div>
-        </div>
-        
-        <div class="border-t border-gray-700 mt-6 pt-6">
-          <h2 class="text-lg font-semibold mb-4">Course Content</h2>
-          <p class="text-gray-400 mb-4">To manage course modules and lessons, please save your changes and use the content editor on the course details page.</p>
-        </div>
-        
-        <div class="flex justify-end space-x-4 mt-6">
-          <a href="/admin/courses<%= course ? '/' + course._id : '' %>" class="bg-gray-700 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition-colors">
-            Cancel
-          </a>
-          <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors">
-            <%= course ? 'Save Changes' : 'Create Course' %>
-          </button>
-        </div>
-      </form>
+          
+          <div class="flex justify-end space-x-4 mt-6">
+            <a href="/admin/courses" id="cancel-link" class="bg-gray-700 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition-colors">
+              Cancel
+            </a>
+            <button type="submit" id="submit-btn" class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center">
+              <span id="submit-text">Save Changes</span>
+              <div id="submit-spinner" class="hidden ml-2">
+                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              </div>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
   <%- include('../partials/footer') %>
   <%- include('../partials/scripts') %>
+  
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const form = document.querySelector('form');
+    let courseId = null;
+    let courseData = null;
+    let formData = null;
+    let isEditMode = false;
+    
+    // Extract course ID from URL
+    function getCourseId() {
+      const pathSegments = window.location.pathname.split('/');
+      const courseIndex = pathSegments.indexOf('courses');
+      if (courseIndex !== -1 && pathSegments[courseIndex + 1] && pathSegments[courseIndex + 2] === 'edit') {
+        return pathSegments[courseIndex + 1];
+      }
+      return null;
+    }
+    
+    // Load course data from API (for edit mode) or form data (for new course)
+    async function loadCourseData() {
+      try {
+        showLoading();
+        hideError();
+        
+        courseId = getCourseId();
+        isEditMode = !!courseId;
+        
+        let apiUrl = isEditMode ? `/admin/api/courses/${courseId}/edit` : '/admin/api/courses/new';
+        
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+          },
+          credentials: 'same-origin'
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+          throw new Error(data.message || 'Failed to load form data');
+        }
+        
+        // Store form data (instructors, categories)
+        formData = data.data;
+        
+        if (isEditMode && data.data.course) {
+          courseData = data.data.course;
+          populateForm(courseData);
+        } else {
+          // For new courses, setup empty form with available options
+          setupNewCourseForm(data.data);
+        }
+        
+        updatePageTitle();
+        setupForm();
+        hideLoading();
+        showContent();
+        
+      } catch (error) {
+        console.error('Error loading course data:', error);
+        hideLoading();
+        showError(error.message);
+      }
+    }
+    
+    // Setup new course form with available options
+    function setupNewCourseForm(data) {
+      // Populate categories dropdown
+      populateCategories(data.categories || []);
+      
+      // Populate instructors dropdown
+      populateInstructors(data.instructors || []);
+      
+      // Set default values for new course
+      document.getElementById('title').value = '';
+      document.getElementById('category').value = '';
+      document.getElementById('price').value = '0';
+      document.getElementById('status').value = 'draft';
+      document.getElementById('featured').checked = false;
+      document.getElementById('description').value = '';
+      document.getElementById('instructor').value = '';
+      
+      // Hide thumbnail preview for new course
+      document.getElementById('current-thumbnail').classList.add('hidden');
+      
+      // Update back link and cancel link for new course
+      document.getElementById('back-link').href = '/admin/courses';
+      document.getElementById('cancel-link').href = '/admin/courses';
+    }
+
+    // Populate form with course data (edit mode)
+    function populateForm(course) {
+      // Populate categories dropdown first
+      populateCategories(formData.categories || []);
+      
+      // Populate instructors dropdown
+      populateInstructors(formData.instructors || []);
+      
+      // Fill form with course data
+      document.getElementById('title').value = course.title || '';
+      document.getElementById('category').value = course.category || '';
+      document.getElementById('price').value = course.price || '0';
+      document.getElementById('status').value = course.status || 'draft';
+      document.getElementById('featured').checked = !!course.featured;
+      document.getElementById('description').value = course.description || '';
+      document.getElementById('instructor').value = course.instructorId || '';
+      
+      // Show current thumbnail if exists
+      if (course.thumbnail) {
+        document.getElementById('current-thumbnail').classList.remove('hidden');
+        document.getElementById('thumbnail-preview').src = course.thumbnail;
+        document.getElementById('thumbnail-preview').alt = course.title;
+      }
+      
+      // Update back link and cancel link
+      document.getElementById('back-link').href = `/admin/courses/${course._id}`;
+      document.getElementById('cancel-link').href = `/admin/courses/${course._id}`;
+    }
+
+    // Populate categories dropdown
+    function populateCategories(categories) {
+      const categorySelect = document.getElementById('category');
+      // Clear existing options except the first one
+      while (categorySelect.children.length > 1) {
+        categorySelect.removeChild(categorySelect.lastChild);
+      }
+      
+      // Add categories from API
+      categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        categorySelect.appendChild(option);
+      });
+    }
+
+    // Populate instructors dropdown
+    function populateInstructors(instructors) {
+      const instructorSelect = document.getElementById('instructor');
+      // Clear existing options except the first one
+      while (instructorSelect.children.length > 1) {
+        instructorSelect.removeChild(instructorSelect.lastChild);
+      }
+      
+      // Add instructors from API
+      instructors.forEach(instructor => {
+        const option = document.createElement('option');
+        option.value = instructor.id;
+        option.textContent = `${instructor.name} (${instructor.email})`;
+        instructorSelect.appendChild(option);
+      });
+    }
+    
+    // Update page title and elements
+    function updatePageTitle() {
+      const title = isEditMode ? 'Edit Course' : 'Add New Course';
+      document.title = `${title} - LearnHub`;
+      document.getElementById('page-title').textContent = title;
+      document.getElementById('submit-text').textContent = isEditMode ? 'Save Changes' : 'Create Course';
+      document.getElementById('thumbnail-help').textContent = isEditMode 
+        ? 'Leave empty to keep current thumbnail' 
+        : 'Upload a thumbnail for the course';
+    }
+    
+    // Setup form validation and submission
+    function setupForm() {
+      const form = document.getElementById('course-form');
       const titleField = document.getElementById('title');
-      const descriptionField = document.getElementById('description');
+      const categoryField = document.getElementById('category');
       const priceField = document.getElementById('price');
-
-      form.addEventListener('submit', function(e) {
-        const errors = [];
-
-        // Title validation
-        const title = titleField.value.trim();
-        if (!title) {
-          errors.push('Course title is required.');
-        } else if (!/^[A-Za-z\s]+$/.test(title)) {
-          errors.push('Course title can only contain letters and spaces.');
-        } else if (title.length < 3) {
-          errors.push('Course title must be at least 3 characters.');
-        } else if (title.length > 100) {
-          errors.push('Course title must be 100 characters or fewer.');
+      const statusField = document.getElementById('status');
+      const descriptionField = document.getElementById('description');
+      const thumbnailField = document.getElementById('thumbnail');
+      
+      const instructorField = document.getElementById('instructor');
+      
+      // Real-time validation
+      titleField.addEventListener('input', () => validateField('title'));
+      categoryField.addEventListener('change', () => validateField('category'));
+      priceField.addEventListener('input', () => validateField('price'));
+      statusField.addEventListener('change', () => validateField('status'));
+      descriptionField.addEventListener('input', () => validateField('description'));
+      instructorField.addEventListener('change', () => validateField('instructor'));
+      
+      // Form submission
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        if (!validateForm()) {
+          return;
         }
-
-        // Description validation
-        const description = descriptionField.value.trim();
-        if (!description) {
-          errors.push('Course description is required.');
-        } else if (description.length < 10) {
-          errors.push('Course description must be at least 10 characters.');
-        }
-
-        // Price validation
-        const price = parseFloat(priceField.value);
-        if (price < 0) {
-          errors.push('Price cannot be negative.');
-        }
-
-        if (errors.length > 0) {
-          e.preventDefault();
-          alert(errors.join('\n'));
+        
+        await submitForm();
+      });
+    }
+    
+    // Validate individual field
+    function validateField(fieldName) {
+      const field = document.getElementById(fieldName);
+      const errorElement = document.getElementById(`${fieldName}-error`);
+      let isValid = true;
+      let errorMessage = '';
+      
+      switch (fieldName) {
+        case 'title':
+          const title = field.value.trim();
+          if (!title) {
+            errorMessage = 'Course title is required.';
+            isValid = false;
+          } else if (!/^[A-Za-z\s]+$/.test(title)) {
+            errorMessage = 'Course title can only contain letters and spaces.';
+            isValid = false;
+          } else if (title.length < 3) {
+            errorMessage = 'Course title must be at least 3 characters.';
+            isValid = false;
+          } else if (title.length > 100) {
+            errorMessage = 'Course title must be 100 characters or fewer.';
+            isValid = false;
+          }
+          break;
+          
+        case 'category':
+          if (!field.value) {
+            errorMessage = 'Please select a category.';
+            isValid = false;
+          }
+          break;
+          
+        case 'price':
+          const price = parseFloat(field.value);
+          if (isNaN(price) || price < 0) {
+            errorMessage = 'Price must be a valid non-negative number.';
+            isValid = false;
+          }
+          break;
+          
+        case 'status':
+          if (!field.value) {
+            errorMessage = 'Please select a status.';
+            isValid = false;
+          }
+          break;
+          
+        case 'description':
+          const description = field.value.trim();
+          if (!description) {
+            errorMessage = 'Course description is required.';
+            isValid = false;
+          } else if (description.length < 10) {
+            errorMessage = 'Course description must be at least 10 characters.';
+            isValid = false;
+          }
+          break;
+          
+        case 'instructor':
+          // Instructor is optional, so no validation needed
+          // But we can validate if provided value is valid
+          if (field.value && !field.querySelector(`option[value="${field.value}"]`)) {
+            errorMessage = 'Please select a valid instructor.';
+            isValid = false;
+          }
+          break;
+      }
+      
+      if (isValid) {
+        errorElement.classList.add('hidden');
+        field.classList.remove('border-red-500');
+        field.classList.add('border-gray-600');
+      } else {
+        errorElement.textContent = errorMessage;
+        errorElement.classList.remove('hidden');
+        field.classList.add('border-red-500');
+        field.classList.remove('border-gray-600');
+      }
+      
+      return isValid;
+    }
+    
+    // Validate entire form
+    function validateForm() {
+      const fields = ['title', 'category', 'price', 'status', 'description', 'instructor'];
+      let isValid = true;
+      
+      fields.forEach(field => {
+        if (!validateField(field)) {
+          isValid = false;
         }
       });
+      
+      return isValid;
+    }
+    
+    // Submit form data
+    async function submitForm() {
+      try {
+        setSubmitLoading(true);
+        hideError();
+        hideSuccess();
+        
+        const form = document.getElementById('course-form');
+        const formData = new FormData(form);
+        
+        // Add featured checkbox value
+        formData.set('featured', document.getElementById('featured').checked);
+        
+        const url = isEditMode ? `/admin/courses/${courseId}?_method=PUT` : '/admin/courses';
+        const method = 'POST'; // Always POST, but with _method for PUT
+        
+        const response = await fetch(url, {
+          method: method,
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          credentials: 'same-origin'
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
+        
+        // Check if response is JSON or redirect
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          if (!data.success) {
+            throw new Error(data.message || 'Failed to save course');
+          }
+          
+          showSuccess(data.message || `Course ${isEditMode ? 'updated' : 'created'} successfully!`);
+          
+          // Redirect after success
+          setTimeout(() => {
+            if (isEditMode) {
+              window.location.href = `/admin/courses/${courseId}`;
+            } else if (data.data && data.data.courseId) {
+              window.location.href = `/admin/courses/${data.data.courseId}`;
+            } else if (data.data && data.data.redirectUrl) {
+              window.location.href = data.data.redirectUrl;
+            } else {
+              window.location.href = '/admin/courses';
+            }
+          }, 1500);
+        } else {
+          // Handle redirect response (fallback for non-API requests)
+          showSuccess(`Course ${isEditMode ? 'updated' : 'created'} successfully!`);
+          setTimeout(() => {
+            window.location.href = isEditMode ? `/admin/courses/${courseId}` : '/admin/courses';
+          }, 1500);
+        }
+        
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        showError(error.message);
+      } finally {
+        setSubmitLoading(false);
+      }
+    }
+    
+    // UI state management
+    function showLoading() {
+      document.getElementById('loading').classList.remove('hidden');
+    }
+    
+    function hideLoading() {
+      document.getElementById('loading').classList.add('hidden');
+    }
+    
+    function showContent() {
+      document.getElementById('content').classList.remove('hidden');
+    }
+    
+    function showError(message) {
+      document.getElementById('error-message').textContent = message;
+      document.getElementById('error').classList.remove('hidden');
+    }
+    
+    function hideError() {
+      document.getElementById('error').classList.add('hidden');
+    }
+    
+    function showSuccess(message) {
+      document.getElementById('success-message').textContent = message;
+      document.getElementById('success').classList.remove('hidden');
+    }
+    
+    function hideSuccess() {
+      document.getElementById('success').classList.add('hidden');
+    }
+    
+    function setSubmitLoading(loading) {
+      const btn = document.getElementById('submit-btn');
+      const spinner = document.getElementById('submit-spinner');
+      const text = document.getElementById('submit-text');
+      
+      if (loading) {
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+        spinner.classList.remove('hidden');
+        text.textContent = isEditMode ? 'Saving...' : 'Creating...';
+      } else {
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        spinner.classList.add('hidden');
+        text.textContent = isEditMode ? 'Save Changes' : 'Create Course';
+      }
+    }
+    
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+      loadCourseData();
     });
   </script>
 </body>

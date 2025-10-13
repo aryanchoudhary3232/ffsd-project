@@ -144,37 +144,314 @@
   <%- include('../partials/footer') %>
   <%- include('../partials/scripts') %>
   <script>
+    let currentUser = null;
+    let adminCount = 1;
+    const currentUserId = '<%= userId %>';
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const alertContainer = document.getElementById('alert-container');
+    const editForm = document.getElementById('edit-user-form');
+    const backButton = document.getElementById('back-button');
+    const cancelButton = document.getElementById('cancel-button');
+
+    // Initialize page
     document.addEventListener('DOMContentLoaded', function() {
-      const nameField = document.getElementById('name');
-      const passwordField = document.getElementById('password');
-      const confirmPasswordField = document.getElementById('confirmPassword');
-      const form = document.querySelector('form');
-
-      form.addEventListener('submit', function(e) {
-        // Validate name
-        const nameValue = nameField.value.trim();
-        if (!/^[a-zA-Z\s]+$/.test(nameValue)) {
-          e.preventDefault();
-          alert('Full Name must contain only letters and spaces.');
-          return;
-        }
-
-        // Validate password
-        if (passwordField.value && passwordField.value.length !== 6) {
-          e.preventDefault();
-          alert('Password must be exactly 6 characters long.');
-          return;
-        }
-
-        // Check if password fields match (only if any password is entered)
-        if (passwordField.value || confirmPasswordField.value) {
-          if (passwordField.value !== confirmPasswordField.value) {
-            e.preventDefault();
-            alert('Passwords do not match');
-          }
-        }
-      });
+        loadUserData();
+        setupEventListeners();
     });
+
+    // Setup event listeners
+    function setupEventListeners() {
+        // Form submission
+        editForm.addEventListener('submit', handleFormSubmit);
+        
+        // Back and cancel buttons
+        if (backButton) {
+            backButton.addEventListener('click', function() {
+                window.location.href = `/admin/users/${currentUserId}`;
+            });
+        }
+        
+        if (cancelButton) {
+            cancelButton.addEventListener('click', function() {
+                window.location.href = `/admin/users/${currentUserId}`;
+            });
+        }
+
+        // Real-time validation
+        setupRealTimeValidation();
+    }
+
+    // Load user data via API
+    async function loadUserData() {
+        try {
+            const response = await fetch(`/admin/api/users/${currentUserId}/edit`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            currentUser = data.data.user;
+            adminCount = data.data.adminCount;
+
+            // Populate form with user data
+            populateForm(data.data.user);
+            
+            // Handle admin restrictions
+            handleAdminRestrictions(data.data.user, data.data.adminCount);
+            
+            // Hide loading overlay
+            loadingOverlay.classList.add('hidden');
+            
+            console.log('User edit data loaded:', data);
+            
+        } catch (error) {
+            console.error('Error loading user data:', error);
+            showAlert('Failed to load user data. Please try again.', 'error');
+            loadingOverlay.classList.add('hidden');
+        }
+    }
+
+    // Populate form with user data
+    function populateForm(user) {
+        document.getElementById('user-title').textContent = user.name || user.username;
+        document.getElementById('name').value = user.name || user.username || '';
+        document.getElementById('email').value = user.email || '';
+        document.getElementById('role').value = user.role || 'student';
+        document.getElementById('status').value = user.status || 'active';
+        document.getElementById('bio').value = user.bio || '';
+    }
+
+    // Handle admin restrictions
+    function handleAdminRestrictions(user, adminCount) {
+        const roleSelect = document.getElementById('role');
+        const roleWarning = document.getElementById('role-warning');
+        
+        if (user.role === 'admin' && adminCount <= 1) {
+            roleSelect.disabled = true;
+            roleWarning.classList.remove('hidden');
+        } else {
+            roleSelect.disabled = false;
+            roleWarning.classList.add('hidden');
+        }
+    }
+
+    // Setup real-time validation
+    function setupRealTimeValidation() {
+        const nameField = document.getElementById('name');
+        const emailField = document.getElementById('email');
+        const passwordField = document.getElementById('password');
+        const confirmPasswordField = document.getElementById('confirmPassword');
+
+        // Name validation
+        nameField.addEventListener('blur', function() {
+            validateName();
+        });
+
+        // Email validation
+        emailField.addEventListener('blur', function() {
+            validateEmail();
+        });
+
+        // Password validation
+        passwordField.addEventListener('input', function() {
+            validatePassword();
+            if (confirmPasswordField.value) {
+                validatePasswordMatch();
+            }
+        });
+
+        confirmPasswordField.addEventListener('input', function() {
+            validatePasswordMatch();
+        });
+    }
+
+    // Validation functions
+    function validateName() {
+        const nameField = document.getElementById('name');
+        const nameError = document.getElementById('name-error');
+        const nameValue = nameField.value.trim();
+
+        if (!nameValue) {
+            showFieldError('name-error', 'Full name is required');
+            return false;
+        }
+
+        if (!/^[a-zA-Z\s]+$/.test(nameValue)) {
+            showFieldError('name-error', 'Full name must contain only letters and spaces');
+            return false;
+        }
+
+        hideFieldError('name-error');
+        return true;
+    }
+
+    function validateEmail() {
+        const emailField = document.getElementById('email');
+        const emailError = document.getElementById('email-error');
+        const emailValue = emailField.value.trim();
+
+        if (!emailValue) {
+            showFieldError('email-error', 'Email is required');
+            return false;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailValue)) {
+            showFieldError('email-error', 'Please enter a valid email address');
+            return false;
+        }
+
+        hideFieldError('email-error');
+        return true;
+    }
+
+    function validatePassword() {
+        const passwordField = document.getElementById('password');
+        const passwordError = document.getElementById('password-error');
+        const passwordValue = passwordField.value;
+
+        if (passwordValue && passwordValue.length !== 6) {
+            showFieldError('password-error', 'Password must be exactly 6 characters long');
+            return false;
+        }
+
+        hideFieldError('password-error');
+        return true;
+    }
+
+    function validatePasswordMatch() {
+        const passwordField = document.getElementById('password');
+        const confirmPasswordField = document.getElementById('confirmPassword');
+        const confirmPasswordError = document.getElementById('confirmPassword-error');
+
+        if (passwordField.value !== confirmPasswordField.value) {
+            showFieldError('confirmPassword-error', 'Passwords do not match');
+            return false;
+        }
+
+        hideFieldError('confirmPassword-error');
+        return true;
+    }
+
+    // Handle form submission
+    async function handleFormSubmit(e) {
+        e.preventDefault();
+
+        // Validate all fields
+        const isNameValid = validateName();
+        const isEmailValid = validateEmail();
+        const isPasswordValid = validatePassword();
+        const isPasswordMatchValid = validatePasswordMatch();
+
+        if (!isNameValid || !isEmailValid || !isPasswordValid || !isPasswordMatchValid) {
+            showAlert('Please fix the validation errors before submitting', 'error');
+            return;
+        }
+
+        // Show loading state
+        toggleSaveButton(true);
+
+        try {
+            const formData = new FormData(editForm);
+            const userData = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                role: formData.get('role'),
+                status: formData.get('status'),
+                bio: formData.get('bio')
+            };
+
+            // Only include password if it's provided
+            if (formData.get('password')) {
+                userData.password = formData.get('password');
+            }
+
+            const response = await fetch(`/admin/users/${currentUserId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            
+            console.log('User updated successfully:', result);
+            showAlert('User updated successfully!', 'success');
+            
+            // Redirect after a short delay
+            setTimeout(() => {
+                window.location.href = `/admin/users/${currentUserId}`;
+            }, 1500);
+            
+        } catch (error) {
+            console.error('Error updating user:', error);
+            showAlert(error.message || 'Failed to update user. Please try again.', 'error');
+        } finally {
+            toggleSaveButton(false);
+        }
+    }
+
+    // Helper functions
+    function showFieldError(errorId, message) {
+        const errorElement = document.getElementById(errorId);
+        errorElement.textContent = message;
+        errorElement.classList.remove('hidden');
+    }
+
+    function hideFieldError(errorId) {
+        const errorElement = document.getElementById(errorId);
+        errorElement.classList.add('hidden');
+    }
+
+    function toggleSaveButton(loading) {
+        const saveButton = document.getElementById('save-button');
+        const saveText = document.getElementById('save-text');
+        const saveSpinner = document.getElementById('save-spinner');
+
+        if (loading) {
+            saveButton.disabled = true;
+            saveText.classList.add('hidden');
+            saveSpinner.classList.remove('hidden');
+        } else {
+            saveButton.disabled = false;
+            saveText.classList.remove('hidden');
+            saveSpinner.classList.add('hidden');
+        }
+    }
+
+    function showAlert(message, type = 'info') {
+        const alertClass = type === 'error' ? 'bg-red-800 border-red-600 text-red-300' : 
+                          type === 'success' ? 'bg-green-800 border-green-600 text-green-300' : 
+                          'bg-blue-800 border-blue-600 text-blue-300';
+        
+        alertContainer.innerHTML = `
+            <div class="${alertClass} border px-4 py-3 rounded">
+                ${message}
+            </div>
+        `;
+        alertContainer.classList.remove('hidden');
+        
+        // Auto-hide after 5 seconds for success messages
+        if (type === 'success') {
+            setTimeout(() => {
+                alertContainer.classList.add('hidden');
+            }, 5000);
+        }
+    }
   </script>
 </body>
 </html>

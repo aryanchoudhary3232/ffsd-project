@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const Course = require("../models/course.model");
 const Order = require("../models/order.model");
+const bcrypt = require("bcrypt");
 
 const AdminController = {
   isValidObjectId: (id) => {
@@ -11,6 +12,39 @@ const AdminController = {
   getAdminDashboard: async (req, res) => {
     if (!req.session.user || req.session.user.role !== "admin") {
       return res.redirect("/login");
+    }
+
+    try {
+      // Just render the page - data will be loaded via fetch API
+      res.render("admin/dashboard", {
+        stats: {
+          totalUsers: 0,
+          totalInstructors: 0,
+          totalCourses: 0,
+          totalRevenue: 0,
+          userDistribution: {
+            students: { percentage: 0 },
+            instructors: { percentage: 0 },
+            admins: { percentage: 0 },
+          },
+        },
+        recentUsers: [],
+        recentCourses: [],
+      });
+    } catch (error) {
+      console.error("Admin Dashboard page error:", error);
+      req.flash("error_msg", "Could not load dashboard page.");
+      res.redirect("/");
+    }
+  },
+
+  // API endpoint to fetch dashboard data
+  getDashboardAPI: async (req, res) => {
+    if (!req.session.user || req.session.user.role !== "admin") {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access",
+      });
     }
 
     try {
@@ -106,15 +140,65 @@ const AdminController = {
         userDistribution,
       };
 
-      res.render("admin/dashboard", {
-        stats,
-        recentUsers,
-        recentCourses,
+      // Get course categories distribution
+      const categoryStats = {};
+      recentCourses.forEach((course) => {
+        if (course.category) {
+          categoryStats[course.category] =
+            (categoryStats[course.category] || 0) + 1;
+        }
+      });
+
+      // Send JSON response with headers that can be seen in network tab
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("X-Total-Users", totalUsers.toString());
+      res.setHeader("X-Total-Courses", totalCourses.toString());
+      res.setHeader("X-Total-Revenue", totalRevenue.toFixed(2));
+      res.setHeader("X-Response-Time", new Date().toISOString());
+      res.setHeader(
+        "X-Admin-User",
+        req.session.user.username || req.session.user.email
+      );
+
+      res.status(200).json({
+        success: true,
+        message: "Dashboard data fetched successfully",
+        data: {
+          stats: stats,
+          recentUsers: recentUsers,
+          recentCourses: recentCourses,
+          categoryStats: categoryStats,
+          systemStatus: {
+            database: "operational",
+            api: "operational",
+            storage: "operational",
+          },
+          metadata: {
+            completedOrders: filteredCompletedOrders.length,
+            pendingOrders:
+              completedOrders.length - filteredCompletedOrders.length,
+            averageRevenuePerOrder:
+              filteredCompletedOrders.length > 0
+                ? (totalRevenue / filteredCompletedOrders.length).toFixed(2)
+                : 0,
+            dataFreshness: new Date().toISOString(),
+          },
+          timestamp: new Date().toISOString(),
+        },
+        meta: {
+          requestId: `dashboard_req_${Date.now()}`,
+          apiVersion: "1.0.0",
+          queryExecutionTime: Date.now(),
+        },
       });
     } catch (error) {
-      console.error("Admin Dashboard error:", error);
-      req.flash("error_msg", "Could not load dashboard.");
-      res.redirect("/");
+      console.error("Get Dashboard API error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch dashboard data",
+        error: error.message,
+        timestamp: new Date().toISOString(),
+      });
     }
   },
 
@@ -123,26 +207,67 @@ const AdminController = {
       return res.redirect("/login");
     }
     try {
+      // Just render the page - data will be loaded via fetch API
+      res.render("admin/users", {
+        users: [], // Empty array since we'll fetch data via API
+      });
+    } catch (error) {
+      console.error("Get Users page error:", error);
+      req.flash("error_msg", "Could not load users page.");
+      res.redirect("/admin/dashboard");
+    }
+  },
+
+  // API endpoint to fetch users data
+  getUsersAPI: async (req, res) => {
+    if (!req.session.user || req.session.user.role !== "admin") {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+    }
+
+    try {
       // Get all users
       let users = await User.find();
 
       // Process user data to ensure all have valid properties
-      // This prevents TypeError when accessing user.username.charAt(0) in the template
       users = users.map((user) => {
         const userObj = user.toObject ? user.toObject() : user;
         return {
           ...userObj,
           username:
-            userObj.username || userObj.name || userObj.email || "Unknown User", // Ensure username is always a string
+            userObj.username || userObj.name || userObj.email || "Unknown User",
           email: userObj.email || "N/A",
         };
       });
 
-      res.render("admin/users", { users });
+      // Send JSON response with headers that can be seen in network tab
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("X-Total-Users", users.length.toString());
+      res.setHeader("X-Response-Time", new Date().toISOString());
+
+      res.status(200).json({
+        success: true,
+        message: "Users fetched successfully",
+        data: {
+          users: users,
+          totalCount: users.length,
+          timestamp: new Date().toISOString(),
+        },
+        meta: {
+          requestId: `req_${Date.now()}`,
+          apiVersion: "1.0.0",
+        },
+      });
     } catch (error) {
-      console.error("Get Users error:", error);
-      req.flash("error_msg", "Could not load users.");
-      res.redirect("/admin/dashboard");
+      console.error("Get Users API error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch users",
+        error: error.message,
+        timestamp: new Date().toISOString(),
+      });
     }
   },
 
@@ -153,21 +278,105 @@ const AdminController = {
 
     try {
       const userId = req.params.id;
+
+      if (!AdminController.isValidObjectId(userId)) {
+        req.flash("error_msg", "Invalid User ID format.");
+        return res.redirect("/admin/users");
+      }
+
+      // Just render the page - data will be loaded via fetch API
+      res.render("admin/user-edit", {
+        userId: userId,
+        user: {
+          id: userId,
+          _id: userId,
+          username: "",
+          email: "",
+          role: "student",
+        },
+        adminCount: 0,
+      });
+    } catch (error) {
+      console.error("Get Edit User Form page error:", error);
+      req.flash("error_msg", "Could not load user edit page.");
+      res.redirect("/admin/users");
+    }
+  },
+
+  // API endpoint to fetch user edit form data
+  getEditUserFormAPI: async (req, res) => {
+    if (!req.session.user || req.session.user.role !== "admin") {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+    }
+
+    try {
+      const userId = req.params.id;
+
+      if (!AdminController.isValidObjectId(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid User ID format",
+        });
+      }
+
       const user = await User.findById(userId);
 
       if (!user) {
-        req.flash("error_msg", "User not found");
-        return res.redirect("/admin/users");
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
       }
 
       // Get admin count to prevent removing the last admin
       const adminCount = await User.countDocuments({ role: "admin" });
 
-      res.render("admin/user-edit", { user, adminCount });
+      // Send JSON response with headers that can be seen in network tab
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("X-User-ID", userId);
+      res.setHeader("X-User-Role", user.role || "unknown");
+      res.setHeader("X-Admin-Count", adminCount.toString());
+      res.setHeader(
+        "X-Can-Change-Role",
+        (user.role !== "admin" || adminCount > 1).toString()
+      );
+      res.setHeader("X-Response-Time", new Date().toISOString());
+
+      res.status(200).json({
+        success: true,
+        message: "User edit data fetched successfully",
+        data: {
+          user: {
+            ...(user.toObject ? user.toObject() : user),
+            id: user._id,
+          },
+          adminCount: adminCount,
+          canChangeRole: user.role !== "admin" || adminCount > 1,
+          isSelf: req.session.user.id === userId.toString(),
+          metadata: {
+            isLastAdmin: user.role === "admin" && adminCount === 1,
+            accountCreated: user.joinDate,
+            roleChangeAllowed: user.role !== "admin" || adminCount > 1,
+          },
+          timestamp: new Date().toISOString(),
+        },
+        meta: {
+          requestId: `user_edit_req_${Date.now()}`,
+          apiVersion: "1.0.0",
+          userId: userId,
+        },
+      });
     } catch (error) {
-      console.error("Get Edit User Form error:", error);
-      req.flash("error_msg", "Could not load user data.");
-      res.redirect("/admin/users");
+      console.error("Get User Edit Form API error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch user edit data",
+        error: error.message,
+        timestamp: new Date().toISOString(),
+      });
     }
   },
 
@@ -322,48 +531,39 @@ const AdminController = {
       return res.redirect("/login");
     }
 
+    try {
+      // Just render the page - data will be loaded via fetch API
+      res.render("admin/courses", {
+        courses: [], // Empty array since we'll fetch data via API
+        categories: [], // Will be populated by API
+        languages: [], // Will be populated by API
+        search: req.query.search || "",
+        category: req.query.category || "all",
+        language: req.query.language || "all",
+        sort: req.query.sort || "newest",
+      });
+    } catch (error) {
+      console.error("Get Courses page error:", error);
+      req.flash("error_msg", "Could not load courses page.");
+      res.redirect("/admin/dashboard");
+    }
+  },
+
+  // API endpoint to fetch courses data
+  getCoursesAPI: async (req, res) => {
+    if (!req.session.user || req.session.user.role !== "admin") {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+    }
+
     const {
       search = "",
       category = "all",
       language = "all",
       sort = "newest",
     } = req.query;
-    let query = {};
-    let sortOption = { createdAt: -1 };
-
-    // Build query
-    if (search) {
-      query.$or = [
-        { title: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-        { instructor: { $regex: search, $options: "i" } },
-      ];
-    }
-    if (category !== "all") {
-      query.category = category;
-    }
-    if (language !== "all") {
-      query.language = language;
-    }
-
-    // Build sort option
-    switch (sort) {
-      case "oldest":
-        sortOption = { createdAt: 1 };
-        break;
-      case "title-asc":
-        sortOption = { title: 1 };
-        break;
-      case "title-desc":
-        sortOption = { title: -1 };
-        break;
-      case "price-low":
-        sortOption = { price: 1 };
-        break;
-      case "price-high":
-        sortOption = { price: -1 };
-        break;
-    }
 
     try {
       // Get courses with search and filter criteria
@@ -408,11 +608,7 @@ const AdminController = {
 
       // Enhance courses with instructor data and student count
       const enhancedCoursesPromises = courses.map(async (course) => {
-        let instructorName = course.instructor || "Unknown Instructor"; // Use existing instructor field as fallback
-
-        console.log(`Processing course: ${course.title}`);
-        console.log(`Course instructorId: ${course.instructorId}`);
-        console.log(`Course instructor field: ${course.instructor}`);
+        let instructorName = course.instructor || "Unknown Instructor";
 
         if (
           course.instructorId &&
@@ -420,21 +616,12 @@ const AdminController = {
         ) {
           try {
             const instructor = await User.findById(course.instructorId);
-            console.log(
-              `Found instructor:`,
-              instructor
-                ? `${
-                    instructor.name || instructor.username || instructor.email
-                  }`
-                : "null"
-            );
-
             if (instructor) {
               instructorName =
                 instructor.name ||
                 instructor.username ||
                 instructor.email ||
-                course.instructor || // Fallback to stored instructor name
+                course.instructor ||
                 "Unknown Instructor";
             }
           } catch (error) {
@@ -442,21 +629,12 @@ const AdminController = {
               `Error fetching instructor for course ${course.title}:`,
               error
             );
-            // Keep the fallback name (course.instructor or "Unknown Instructor")
           }
-        } else {
-          console.log(
-            `Invalid or missing instructorId for course: ${course.title}`
-          );
         }
 
         const studentCount = await User.countDocuments({
           enrolledCourses: course._id,
         });
-
-        console.log(
-          `Final instructor name for ${course.title}: ${instructorName}`
-        );
 
         return {
           ...course,
@@ -466,74 +644,84 @@ const AdminController = {
       });
       const enhancedCourses = await Promise.all(enhancedCoursesPromises);
 
-      // Apply language filter in JavaScript if we're not doing it in the database query
-      let filteredCourses = enhancedCourses;
-      if (language !== "all") {
-        filteredCourses = enhancedCourses.filter(
-          (course) => course.courseLanguage === language
-        );
-      }
-
+      // Get categories and languages for filters
       const categories = await Course.getAllCategories();
-
-      // Get all unique languages from courses
       const languages = [
         ...new Set(
           enhancedCourses
             .map((course) => course.courseLanguage)
-            .filter((lang) => lang) // Remove undefined or empty languages
+            .filter((lang) => lang)
         ),
       ];
 
-      res.render("admin/courses", {
-        courses: filteredCourses,
-        categories,
-        languages,
-        search,
-        category,
-        language,
-        sort,
+      // Send JSON response with headers that can be seen in network tab
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("X-Total-Courses", enhancedCourses.length.toString());
+      res.setHeader("X-Response-Time", new Date().toISOString());
+      res.setHeader("X-Search-Query", search || "none");
+      res.setHeader("X-Category-Filter", category);
+      res.setHeader("X-Language-Filter", language);
+      res.setHeader("X-Sort-Order", sort);
+
+      res.status(200).json({
+        success: true,
+        message: "Courses fetched successfully",
+        data: {
+          courses: enhancedCourses,
+          categories: categories,
+          languages: languages,
+          totalCount: enhancedCourses.length,
+          filters: {
+            search: search,
+            category: category,
+            language: language,
+            sort: sort,
+          },
+          timestamp: new Date().toISOString(),
+        },
+        meta: {
+          requestId: `courses_req_${Date.now()}`,
+          apiVersion: "1.0.0",
+          queryParams: req.query,
+        },
       });
     } catch (error) {
-      console.error("Admin Get Courses error:", error);
-      req.flash("error_msg", "Could not load courses.");
-      res.redirect("/admin/dashboard");
+      console.error("Get Courses API error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch courses",
+        error: error.message,
+        timestamp: new Date().toISOString(),
+      });
     }
   },
 
-  getNewCourseForm: async (req, res) => {
+  // API endpoint to fetch course details
+  getCourseDetailsAPI: async (req, res) => {
     if (!req.session.user || req.session.user.role !== "admin") {
-      return res.redirect("/login");
-    }
-
-    try {
-      // Get instructors for dropdown
-      const instructors = await User.find({ role: "instructor" }, "name email");
-
-      res.render("admin/edit-course", {
-        course: null, // No course data for new course form
-        instructors,
-        formAction: "/admin/courses", // POST to create new course
-        formTitle: "Create New Course",
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access",
       });
-    } catch (error) {
-      console.error("Get New Course Form error:", error);
-      req.flash("error_msg", "Could not load course form.");
-      res.redirect("/admin/courses");
     }
-  },
 
-  getCourseDetails: async (req, res) => {
-    if (!req.session.user || req.session.user.role !== "admin") {
-      return res.redirect("/login");
-    }
     try {
       const courseId = req.params.id;
+
+      if (!AdminController.isValidObjectId(courseId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid course ID format",
+        });
+      }
+
       const course = await Course.getCourseById(courseId);
 
       if (!course) {
-        req.flash("error_msg", "Course not found");
-        return res.redirect("/admin/courses");
+        return res.status(404).json({
+          success: false,
+          message: "Course not found",
+        });
       }
 
       // Find the instructor separately since we can't use populate
@@ -545,17 +733,16 @@ const AdminController = {
         instructor = await User.findById(course.instructorId);
       }
 
-      // Ensure instructor is never undefined, provide default values if instructor not found
-      // idhar maine course  course.instructor add kiya hai
-      // isko dekh lena
+      // Ensure instructor is never undefined, provide default values
       const instructorName =
         instructor?.name ||
         instructor?.username ||
         course.instructor ||
         "Unknown Instructor";
-      instructor = {
+
+      const instructorData = {
         name: instructorName,
-        username: instructorName, // Adding username property to prevent TypeError
+        username: instructorName,
         email: instructor?.email || "N/A",
         id: instructor?._id || null,
       };
@@ -571,29 +758,179 @@ const AdminController = {
         const studentObj = student.toObject ? student.toObject() : student;
         return {
           ...studentObj,
-          name: studentObj.name || "Unknown Student", // Ensure name is always a string
+          name: studentObj.name || "Unknown Student",
           email: studentObj.email || "N/A",
           id: studentObj._id || null,
         };
       });
 
+      // Send JSON response with headers that can be seen in network tab
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("X-Course-ID", courseId);
+      res.setHeader("X-Course-Title", course.title || "Unknown");
+      res.setHeader("X-Course-Status", course.status || "draft");
+      res.setHeader("X-Enrolled-Students", enrolledStudents.length.toString());
+      res.setHeader("X-Response-Time", new Date().toISOString());
+
+      res.status(200).json({
+        success: true,
+        message: "Course details fetched successfully",
+        data: {
+          course: {
+            ...course,
+            instructor: instructorData.username,
+            students: enrolledStudents.length,
+            rating: course.rating || 0,
+          },
+          instructor: instructorData,
+          enrolledStudents: enrolledStudents,
+          metadata: {
+            totalEnrolledStudents: enrolledStudents.length,
+            courseAge: course.createdAt
+              ? Math.floor(
+                  (new Date() - new Date(course.createdAt)) /
+                    (1000 * 60 * 60 * 24)
+                )
+              : 0,
+            lastUpdated: course.updatedAt || course.createdAt,
+          },
+          timestamp: new Date().toISOString(),
+        },
+        meta: {
+          requestId: `course_details_req_${Date.now()}`,
+          apiVersion: "1.0.0",
+          courseId: courseId,
+        },
+      });
+    } catch (error) {
+      console.error("Get Course Details API error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch course details",
+        error: error.message,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  },
+
+  getNewCourseForm: async (req, res) => {
+    if (!req.session.user || req.session.user.role !== "admin") {
+      return res.redirect("/login");
+    }
+
+    try {
+      // Just render the page - data will be loaded via fetch API
+      res.render("admin/edit-course", {
+        course: null, // No course data for new course form
+        instructors: [], // Will be populated by API
+        formAction: "/admin/courses", // POST to create new course
+        formTitle: "Create New Course",
+      });
+    } catch (error) {
+      console.error("Get New Course Form error:", error);
+      req.flash("error_msg", "Could not load course form.");
+      res.redirect("/admin/courses");
+    }
+  },
+
+  // API endpoint to fetch new course form data
+  getNewCourseFormAPI: async (req, res) => {
+    if (!req.session.user || req.session.user.role !== "admin") {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+    }
+
+    try {
+      // Get instructors for dropdown
+      const instructors = await User.find({ role: "instructor" }, "name email");
+
+      // Get categories for dropdown
+      const categories = await Course.getAllCategories();
+
+      // Send JSON response with headers that can be seen in network tab
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("X-Available-Instructors", instructors.length.toString());
+      res.setHeader("X-Available-Categories", categories.length.toString());
+      res.setHeader("X-Form-Type", "new-course");
+      res.setHeader("X-Response-Time", new Date().toISOString());
+
+      res.status(200).json({
+        success: true,
+        message: "New course form data fetched successfully",
+        data: {
+          course: null, // No existing course data
+          instructors: instructors.map((instructor) => ({
+            id: instructor._id,
+            name: instructor.name || instructor.username || "Unknown",
+            email: instructor.email || "N/A",
+          })),
+          categories: categories,
+          formAction: "/admin/courses",
+          formTitle: "Create New Course",
+          metadata: {
+            totalInstructors: instructors.length,
+            totalCategories: categories.length,
+            isNewCourse: true,
+          },
+          timestamp: new Date().toISOString(),
+        },
+        meta: {
+          requestId: `new_course_req_${Date.now()}`,
+          apiVersion: "1.0.0",
+          formType: "new-course",
+        },
+      });
+    } catch (error) {
+      console.error("Get New Course Form API error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch new course form data",
+        error: error.message,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  },
+
+  getCourseDetails: async (req, res) => {
+    if (!req.session.user || req.session.user.role !== "admin") {
+      return res.redirect("/login");
+    }
+    try {
+      const courseId = req.params.id;
+
+      if (!AdminController.isValidObjectId(courseId)) {
+        req.flash("error_msg", "Invalid course ID format.");
+        return res.redirect("/admin/courses");
+      }
+
+      // Just render the page - data will be loaded via fetch API
       res.render("admin/course-details", {
         course: {
-          ...course, // Spread the original course data
-          // Override instructor and students with freshly fetched data
-          instructor: instructor.username, // Use the fetched instructor username
-          students: enrolledStudents.length, // Use the calculated student count
-          rating: course.rating || 0, // Ensure rating is a number, default to 0
+          _id: courseId,
+          title: "Loading...",
+          instructor: "Loading...",
+          students: 0,
+          rating: 0,
+          price: 0,
+          status: "loading",
+          category: "Loading...",
+          thumbnail: "/img/placeholder.svg",
         },
-        instructor: instructor, // Pass the full instructor object as before
-        enrolledStudents, // Pass the enrolled students array as before
-        // Add success/error messages if needed (optional, based on your flash setup)
+        instructor: {
+          name: "Loading...",
+          username: "Loading...",
+          email: "N/A",
+          id: null,
+        },
+        enrolledStudents: [],
         success_msg: req.flash("success_msg"),
         error_msg: req.flash("error_msg"),
       });
     } catch (error) {
-      console.error("Admin Get Course Details error:", error);
-      req.flash("error_msg", "Could not load course details.");
+      console.error("Get Course Details page error:", error);
+      req.flash("error_msg", "Could not load course details page.");
       res.redirect("/admin/courses");
     }
   },
@@ -605,39 +942,155 @@ const AdminController = {
 
     try {
       const courseId = req.params.id;
-      const course = await Course.getCourseById(courseId);
-      console.log(".....", course);
-      if (!course) {
-        req.flash("error_msg", "Course not found");
+
+      if (!AdminController.isValidObjectId(courseId)) {
+        req.flash("error_msg", "Invalid course ID format.");
         return res.redirect("/admin/courses");
+      }
+
+      // Just render the page - data will be loaded via fetch API
+      res.render("admin/edit-course", {
+        course: {
+          _id: courseId,
+          title: "",
+          description: "",
+          category: "",
+          price: 0,
+          status: "draft",
+          featured: false,
+          instructorId: null,
+          language: "",
+          thumbnail: "/img/placeholder.svg",
+        },
+        instructors: [], // Will be populated by API
+        formAction: `/admin/courses/${courseId}?_method=PUT`,
+        formTitle: "Edit Course",
+      });
+    } catch (error) {
+      console.error("Get Edit Course Form page error:", error);
+      req.flash("error_msg", "Could not load course edit page.");
+      res.redirect("/admin/courses");
+    }
+  },
+
+  // API endpoint to fetch course edit form data
+  getEditCourseFormAPI: async (req, res) => {
+    if (!req.session.user || req.session.user.role !== "admin") {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+    }
+
+    try {
+      const courseId = req.params.id;
+
+      if (!AdminController.isValidObjectId(courseId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid course ID format",
+        });
+      }
+
+      const course = await Course.getCourseById(courseId);
+      if (!course) {
+        return res.status(404).json({
+          success: false,
+          message: "Course not found",
+        });
       }
 
       // Get instructors for dropdown
       const instructors = await User.find({ role: "instructor" }, "name email");
 
-      res.render("admin/edit-course", {
-        course,
-        instructors,
-        formAction: `/admin/courses/${courseId}?_method=PUT`, // PUT to update existing course
-        formTitle: "Edit Course",
+      // Get categories for dropdown
+      const categories = await Course.getAllCategories();
+
+      // Send JSON response with headers that can be seen in network tab
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("X-Course-ID", courseId);
+      res.setHeader("X-Course-Title", course.title || "Unknown");
+      res.setHeader("X-Available-Instructors", instructors.length.toString());
+      res.setHeader("X-Available-Categories", categories.length.toString());
+      res.setHeader("X-Response-Time", new Date().toISOString());
+
+      res.status(200).json({
+        success: true,
+        message: "Course edit data fetched successfully",
+        data: {
+          course: course,
+          instructors: instructors.map((instructor) => ({
+            id: instructor._id,
+            name: instructor.name || instructor.username || "Unknown",
+            email: instructor.email || "N/A",
+          })),
+          categories: categories,
+          formAction: `/admin/courses/${courseId}?_method=PUT`,
+          formTitle: "Edit Course",
+          metadata: {
+            totalInstructors: instructors.length,
+            totalCategories: categories.length,
+            courseStatus: course.status || "draft",
+            courseCreated: course.createdAt,
+            courseUpdated: course.updatedAt,
+          },
+          timestamp: new Date().toISOString(),
+        },
+        meta: {
+          requestId: `course_edit_req_${Date.now()}`,
+          apiVersion: "1.0.0",
+          courseId: courseId,
+        },
       });
     } catch (error) {
-      console.error("Get Edit Course Form error:", error);
-      req.flash("error_msg", "Could not load course data.");
-      res.redirect("/admin/courses");
+      console.error("Get Course Edit Form API error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch course edit data",
+        error: error.message,
+        timestamp: new Date().toISOString(),
+      });
     }
   },
 
   createCourse: async (req, res) => {
     if (!req.session.user || req.session.user.role !== "admin") {
+      // Check if it's an API request
+      if (
+        req.headers["x-requested-with"] === "XMLHttpRequest" ||
+        req.headers.accept?.includes("application/json")
+      ) {
+        return res.status(401).json({
+          success: false,
+          message: "Unauthorized access",
+        });
+      }
       return res.redirect("/login");
     }
 
-    const { title, description, category, price, instructorId } = req.body;
+    const {
+      title,
+      description,
+      category,
+      price,
+      instructorId,
+      status,
+      featured,
+    } = req.body;
+    const isApiRequest =
+      req.headers["x-requested-with"] === "XMLHttpRequest" ||
+      req.headers.accept?.includes("application/json");
 
     try {
       if (!title || !description || !category) {
-        req.flash("error_msg", "Please fill in all required fields");
+        const errorMessage = "Please fill in all required fields";
+        if (isApiRequest) {
+          return res.status(400).json({
+            success: false,
+            message: errorMessage,
+          });
+        }
+        req.flash("error_msg", errorMessage);
         return res.redirect("/admin/courses/new");
       }
 
@@ -651,8 +1104,8 @@ const AdminController = {
         : "Unknown Instructor";
 
       const courseData = {
-        title,
-        description,
+        title: title.trim(),
+        description: description.trim(),
         category,
         price: parseFloat(price) || 0,
         instructorId: instructor ? instructor._id : null, // Store the actual ID found, or null
@@ -661,9 +1114,9 @@ const AdminController = {
           ? `/uploads/${req.file.filename}`
           : "/img/placeholder.svg",
         // Add language if it's part of the form
-        language: req.body.language || null, // Assuming language might be in req.body
-        status: "draft", // Default status
-        featured: false, // Default featured
+        language: req.body.language || null,
+        status: status || "draft", // Use provided status or default
+        featured: featured === "true" || featured === true || featured === "on", // Handle different boolean formats
         createdAt: new Date(),
         updatedAt: new Date(),
         modules: [], // Initialize modules
@@ -673,11 +1126,57 @@ const AdminController = {
 
       const newCourse = await Course.createCourse(courseData);
 
+      // Send JSON response with headers that can be seen in network tab
+      if (isApiRequest) {
+        res.setHeader("Content-Type", "application/json");
+        res.setHeader("X-Course-ID", newCourse._id.toString());
+        res.setHeader("X-Course-Title", newCourse.title);
+        res.setHeader("X-Course-Status", newCourse.status);
+        res.setHeader("X-Response-Time", new Date().toISOString());
+
+        return res.status(201).json({
+          success: true,
+          message: "Course created successfully",
+          data: {
+            course: {
+              ...(newCourse.toObject ? newCourse.toObject() : newCourse),
+              id: newCourse._id,
+            },
+            courseId: newCourse._id,
+            redirectUrl: `/admin/courses/${newCourse._id}`,
+            metadata: {
+              instructor: instructorName,
+              hasImage: !!req.file,
+              isFeatured: courseData.featured,
+              createdAt: courseData.createdAt,
+            },
+            timestamp: new Date().toISOString(),
+          },
+          meta: {
+            requestId: `create_course_req_${Date.now()}`,
+            apiVersion: "1.0.0",
+            courseId: newCourse._id,
+          },
+        });
+      }
+
+      // Traditional redirect for non-API requests
       req.flash("success_msg", "Course created successfully");
       res.redirect(`/admin/courses/${newCourse._id}`);
     } catch (error) {
       console.error("Create Course error:", error);
-      req.flash("error_msg", error.message || "Error creating course");
+      const errorMessage = error.message || "Error creating course";
+
+      if (isApiRequest) {
+        return res.status(500).json({
+          success: false,
+          message: errorMessage,
+          error: error.message,
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      req.flash("error_msg", errorMessage);
       res.redirect("/admin/courses/new");
     }
   },
@@ -957,17 +1456,111 @@ const AdminController = {
       return res.redirect("/login");
     }
     try {
-      const totalRevenue = await Order.getTotalRevenue();
-      const monthlyRevenueData = await Order.getRevenueByMonth();
-
+      // Just render the page - data will be loaded via fetch API
       res.render("admin/revenue", {
-        totalRevenue: totalRevenue.toFixed(2),
-        monthlyRevenue: monthlyRevenueData,
+        totalRevenue: "0.00", // Placeholder, will be loaded via API
+        monthlyRevenue: [], // Empty array, will be loaded via API
+        success_msg: req.flash("success_msg"),
+        error_msg: req.flash("error_msg"),
       });
     } catch (error) {
-      console.error("Admin Get Revenue error:", error);
-      req.flash("error_msg", "Could not load revenue data.");
+      console.error("Admin Get Revenue page error:", error);
+      req.flash("error_msg", "Could not load revenue page.");
       res.redirect("/admin/dashboard");
+    }
+  },
+
+  // API endpoint to fetch revenue data
+  getRevenueAPI: async (req, res) => {
+    if (!req.session.user || req.session.user.role !== "admin") {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+    }
+
+    try {
+      const totalRevenue = await Order.getTotalRevenue();
+      const monthlyRevenueData = await Order.getRevenueByMonth();
+      const allOrders = await Order.getAllOrders();
+
+      // Calculate additional revenue statistics
+      const completedOrders = allOrders.filter(
+        (order) => order.status === "completed"
+      );
+      const pendingOrders = allOrders.filter(
+        (order) => order.status === "pending"
+      );
+      const averageOrderValue =
+        completedOrders.length > 0 ? totalRevenue / completedOrders.length : 0;
+
+      // Calculate revenue growth (comparing last month with previous month)
+      let revenueGrowth = 0;
+      if (monthlyRevenueData.length >= 2) {
+        const lastMonth = monthlyRevenueData[monthlyRevenueData.length - 1];
+        const previousMonth = monthlyRevenueData[monthlyRevenueData.length - 2];
+        if (previousMonth.revenue > 0) {
+          revenueGrowth =
+            ((lastMonth.revenue - previousMonth.revenue) /
+              previousMonth.revenue) *
+            100;
+        }
+      }
+
+      // Get top revenue generating months
+      const sortedMonths = [...monthlyRevenueData].sort(
+        (a, b) => b.revenue - a.revenue
+      );
+      const topMonth = sortedMonths[0] || { month: "N/A", revenue: 0 };
+
+      // Send JSON response with headers that can be seen in network tab
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("X-Total-Revenue", totalRevenue.toFixed(2));
+      res.setHeader("X-Total-Orders", allOrders.length.toString());
+      res.setHeader("X-Completed-Orders", completedOrders.length.toString());
+      res.setHeader("X-Pending-Orders", pendingOrders.length.toString());
+      res.setHeader(
+        "X-Monthly-Data-Points",
+        monthlyRevenueData.length.toString()
+      );
+      res.setHeader("X-Revenue-Growth", revenueGrowth.toFixed(2) + "%");
+      res.setHeader("X-Response-Time", new Date().toISOString());
+
+      res.status(200).json({
+        success: true,
+        message: "Revenue data fetched successfully",
+        data: {
+          totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+          monthlyRevenue: monthlyRevenueData,
+          statistics: {
+            totalOrders: allOrders.length,
+            completedOrders: completedOrders.length,
+            pendingOrders: pendingOrders.length,
+            averageOrderValue: parseFloat(averageOrderValue.toFixed(2)),
+            revenueGrowth: parseFloat(revenueGrowth.toFixed(2)),
+            topMonth: topMonth,
+          },
+          metadata: {
+            dataPoints: monthlyRevenueData.length,
+            hasRevenueData: monthlyRevenueData.length > 0,
+            lastUpdated: new Date().toISOString(),
+            currency: "INR",
+          },
+          timestamp: new Date().toISOString(),
+        },
+        meta: {
+          requestId: `revenue_req_${Date.now()}`,
+          apiVersion: "1.0.0",
+        },
+      });
+    } catch (error) {
+      console.error("Get Revenue API error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch revenue data",
+        error: error.message,
+        timestamp: new Date().toISOString(),
+      });
     }
   },
 
@@ -984,11 +1577,56 @@ const AdminController = {
         return res.redirect("/admin/users");
       }
 
+      // Just render the page - data will be loaded via fetch API
+      res.render("admin/user-details", {
+        userId: userId,
+        user: {
+          _id: userId,
+          username: "Loading...",
+          email: "Loading...",
+          role: "loading",
+          joinDate: new Date(),
+        },
+        enrolledCourses: [],
+        instructorCourses: [],
+        orders: [],
+        adminCount: 0,
+        success_msg: req.flash("success_msg"),
+        error_msg: req.flash("error_msg"),
+      });
+    } catch (error) {
+      console.error("Get User Details page error:", error);
+      req.flash("error_msg", "Could not load user details page.");
+      res.redirect("/admin/users");
+    }
+  },
+
+  // API endpoint to fetch user details
+  getUserDetailsAPI: async (req, res) => {
+    if (!req.session.user || req.session.user.role !== "admin") {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+    }
+
+    try {
+      const userId = req.params.id;
+
+      if (!AdminController.isValidObjectId(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid User ID format",
+        });
+      }
+
       const user = await User.findById(userId);
 
       if (!user) {
-        req.flash("error_msg", "User not found");
-        return res.redirect("/admin/users");
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
       }
 
       const adminCount = await User.countDocuments({ role: "admin" });
@@ -1080,22 +1718,59 @@ const AdminController = {
 
       orders = await Promise.all(orders);
 
-      res.render("admin/user-details", {
-        user: {
-          ...(user.toObject ? user.toObject() : user),
-          id: user._id,
+      // Send JSON response with headers that can be seen in network tab
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("X-User-ID", userId);
+      res.setHeader("X-User-Role", user.role || "unknown");
+      res.setHeader("X-Enrolled-Courses", enrolledCourses.length.toString());
+      res.setHeader(
+        "X-Instructor-Courses",
+        instructorCourses.length.toString()
+      );
+      res.setHeader("X-Orders-Count", orders.length.toString());
+      res.setHeader("X-Response-Time", new Date().toISOString());
+
+      res.status(200).json({
+        success: true,
+        message: "User details fetched successfully",
+        data: {
+          user: {
+            ...(user.toObject ? user.toObject() : user),
+            id: user._id,
+          },
+          enrolledCourses: enrolledCourses,
+          instructorCourses: instructorCourses,
+          orders: orders,
+          adminCount: adminCount,
+          metadata: {
+            totalEnrolledCourses: enrolledCourses.length,
+            totalInstructorCourses: instructorCourses.length,
+            totalOrders: orders.length,
+            canDelete:
+              user.role !== "admin" ||
+              (user.role === "admin" && adminCount > 1),
+            accountAge: user.joinDate
+              ? Math.floor(
+                  (new Date() - new Date(user.joinDate)) / (1000 * 60 * 60 * 24)
+                )
+              : 0,
+          },
+          timestamp: new Date().toISOString(),
         },
-        enrolledCourses,
-        instructorCourses,
-        orders,
-        adminCount,
-        success_msg: req.flash("success_msg"),
-        error_msg: req.flash("error_msg"),
+        meta: {
+          requestId: `user_details_req_${Date.now()}`,
+          apiVersion: "1.0.0",
+          userId: userId,
+        },
       });
     } catch (error) {
-      console.error("Get User Details error:", error);
-      req.flash("error_msg", "Could not load user details.");
-      res.redirect("/admin/users");
+      console.error("Get User Details API error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch user details",
+        error: error.message,
+        timestamp: new Date().toISOString(),
+      });
     }
   },
 
@@ -1155,6 +1830,274 @@ const AdminController = {
       console.error("Admin Course Ratings error:", error);
       req.flash("error_msg", "Failed to retrieve course ratings");
       res.redirect("/admin/courses");
+    }
+  },
+
+  // Admin Profile Methods
+  getAdminProfile: async (req, res) => {
+    if (!req.session.user || req.session.user.role !== "admin") {
+      return res.redirect("/login");
+    }
+
+    try {
+      // Just render the page - data will be loaded via fetch API
+      res.render("admin/profile", {
+        user: {
+          _id: req.session.user.id,
+          username: "Loading...",
+          email: "Loading...",
+          role: "admin",
+          createdAt: new Date(),
+        },
+        success_msg: req.flash("success_msg"),
+        error_msg: req.flash("error_msg"),
+      });
+    } catch (error) {
+      console.error("Get Admin Profile page error:", error);
+      req.flash("error_msg", "Could not load profile page.");
+      res.redirect("/admin/dashboard");
+    }
+  },
+
+  // API endpoint to fetch admin profile data
+  getAdminProfileAPI: async (req, res) => {
+    if (!req.session.user || req.session.user.role !== "admin") {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+    }
+
+    try {
+      const userId = req.session.user.id;
+
+      if (!AdminController.isValidObjectId(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid User ID format",
+        });
+      }
+
+      const user = await User.findById(userId);
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      const adminCount = await User.countDocuments({ role: "admin" });
+      const totalUsers = await User.countDocuments();
+      const totalCourses = await Course.getAllCourses();
+      const totalOrders = await Order.getAllOrders();
+
+      // Calculate admin statistics
+      const stats = {
+        totalUsers: totalUsers,
+        totalCourses: totalCourses.length,
+        totalOrders: totalOrders.length,
+        totalRevenue: totalOrders.reduce(
+          (sum, order) => sum + (order.amount || 0),
+          0
+        ),
+        adminCount: adminCount,
+        accountAge: user.createdAt
+          ? Math.floor(
+              (new Date() - new Date(user.createdAt)) / (1000 * 60 * 60 * 24)
+            )
+          : 0,
+      };
+
+      // Send JSON response with headers that can be seen in network tab
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader("X-Admin-ID", userId);
+      res.setHeader("X-Admin-Name", user.username || user.name || "Unknown");
+      res.setHeader("X-Total-Users", stats.totalUsers.toString());
+      res.setHeader("X-Total-Courses", stats.totalCourses.toString());
+      res.setHeader("X-Total-Orders", stats.totalOrders.toString());
+      res.setHeader("X-Admin-Count", stats.adminCount.toString());
+      res.setHeader("X-Response-Time", new Date().toISOString());
+
+      // Calculate profile completion
+      const calculateProfileCompletion = (user) => {
+        let completion = 0;
+        const fields = ["username", "name", "email", "bio"];
+        fields.forEach((field) => {
+          if (user[field] && user[field].trim()) completion += 25;
+        });
+        return Math.min(completion, 100);
+      };
+
+      res.status(200).json({
+        success: true,
+        message: "Admin profile data fetched successfully",
+        data: {
+          user: {
+            ...(user.toObject ? user.toObject() : user),
+            id: user._id,
+          },
+          statistics: stats,
+          metadata: {
+            isLastAdmin: adminCount === 1,
+            canChangeRole: false, // Admins typically can't change their own role
+            lastLogin: user.lastLogin || user.createdAt,
+            profileCompletion: calculateProfileCompletion(user),
+          },
+          timestamp: new Date().toISOString(),
+        },
+        meta: {
+          requestId: `admin_profile_req_${Date.now()}`,
+          apiVersion: "1.0.0",
+          userId: userId,
+        },
+      });
+    } catch (error) {
+      console.error("Get Admin Profile API error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch admin profile data",
+        error: error.message,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  },
+
+  // Update admin profile
+  updateAdminProfile: async (req, res) => {
+    if (!req.session.user || req.session.user.role !== "admin") {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+    }
+
+    try {
+      const userId = req.session.user.id;
+      const { name, email, currentPassword, newPassword, bio } = req.body;
+
+      if (!AdminController.isValidObjectId(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid User ID format",
+        });
+      }
+
+      const user = await User.findById(userId);
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      }
+
+      // Prepare update object
+      const updates = {};
+
+      // Validate and update name
+      if (name && name.trim()) {
+        if (!/^[a-zA-Z\s'-]+$/.test(name.trim())) {
+          return res.status(400).json({
+            success: false,
+            message:
+              "Name can only contain letters, spaces, apostrophes, and hyphens",
+          });
+        }
+        updates.username = name.trim();
+        updates.name = name.trim();
+      }
+
+      // Validate and update email
+      if (email && email.trim()) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email.trim())) {
+          return res.status(400).json({
+            success: false,
+            message: "Please enter a valid email address",
+          });
+        }
+
+        // Check if email is already taken by another user
+        const existingUser = await User.findOne({
+          email: email.trim(),
+          _id: { $ne: userId },
+        });
+
+        if (existingUser) {
+          return res.status(400).json({
+            success: false,
+            message: "Email is already taken by another user",
+          });
+        }
+
+        updates.email = email.trim();
+      }
+
+      // Update bio if provided
+      if (bio !== undefined) {
+        updates.bio = bio.trim();
+      }
+
+      // Handle password update
+      if (currentPassword && newPassword) {
+        // Verify current password
+        const isValidPassword = await bcrypt.compare(
+          currentPassword,
+          user.password
+        );
+        if (!isValidPassword) {
+          return res.status(400).json({
+            success: false,
+            message: "Current password is incorrect",
+          });
+        }
+
+        // Validate new password
+        if (newPassword.length < 6) {
+          return res.status(400).json({
+            success: false,
+            message: "New password must be at least 6 characters long",
+          });
+        }
+
+        // Hash new password
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+        updates.password = hashedPassword;
+      }
+
+      // Update user
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { $set: updates },
+        { new: true, runValidators: true }
+      );
+
+      // Update session data
+      req.session.user.username = updatedUser.username || updatedUser.name;
+      req.session.user.email = updatedUser.email;
+
+      res.status(200).json({
+        success: true,
+        message: "Profile updated successfully",
+        data: {
+          user: {
+            ...(updatedUser.toObject ? updatedUser.toObject() : updatedUser),
+            id: updatedUser._id,
+          },
+          passwordChanged: !!(currentPassword && newPassword),
+        },
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Update Admin Profile error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to update profile",
+        error: error.message,
+        timestamp: new Date().toISOString(),
+      });
     }
   },
 };
