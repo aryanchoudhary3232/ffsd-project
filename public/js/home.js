@@ -43,7 +43,7 @@ async function loadFeaturedCourses() {
         container.appendChild(courseCard);
       });
 
-      // Trigger GSAP animation after courses are loaded
+      // Trigger GSAP animation after courses are loaded if available
       if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
         gsap.from('.course-card', {
           opacity: 0,
@@ -80,21 +80,26 @@ function createCourseCard(course) {
   const card = document.createElement('div');
   card.className = 'course-card';
   
+  // Get the rating and rating count
+  const rating = course.rating || 0;
+  const ratingCount = course.ratingCount || 0;
+  const price = course.price || 0;
+  
   card.innerHTML = `
-    <img src="${escapeHtml(course.thumbnail)}" alt="${escapeHtml(course.title)}" class="w-full h-48 object-cover rounded-t-lg">
+    <img src="${escapeHtml(course.thumbnail || '/img/course-placeholder.jpg')}" alt="${escapeHtml(course.title)}" class="w-full h-48 object-cover rounded-t-lg">
     <div class="p-6">
       <div class="flex justify-between items-start mb-2">
         <h3 class="text-xl font-bold">${escapeHtml(course.title)}</h3>
-        <span class="badge badge-primary">₹${parseFloat(course.price).toFixed(2)}</span>
+        <span class="badge badge-primary">₹${parseFloat(price).toFixed(2)}</span>
       </div>
-      <p class="text-gray-600 mb-4">${escapeHtml(course.instructor)}</p>
+      <p class="text-gray-600 mb-4">${escapeHtml(course.instructor || 'Unknown Instructor')}</p>
       <div class="flex justify-between items-center mb-4">
         <div class="flex items-center">
           <span class="text-yellow-500 mr-1">★</span>
-          <span>${escapeHtml(course.rating)}</span>
-          <span class="text-gray-500 ml-1">(${escapeHtml(course.students)})</span>
+          <span>${parseFloat(rating).toFixed(1)}</span>
+          <span class="text-gray-500 ml-1">(${ratingCount})</span>
         </div>
-        <span class="badge badge-secondary">${escapeHtml(course.category)}</span>
+        <span class="badge badge-secondary">${escapeHtml(course.category || 'General')}</span>
       </div>
       <a href="/courses/${escapeHtml(course._id)}" class="btn btn-primary w-full">View Course</a>
     </div>
