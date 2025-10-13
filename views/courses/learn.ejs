@@ -344,9 +344,10 @@
         }
       });
 
-      $('#sidebar-overlay').on('click', function() {
-        $('#sidebar-toggle').trigger('click');
-      });
+        overlay.addEventListener('click', function() {
+          sidebarToggle.click();
+        });
+      }
 
       loadComments();
       $('#post-comment-btn').on('click', postComment);
@@ -359,21 +360,21 @@
       const video = $('#lesson-video')[0];
       if (video) {
         let hasMarkedComplete = false;
-        $(video).on('timeupdate', function() {
+        video.addEventListener('timeupdate', function() {
           const percentWatched = (video.currentTime / video.duration) * 100;
           if (percentWatched >= 90 && !hasMarkedComplete) {
             hasMarkedComplete = true;
-            const $completeBtn = $('#complete-lesson-btn');
-            if ($completeBtn.length && !$completeBtn.prop('disabled')) {
+            const completeBtn = document.getElementById('complete-lesson-btn');
+            if (completeBtn && !completeBtn.disabled) {
               markAsComplete();
             }
           }
         });
         
-        $(video).on('ended', function() {
+        video.addEventListener('ended', function() {
           if (!hasMarkedComplete) {
-            const $completeBtn = $('#complete-lesson-btn');
-            if ($completeBtn.length && !$completeBtn.prop('disabled')) {
+            const completeBtn = document.getElementById('complete-lesson-btn');
+            if (completeBtn && !completeBtn.disabled) {
               markAsComplete();
             }
           }
@@ -381,62 +382,76 @@
       }
     });
 
-    function markAsComplete() {
-      const $completeBtn = $('#complete-lesson-btn');
-      $completeBtn.prop('disabled', true);
-      $completeBtn.html('<i class="fas fa-spinner fa-spin mr-2"></i> Processing...');
+    async function markAsComplete() {
+      const completeBtn = document.getElementById('complete-lesson-btn');
+      if (!completeBtn) return;
+      
+      completeBtn.disabled = true;
+      completeBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
       
       const apiUrl = `/courses/${courseId}/lessons/${lessonId}/complete`;
       if (!courseId || !lessonId) {
         console.error('Missing required IDs:', { courseId, lessonId });
-        $completeBtn.html('<i class="fas fa-times-circle mr-2"></i> Error');
-        $completeBtn.prop('disabled', false);
+        completeBtn.innerHTML = '<i class="fas fa-times-circle mr-2"></i> Error';
+        completeBtn.disabled = false;
         showToast('Error: Missing course or lesson information.', 'error');
         return;
       }
       
-      $.ajax({
-        url: apiUrl,
-        method: 'POST',
-        contentType: 'application/json',
-        dataType: 'json',
-        success: function(data) {
-          if (data.success) {
-            $completeBtn.html('<i class="fas fa-check-circle mr-2"></i> Completed');
-            $completeBtn.removeClass('bg-purple-500 hover:bg-purple-600');
-            $completeBtn.addClass('bg-green-500 hover:bg-green-600');
-            $('.progress-bar-fill')
-              .css('width', `${data.progress}%`)
-              .attr('data-progress', data.progress);
-            $('.text-sm.font-medium').text(`${data.progress}%`);
-            
-            showToast('Lesson marked as complete!', 'success');
-            
-            // Check if there's a next lesson button
-            const $nextLessonBtn = $('a:contains("Next Lesson")').last();
-            
-            if ($nextLessonBtn.length > 0) {
-              // Automatically navigate to next lesson after a short delay
-              setTimeout(() => {
-                window.location.href = $nextLessonBtn.attr('href');
-              }, 1500);
-            } else {
-              // No next lesson, reload to show completion state
-              setTimeout(() => { window.location.reload(); }, 1500);
-            }
-          } else {
-            $completeBtn.html('<i class="fas fa-times-circle mr-2"></i> Error');
-            $completeBtn.prop('disabled', false);
-            showToast(data.message || 'An error occurred.', 'error');
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
           }
-        },
-        error: function(xhr, status, error) {
-          console.error('Error marking lesson as complete:', error);
-          $completeBtn.html('<i class="fas fa-times-circle mr-2"></i> Error');
-          $completeBtn.prop('disabled', false);
-          showToast('Network error while marking lesson as complete. Check console for details.', 'error');
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
         }
-      });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          completeBtn.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Completed';
+          completeBtn.classList.remove('bg-purple-500', 'hover:bg-purple-600');
+          completeBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+          
+          // Update progress bar
+          const progressBar = document.querySelector('.bg-purple-500.h-2\\.5.rounded-full');
+          const progressText = document.querySelectorAll('.text-sm.font-medium');
+          if (progressBar) progressBar.style.width = `${data.progress}%`;
+          progressText.forEach(el => el.textContent = `${data.progress}%`);
+          
+          showToast('Lesson marked as complete!', 'success');
+          
+          // Check if there's a next lesson button
+          const nextLessonLinks = Array.from(document.querySelectorAll('a')).filter(a => 
+            a.textContent.includes('Next Lesson')
+          );
+          const nextLessonBtn = nextLessonLinks.length > 0 ? nextLessonLinks[nextLessonLinks.length - 1] : null;
+          
+          if (nextLessonBtn) {
+            // Automatically navigate to next lesson after a short delay
+            setTimeout(() => {
+              window.location.href = nextLessonBtn.href;
+            }, 1500);
+          } else {
+            // No next lesson, reload to show completion state
+            setTimeout(() => { window.location.reload(); }, 1500);
+          }
+        } else {
+          completeBtn.innerHTML = '<i class="fas fa-times-circle mr-2"></i> Error';
+          completeBtn.disabled = false;
+          showToast(data.message || 'An error occurred.', 'error');
+        }
+      } catch (error) {
+        console.error('Error marking lesson as complete:', error);
+        completeBtn.innerHTML = '<i class="fas fa-times-circle mr-2"></i> Error';
+        completeBtn.disabled = false;
+        showToast('Network error while marking lesson as complete. Check console for details.', 'error');
+      }
     }
 
     function startQuiz() {
@@ -450,43 +465,52 @@
         info: 'bg-purple-500'
       };
       
-      const toast = $('<div>')
-        .addClass(`fixed bottom-4 right-4 px-4 py-2 rounded-lg text-white ${toastColors[type] || toastColors.info} shadow-lg z-50 transition-opacity duration-300`)
-        .text(message);
+      const toast = document.createElement('div');
+      toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg text-white ${toastColors[type] || toastColors.info} shadow-lg z-50 transition-opacity duration-300`;
+      toast.textContent = message;
       
-      $('body').append(toast);
+      document.body.appendChild(toast);
       setTimeout(() => {
-        toast.addClass('opacity-0');
+        toast.classList.add('opacity-0');
         setTimeout(() => { toast.remove(); }, 300);
       }, 3000);
     }
 
-    function loadComments() {
-      const $commentsContainer = $('#comments-container');
+    async function loadComments() {
+      const commentsContainer = document.getElementById('comments-container');
+      if (!commentsContainer) return;
       
-      $.ajax({
-        url: `/courses/${courseId}/lessons/${lessonId}/comments`,
-        method: 'GET',
-        dataType: 'json',
-        success: function(data) {
-          if (data.success && data.comments) {
-            if (data.comments.length === 0) {
-              $commentsContainer.html('<p class="text-center text-gray-400">No comments yet. Be the first to comment!</p>');
-            } else {
-              $commentsContainer.empty();
-              data.comments.forEach(comment => {
-                $commentsContainer.append(createCommentHTML(comment));
-              });
-            }
-          } else {
-            $commentsContainer.html('<p class="text-center text-red-400">Could not load comments</p>');
+      try {
+        const response = await fetch(`/courses/${courseId}/lessons/${lessonId}/comments`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
           }
-        },
-        error: function(xhr, status, error) {
-          console.error('Error loading comments:', error);
-          $commentsContainer.html('<p class="text-center text-red-400">Error loading comments. Please try again later.</p>');
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to load comments');
         }
-      });
+
+        const data = await response.json();
+        
+        if (data.success && data.comments) {
+          if (data.comments.length === 0) {
+            commentsContainer.innerHTML = '<p class="text-center text-gray-400">No comments yet. Be the first to comment!</p>';
+          } else {
+            commentsContainer.innerHTML = '';
+            data.comments.forEach(comment => {
+              commentsContainer.insertAdjacentHTML('beforeend', createCommentHTML(comment));
+            });
+          }
+        } else {
+          commentsContainer.innerHTML = '<p class="text-center text-red-400">Could not load comments</p>';
+        }
+      } catch (error) {
+        console.error('Error loading comments:', error);
+        commentsContainer.innerHTML = '<p class="text-center text-red-400">Error loading comments. Please try again later.</p>';
+      }
     }
 
     function createCommentHTML(comment) {
@@ -508,56 +532,71 @@
       `;
     }
 
-    function postComment() {
-      const $commentTextarea = $('#comment-text');
-      const commentText = $commentTextarea.val().trim();
+    async function postComment() {
+      const commentTextarea = document.getElementById('comment-text');
+      const postButton = document.getElementById('post-comment-btn');
+      
+      if (!commentTextarea || !postButton) return;
+      
+      const commentText = commentTextarea.value.trim();
 
       if (!commentText) {
         showToast('Please enter a comment.', 'error');
         return;
       }
 
-      const $postButton = $('#post-comment-btn');
-      $postButton.prop('disabled', true);
-      $postButton.html('Posting...');
+      postButton.disabled = true;
+      postButton.innerHTML = 'Posting...';
 
-      $.ajax({
-        url: `/courses/${courseId}/lessons/${lessonId}/comments`,
-        method: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({ comment: commentText }),
-        dataType: 'json',
-        success: function(data) {
-          if (data.success) {
-            const newCommentHTML = createCommentHTML({
-              username: data.username,
-              comment: data.comment,
-              timestamp: data.timestamp
-            });
-            
-            const $noCommentsMsg = $('#comments-container .text-center');
-            if ($noCommentsMsg.length) {
-              $('#comments-container').empty();
+      try {
+        const response = await fetch(`/courses/${courseId}/lessons/${lessonId}/comments`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ comment: commentText })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to post comment');
+        }
+
+        const data = await response.json();
+        
+        if (data.success) {
+          // Create HTML for the new comment
+          const newCommentHTML = createCommentHTML({
+            username: data.username,
+            comment: data.comment,
+            timestamp: data.timestamp
+          });
+          
+          const commentsContainer = document.getElementById('comments-container');
+          if (commentsContainer) {
+            // Check if there's a "no comments" message
+            const noCommentsMsg = commentsContainer.querySelector('.text-center');
+            if (noCommentsMsg) {
+              commentsContainer.innerHTML = ''; // Clear "no comments" message
             }
             
-            const $commentsContainer = $('#comments-container');
-            $commentsContainer.prepend(newCommentHTML);
-            
-            $commentTextarea.val('');
-            showToast('Comment posted successfully!');
-          } else {
-            showToast('Error posting comment', 'error');
+            // Add the new comment to the top of the list
+            commentsContainer.insertAdjacentHTML('afterbegin', newCommentHTML);
           }
-        },
-        error: function(xhr, status, error) {
-          console.error('Comment posting error:', error);
-          showToast('Network error while posting comment', 'error');
-        },
-        complete: function() {
-          $postButton.prop('disabled', false);
-          $postButton.html('Post Comment');
+          
+          // Clear the textarea
+          commentTextarea.value = '';
+          showToast('Comment posted successfully!');
+        } else {
+          showToast('Error posting comment', 'error');
         }
-      });
+      } catch (error) {
+        console.error('Comment posting error:', error);
+        showToast('Network error while posting comment', 'error');
+      } finally {
+        postButton.disabled = false;
+        postButton.innerHTML = 'Post Comment';
+      }
     }
   </script>
 </body>

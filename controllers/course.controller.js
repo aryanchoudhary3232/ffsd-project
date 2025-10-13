@@ -32,7 +32,9 @@ const CourseController = {
       } else if (category && category !== "all") {
         courses = courses.filter((course) => course.category === category);
       } else if (language && language !== "all") {
-        courses = courses.filter((course) => course.courseLanguage === language);
+        courses = courses.filter(
+          (course) => course.courseLanguage === language
+        );
       }
 
       // Apply sorting
@@ -64,10 +66,21 @@ const CourseController = {
       const languages = await CourseModel.getAllLanguages();
 
       if (ajax) {
-        // render only the course cards
-        return res.render("courses/course-cards", { courses, search }, (err, html) => {
-          if (err) return res.status(500).send("Error rendering courses");
-          res.send(html);
+        // Return JSON data instead of HTML
+        return res.json({
+          success: true,
+          courses: courses.map((course) => ({
+            _id: course._id,
+            title: course.title,
+            description: course.description,
+            instructor: course.instructor,
+            thumbnail: course.thumbnail,
+            price: course.price,
+            rating: course.rating,
+            students: course.students,
+            category: course.category,
+            courseLanguage: course.courseLanguage,
+          })),
         });
       }
 
@@ -86,6 +99,70 @@ const CourseController = {
       res.redirect("/");
     }
   },
+
+
+  filterCourses: async (req, res) => {
+    const { search, category, language, sort } = req.body;
+
+    try {
+      let courses;
+
+      // Handle search query
+      if (search) {
+        courses = await CourseModel.searchCourses(search);
+      } else if (category && category !== "all") {
+        courses = await CourseModel.getCoursesByCategory(category);
+      } else if (language && language !== "all") {
+        courses = await CourseModel.getCoursesByLanguage(language);
+      } else {
+        courses = await CourseModel.getAllCourses();
+      }
+
+      // Combine filters
+      if (category && category !== "all") {
+        courses = courses.filter((c) => c.category === category);
+      }
+      if (language && language !== "all") {
+        courses = courses.filter((c) => c.courseLanguage === language);
+      }
+
+      // Sorting
+      if (sort) {
+        switch (sort) {
+          case "price-low":
+            courses = courses.sort((a, b) => a.price - b.price);
+            break;
+          case "price-high":
+            courses = courses.sort((a, b) => b.price - a.price);
+            break;
+          case "rating":
+            courses = courses.sort((a, b) => b.rating - a.rating);
+            break;
+          case "newest":
+            courses = courses.sort(
+              (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+            );
+            break;
+        }
+      }
+
+      // Render partial HTML
+      res.render("courses/course-cards", { courses, search }, (err, html) => {
+        if (err) {
+          console.error("Render error:", err);
+          return res.json({ success: false, message: "Render failed" });
+        }
+        res.json({ success: true, html });
+      });
+    } catch (error) {
+      console.error("Filter Courses error:", error);
+      res.json({
+        success: false,
+        message: error.message || "Failed to filter courses",
+      });
+    }
+  },
+
 
   // Get course details
   getCourseDetails: async (req, res) => {
@@ -163,12 +240,17 @@ const CourseController = {
         return res.redirect("/courses");
       }
 
-      console.log('Course found:', course.title);
-      console.log('Course has modules:', course.modules ? 'Yes' : 'No');
+      console.log("Course found:", course.title);
+      console.log("Course has modules:", course.modules ? "Yes" : "No");
       if (course.modules) {
-        console.log('Number of modules:', course.modules.length);
+        console.log("Number of modules:", course.modules.length);
         course.modules.forEach((module, idx) => {
-          console.log(`Module ${idx + 1}:`, module.title, 'Lessons:', module.lessons ? module.lessons.length : 0);
+          console.log(
+            `Module ${idx + 1}:`,
+            module.title,
+            "Lessons:",
+            module.lessons ? module.lessons.length : 0
+          );
         });
       }
 
@@ -289,48 +371,51 @@ const CourseController = {
 
   // Mark lesson as complete
   markLessonAsComplete: async (req, res) => {
-    console.log('markLessonAsComplete called with:', req.params);
-    
+    console.log("markLessonAsComplete called with:", req.params);
+
     if (!req.session.user) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
     const { courseId, lessonId } = req.params;
     const userId = req.session.user.id;
-    
-    console.log('User ID:', userId);
-    console.log('Course ID:', courseId);
-    console.log('Lesson ID:', lessonId);
+
+    console.log("User ID:", userId);
+    console.log("Course ID:", courseId);
+    console.log("Lesson ID:", lessonId);
 
     try {
       // First verify the course exists
       const course = await CourseModel.getCourseById(courseId);
       if (!course) {
-        console.log('Course not found:', courseId);
+        console.log("Course not found:", courseId);
         return res.status(404).json({
           success: false,
           message: "Course not found",
         });
       }
 
-      console.log('Course found:', course.title);
-      
+      console.log("Course found:", course.title);
+
       // Verify the user is enrolled in this course
       const user = await User.findById(userId);
       if (!user) {
-        console.log('User not found:', userId);
+        console.log("User not found:", userId);
         return res.status(404).json({
           success: false,
           message: "User not found",
         });
       }
-      
-      const isEnrolled = user.enrolledCourses && user.enrolledCourses.some(
-        (enrolledCourseId) => enrolledCourseId.toString() === courseId.toString()
-      );
-      
+
+      const isEnrolled =
+        user.enrolledCourses &&
+        user.enrolledCourses.some(
+          (enrolledCourseId) =>
+            enrolledCourseId.toString() === courseId.toString()
+        );
+
       if (!isEnrolled) {
-        console.log('User not enrolled in course');
+        console.log("User not enrolled in course");
         return res.status(403).json({
           success: false,
           message: "You are not enrolled in this course",
@@ -342,14 +427,12 @@ const CourseController = {
       for (const module of course.modules || []) {
         if (Array.isArray(module.lessons)) {
           if (
-            module.lessons.some(
-              (lesson) => {
-                if (!lesson) return false;
-                // Check both _id and id fields to handle legacy data
-                const lessonIdToCheck = lesson._id || lesson.id;
-                return lessonIdToCheck && lessonIdToCheck.toString() === lessonId;
-              }
-            )
+            module.lessons.some((lesson) => {
+              if (!lesson) return false;
+              // Check both _id and id fields to handle legacy data
+              const lessonIdToCheck = lesson._id || lesson.id;
+              return lessonIdToCheck && lessonIdToCheck.toString() === lessonId;
+            })
           ) {
             lessonExists = true;
             break;
@@ -358,14 +441,14 @@ const CourseController = {
       }
 
       if (!lessonExists) {
-        console.log('Lesson not found in course:', lessonId);
+        console.log("Lesson not found in course:", lessonId);
         return res.status(404).json({
           success: false,
           message: "Lesson not found in this course",
         });
       }
 
-      console.log('Lesson exists, proceeding to mark as complete');
+      console.log("Lesson exists, proceeding to mark as complete");
 
       // Calculate total lessons from the fetched course
       const totalLessons = (course.modules || []).reduce((total, module) => {
@@ -373,7 +456,7 @@ const CourseController = {
         return total + lessons.length;
       }, 0);
 
-      console.log('Total lessons in course:', totalLessons);
+      console.log("Total lessons in course:", totalLessons);
 
       // Now proceed with marking the lesson as complete, passing totalLessons
       const updatedProgress = await ProgressModel.markLessonAsComplete(
@@ -384,14 +467,14 @@ const CourseController = {
       );
 
       if (!updatedProgress) {
-        console.log('Failed to update progress');
+        console.log("Failed to update progress");
         return res.status(500).json({
           success: false,
           message: "Could not update progress",
         });
       }
 
-      console.log('Progress updated successfully:', updatedProgress);
+      console.log("Progress updated successfully:", updatedProgress);
 
       res.json({
         success: true,
@@ -501,6 +584,84 @@ const CourseController = {
       res.status(500).json({
         success: false,
         message: error.message || "Error fetching comments",
+      });
+    }
+  },
+
+  // Get course details as JSON (API endpoint)
+  getCourseDetailsAPI: async (req, res) => {
+    const courseId = req.params.id;
+
+    try {
+      const course = await CourseModel.getCourseById(courseId);
+
+      if (!course) {
+        return res.status(404).json({
+          success: false,
+          message: "Course not found"
+        });
+      }
+
+      // Get instructor info if needed
+      let instructorName = course.instructor || "Unknown Instructor";
+
+      // Check if user is enrolled
+      let isEnrolled = false;
+      let progress = 0;
+      let user = null;
+
+      if (req.session.user) {
+        user = await User.findById(req.session.user.id);
+        // Check if user exists and has enrolledCourses array
+        if (
+          user &&
+          user.enrolledCourses &&
+          user.enrolledCourses.some(
+            (enrolledCourseId) => enrolledCourseId.toString() === courseId
+          )
+        ) {
+          isEnrolled = true;
+          // Find progress record
+          const userProgress = await ProgressModel.getProgress(
+            user._id,
+            courseId
+          );
+          progress = userProgress ? userProgress.progress : 0;
+        }
+      }
+
+      // Return course data as JSON
+      res.json({
+        success: true,
+        course: {
+          _id: course._id,
+          title: course.title,
+          description: course.description,
+          thumbnail: course.thumbnail,
+          price: course.price,
+          category: course.category,
+          instructor: instructorName,
+          instructorId: course.instructorId,
+          students: course.students,
+          rating: course.rating,
+          modules: course.modules,
+          createdAt: course.createdAt,
+          updatedAt: course.updatedAt,
+          status: course.status
+        },
+        isEnrolled,
+        progress,
+        user: user ? {
+          id: user._id,
+          username: user.username,
+          email: user.email
+        } : null
+      });
+    } catch (error) {
+      console.error("Get Course Details API error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Could not load course details."
       });
     }
   },

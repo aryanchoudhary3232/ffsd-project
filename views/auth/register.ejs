@@ -330,7 +330,9 @@
       });
 
       // Form submission validation
-      form.addEventListener('submit', function(e) {
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault(); // Always prevent default to use fetch
+        
         const name = nameInput.value.trim();
         const email = emailInput.value.trim();
         const password = passwordInput.value;
@@ -395,8 +397,6 @@
 
         // Prevent form submission if validation fails
         if (!isValid) {
-          e.preventDefault();
-          
           // Focus on first error field
           if (nameInput.classList.contains('border-red-500')) {
             nameInput.focus();
@@ -409,10 +409,77 @@
           } else if (roleSelect.classList.contains('border-red-500')) {
             roleSelect.focus();
           }
-        } else {
-          // Show loading state
-          registerBtn.disabled = true;
-          registerBtn.textContent = 'Creating account...';
+          return;
+        }
+
+        // Show loading state
+        registerBtn.disabled = true;
+        const originalText = registerBtn.textContent;
+        registerBtn.textContent = 'Creating account...';
+
+        try {
+          // Use fetch API to submit registration
+          const response = await fetch('/register', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({ 
+              name: name,
+              email: email, 
+              password: password,
+              confirmPassword: confirmPassword,
+              role: role
+            })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            // Handle error response
+            if (data.errors && Array.isArray(data.errors)) {
+              throw new Error(data.errors.join(', '));
+            } else {
+              throw new Error(data.error || 'Registration failed');
+            }
+          }
+
+          // Registration successful
+          if (data.success && data.redirectUrl) {
+            // Redirect to the appropriate dashboard
+            window.location.href = data.redirectUrl;
+          } else {
+            throw new Error('Invalid response from server');
+          }
+        } catch (error) {
+          console.error('Registration error:', error);
+          
+          // Show error message to user
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4';
+          
+          // Check if it's multiple errors or single error
+          if (error.message.includes(',')) {
+            const errors = error.message.split(',').map(e => e.trim());
+            errorDiv.innerHTML = '<ul class="list-disc pl-4">' + 
+              errors.map(e => `<li>${e}</li>`).join('') + 
+              '</ul>';
+          } else {
+            errorDiv.textContent = error.message || 'An error occurred during registration.';
+          }
+          
+          // Insert error message at the top of the form
+          const formContainer = form.parentElement;
+          const existingError = formContainer.querySelector('.bg-red-100');
+          if (existingError) {
+            existingError.remove();
+          }
+          formContainer.insertBefore(errorDiv, form);
+
+          // Reset button state
+          registerBtn.disabled = false;
+          registerBtn.textContent = originalText;
         }
       });
 
@@ -439,7 +506,10 @@
           registerBtn.classList.add('opacity-50', 'cursor-not-allowed');
         }
       }
-
+es.status(400).json({ 
+        success: false, 
+        error: "Please fill in all fields" 
+      });
       // Check form validity on input
       nameInput.addEventListener('input', checkFormValidity);
       emailInput.addEventListener('input', checkFormValidity);

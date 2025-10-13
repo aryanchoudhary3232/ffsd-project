@@ -149,16 +149,19 @@
   <%- include('../partials/footer') %>
   <%- include('../partials/scripts') %>
   <script>
-    document.getElementById('checkout-form').addEventListener('submit', function(e) {
+    document.getElementById('checkout-form').addEventListener('submit', async function(e) {
+      e.preventDefault(); // Always prevent default submission
+      
       // Validate expiry date before submission
       const expiryInput = document.getElementById('expiry-date');
-      if (expiryInput.value) {
+      const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+      
+      if (paymentMethod === 'credit_card' && expiryInput.value) {
         const expiryPattern = /^(0[1-9]|1[0-2])\/([0-9]{4})$/;
         if (!expiryPattern.test(expiryInput.value)) {
-          e.preventDefault();
-          alert('Please enter a valid expiry date in MM/YYYY format');
+          showMessage('Please enter a valid expiry date in MM/YYYY format', 'error');
           expiryInput.focus();
-          return false;
+          return;
         }
         
         // Check if the card is not expired
@@ -168,18 +171,86 @@
         currentDate.setDate(1); // Set to first day of current month for proper comparison
         
         if (expiryDate < currentDate) {
-          e.preventDefault();
-          alert('Card has expired. Please enter a valid expiry date');
+          showMessage('Card has expired. Please enter a valid expiry date', 'error');
           expiryInput.focus();
-          return false;
+          return;
         }
       }
       
       // Show loading state
       const submitButton = this.querySelector('button[type="submit"]');
+      const originalButtonText = submitButton.innerHTML;
       submitButton.disabled = true;
       submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
+
+      try {
+        const formData = new FormData(this);
+        const paymentData = {
+          paymentMethod: formData.get('paymentMethod')
+        };
+
+        // Add payment details based on method
+        if (paymentData.paymentMethod === 'credit_card') {
+          paymentData.cardNumber = formData.get('cardNumber');
+          paymentData.expiryDate = formData.get('expiryDate');
+          paymentData.cvv = formData.get('cvv');
+          paymentData.cardName = formData.get('cardName');
+        } else if (paymentData.paymentMethod === 'upi') {
+          paymentData.upiId = document.getElementById('upi-id').value;
+        }
+
+        const response = await fetch('/cart/checkout/process', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(paymentData)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showMessage(data.message, 'success');
+          setTimeout(() => {
+            window.location.href = data.redirectUrl;
+          }, 1000);
+        } else {
+          showMessage(data.message, 'error');
+          submitButton.disabled = false;
+          submitButton.innerHTML = originalButtonText;
+        }
+      } catch (error) {
+        console.error('Payment error:', error);
+        showMessage('An error occurred while processing your payment. Please try again.', 'error');
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalButtonText;
+      }
     });
+
+    function showMessage(message, type) {
+      const existingMessage = document.querySelector('.payment-message');
+      if (existingMessage) {
+        existingMessage.remove();
+      }
+
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `payment-message px-4 py-3 rounded mb-4 ${
+        type === 'success' 
+          ? 'bg-green-800 border border-green-600 text-green-300' 
+          : 'bg-red-800 border border-red-600 text-red-300'
+      }`;
+      messageDiv.textContent = message;
+
+      const container = document.querySelector('.container');
+      const heading = container.querySelector('h1');
+      heading.insertAdjacentElement('afterend', messageDiv);
+
+      // Auto-remove after 5 seconds
+      setTimeout(() => {
+        messageDiv.remove();
+      }, 5000);
+    }
 
     // Format expiry date as MM/YYYY
     function formatExpiryDate(input) {

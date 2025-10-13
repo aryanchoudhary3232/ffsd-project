@@ -167,7 +167,9 @@
       });
 
       // Form submission validation
-      form.addEventListener('submit', function(e) {
+      form.addEventListener('submit', async function(e) {
+        e.preventDefault(); // Always prevent default to use fetch
+        
         const email = emailInput.value.trim();
         const password = passwordInput.value;
         let isValid = true;
@@ -199,18 +201,67 @@
 
         // Prevent form submission if validation fails
         if (!isValid) {
-          e.preventDefault();
-          
           // Focus on first error field
           if (emailInput.classList.contains('border-red-500')) {
             emailInput.focus();
           } else if (passwordInput.classList.contains('border-red-500')) {
             passwordInput.focus();
           }
-        } else {
-          // Show loading state
-          loginBtn.disabled = true;
-          loginBtn.textContent = 'Logging in...';
+          return;
+        }
+
+        // Show loading state
+        loginBtn.disabled = true;
+        const originalText = loginBtn.textContent;
+        loginBtn.textContent = 'Logging in...';
+
+        try {
+          // Use fetch API to submit login
+          const response = await fetch('/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({ 
+              email: email, 
+              password: password 
+            })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            // Handle error response
+            throw new Error(data.error || 'Login failed');
+          }
+
+          // Login successful
+          if (data.success && data.redirectUrl) {
+            // Redirect to the appropriate dashboard
+            window.location.href = data.redirectUrl;
+          } else {
+            throw new Error('Invalid response from server');
+          }
+        } catch (error) {
+          console.error('Login error:', error);
+          
+          // Show error message to user
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4';
+          errorDiv.textContent = error.message || 'An error occurred during login.';
+          
+          // Insert error message at the top of the form
+          const formContainer = form.parentElement;
+          const existingError = formContainer.querySelector('.bg-red-100');
+          if (existingError) {
+            existingError.remove();
+          }
+          formContainer.insertBefore(errorDiv, form);
+
+          // Reset button state
+          loginBtn.disabled = false;
+          loginBtn.textContent = originalText;
         }
       });
 

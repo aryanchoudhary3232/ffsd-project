@@ -5,6 +5,7 @@ const { isAuthenticated } = require("../middleware/auth.middleware")
 
 // Student dashboard
 router.get("/dashboard", isAuthenticated, UserController.getStudentDashboard)
+router.get("/dashboard/data", isAuthenticated, UserController.getStudentDashboardData)
 
 // User profile
 router.get("/profile", isAuthenticated, UserController.getUserProfile)

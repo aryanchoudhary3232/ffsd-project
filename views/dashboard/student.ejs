@@ -5,95 +5,76 @@
   <div class="container mx-auto px-4 py-8">
     <h1 class="text-2xl font-bold mb-6">My Dashboard</h1>
     
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div class="bg-gray-800 text-white rounded-lg shadow-md p-6">
-        <h2 class="text-lg font-semibold mb-2">Enrolled Courses</h2>
-        <p class="text-3xl font-bold"><%= enrolledCourses.length %></p>
-      </div>
-      <div class="bg-gray-800 text-white rounded-lg shadow-md p-6">
-        <h2 class="text-lg font-semibold mb-2">Completed Courses</h2>
-        <p class="text-3xl font-bold"><%= progress.completedCourses %></p>
-      </div>
-      <div class="bg-gray-800 text-white rounded-lg shadow-md p-6">
-        <h2 class="text-lg font-semibold mb-2">Average Progress</h2>
-        <p class="text-3xl font-bold"><%= progress.averageProgress %> %</p>
-      </div>
+    <!-- Loading Spinner -->
+    <div id="loading" class="text-center py-8">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+      <p class="mt-2 text-gray-400">Loading dashboard...</p>
     </div>
-    
-    <div class="mb-8">
-      <h2 class="text-xl font-bold mb-4">Continue Learning</h2>
-      <% if (enrolledCourses.filter(course => course.progress > 0 && course.progress < 100).length > 0) { %>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <% enrolledCourses.filter(course => course.progress > 0 && course.progress < 100).forEach(function(course) { %>
-            <div class="bg-gray-800 text-white rounded-lg shadow-md overflow-hidden">
-              <img src="<%= course.thumbnail %>" alt="<%= course.title %>" class="w-full h-40 object-cover">
-              <div class="p-4">
-                <h3 class="text-lg font-semibold mb-2"><%= course.title %></h3>
-                <p class="text-gray-400 mb-2"><%= course.instructor %></p>
-                <div class="mb-2">
-                  <div class="flex justify-between text-sm mb-1">
-                    <span>Progress</span>
-                    <span><%= course.progress %>%</span>
-                  </div>
-                  <div class="w-full bg-gray-700 rounded-full h-2.5">
-                    <div class="bg-blue-500 h-2.5 rounded-full" style="width: <%= course.progress ? course.progress : 0 %>%"></div>
-                  </div>
-                </div>
-                <a href="/courses/<%= course._id %>/learn" class="block w-full text-center bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700">Continue Learning</a>
-              </div>
-            </div>
-          <% }); %>
+
+    <!-- Dashboard Content (Hidden until loaded) -->
+    <div id="dashboard-content" class="hidden">
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-gray-800 text-white rounded-lg shadow-md p-6">
+          <h2 class="text-lg font-semibold mb-2">Enrolled Courses</h2>
+          <p id="enrolled-count" class="text-3xl font-bold">0</p>
         </div>
-      <% } else { %>
-        <p class="text-gray-400">You haven't started any courses yet. Browse our courses to get started!</p>
-      <% } %>
-    </div>
-    
-    <div class="mb-8">
-      <h2 class="text-xl font-bold mb-4">My Courses</h2>
-      <% if (enrolledCourses.length > 0) { %>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <% enrolledCourses.forEach(function(course) { %>
-            <div class="bg-gray-800 text-white rounded-lg shadow-md overflow-hidden">
-              <img src="<%= course.thumbnail %>" alt="<%= course.title %>" class="w-full h-40 object-cover">
-              <div class="p-4">
-                <h3 class="text-lg font-semibold mb-2"><%= course.title %></h3>
-                <p class="text-gray-400 mb-2"><%= course.instructor %></p>
-                <div class="mb-2">
-                  <div class="flex justify-between text-sm mb-1">
-                    <span>Progress</span>
-                    <span><%= course.progress %>%</span>
-                  </div>
-                  <div class="w-full bg-gray-700 rounded-full h-2.5">
-                    <div class="bg-blue-500 h-2.5 rounded-full" style="width: <%= course.progress %>%"></div>
-                  </div>
-                </div>
-                <a href="/courses/<%= course._id %>/learn" class="block w-full text-center bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-700">
-                  <% if (course.progress === 0) { %>
-                    Start Course
-                  <% } else if (course.progress === 100) { %>
-                    Review Course
-                  <% } else { %>
-                    Continue Learning
-                  <% } %>
-                </a>
-              </div>
-            </div>
-          <% }); %>
+        <div class="bg-gray-800 text-white rounded-lg shadow-md p-6">
+          <h2 class="text-lg font-semibold mb-2">Completed Courses</h2>
+          <p id="completed-count" class="text-3xl font-bold">0</p>
         </div>
-      <% } else { %>
-        <p class="text-gray-400">You haven't enrolled in any courses yet. Browse our courses to get started!</p>
-      <% } %>
-    </div>
-    
-    <div>
-      <h2 class="text-xl font-bold mb-4">Recommended Courses</h2>
+        <div class="bg-gray-800 text-white rounded-lg shadow-md p-6">
+          <h2 class="text-lg font-semibold mb-2">Average Progress</h2>
+          <p id="average-progress" class="text-3xl font-bold">0 %</p>
+        </div>
+      </div>
       
+      <!-- Continue Learning Section -->
+      <div class="mb-8">
+        <h2 class="text-xl font-bold mb-4">Continue Learning</h2>
+        <div id="continue-learning-container"></div>
+      </div>
+      
+      <!-- All Courses Section -->
+      <div class="mb-8">
+        <h2 class="text-xl font-bold mb-4">My Courses</h2>
+        <div id="all-courses-container"></div>
+      </div>
+      
+      <!-- Recommended Courses Section -->
+      <div>
+        <h2 class="text-xl font-bold mb-4">Recommended Courses</h2>
+        <div id="recommended-courses-container"></div>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-message" class="hidden bg-red-500 text-white p-4 rounded-lg mb-4"></div>
+  </div>
+
+  <!-- Course Details Modal -->
+  <div id="course-details-modal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen px-4 py-8">
+      <div class="bg-gray-900 rounded-lg max-w-4xl w-full shadow-xl relative">
+        <!-- Close Button -->
+        <button onclick="closeCourseModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl z-10">
+          <i class="fas fa-times"></i>
+        </button>
+        
+        <!-- Modal Content -->
+        <div id="course-modal-content" class="p-8">
+          <div class="text-center py-8">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+            <p class="mt-2 text-gray-400">Loading course details...</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <%- include('../partials/footer') %>
   <%- include('../partials/scripts') %>
+  <script src="/js/student-dashboard.js"></script>
 </body>
 </html>
 
