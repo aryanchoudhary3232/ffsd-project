@@ -311,6 +311,9 @@
     // Prevent cart operations from running on the learning page
     window.isLearningPage = true;
     
+    // Define courseId from server-side variable
+    const courseId = '<%= courseId %>';
+    
     // Determine the correct lesson ID (prefer _id, fallback to id)
     const lessonIdentifier = '<%= typeof currentLesson._id !== "undefined" ? currentLesson._id : currentLesson.id %>';
     // Clean the identifier if it's an ObjectId string representation like {"$oid":"..."} 
