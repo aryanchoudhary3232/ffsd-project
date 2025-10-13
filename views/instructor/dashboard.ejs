@@ -8,129 +8,107 @@
       <a href="/instructor/courses/new" class="bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark">Create New Course</a>
     </div>
     
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <!-- Loading State for Stats -->
+    <div id="stats-loading" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-gray-700 rounded-lg shadow-md p-6 animate-pulse">
+        <div class="h-4 bg-gray-600 rounded w-3/4 mb-2"></div>
+        <div class="h-8 bg-gray-600 rounded w-1/2"></div>
+      </div>
+      <div class="bg-gray-700 rounded-lg shadow-md p-6 animate-pulse">
+        <div class="h-4 bg-gray-600 rounded w-3/4 mb-2"></div>
+        <div class="h-8 bg-gray-600 rounded w-1/2"></div>
+      </div>
+      <div class="bg-gray-700 rounded-lg shadow-md p-6 animate-pulse">
+        <div class="h-4 bg-gray-600 rounded w-3/4 mb-2"></div>
+        <div class="h-8 bg-gray-600 rounded w-1/2"></div>
+      </div>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div id="stats-cards" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" style="display: none;">
       <div class="bg-gray-700 rounded-lg shadow-md p-6">
         <h2 class="text-lg font-semibold mb-2">Total Courses</h2>
-        <p class="text-3xl font-bold"><%= courses.length %></p>
+        <p id="total-courses" class="text-3xl font-bold">0</p>
       </div>
       <div class="bg-gray-700 rounded-lg shadow-md p-6">
         <h2 class="text-lg font-semibold mb-2">Total Students</h2>
-        <p class="text-3xl font-bold"><%= totalStudents %></p>
+        <p id="total-students" class="text-3xl font-bold">0</p>
       </div>
       <div class="bg-gray-700 rounded-lg shadow-md p-6">
         <h2 class="text-lg font-semibold mb-2">Total Revenue</h2>
-        <p class="text-3xl font-bold">$<%= totalRevenue.toFixed(2) %></p>
+        <p id="total-revenue" class="text-3xl font-bold">$0.00</p>
       </div>
     </div>
     
     <div class="mb-8">
       <h2 class="text-xl font-bold mb-4">My Courses</h2>
-      <% if (courses.length > 0) { %>
-        <div class="bg-gray-700 rounded-lg shadow-md overflow-hidden">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-700">
-              <tr>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Course</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Students</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Revenue</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Rating</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="bg-gray-700 divide-y divide-gray-200">
-              <% courses.forEach(function(course) { %>
-                <tr>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex items-center">
-                      <div class="flex-shrink-0 h-10 w-10">
-                        <img class="h-10 w-10 rounded-full object-cover" src="<%= course.thumbnail %>" alt="<%= course.title %>">
-                      </div>
-                      <div class="ml-4">
-                        <div class="text-sm font-medium text-gray-100"><%= course.title %></div>
-                        <div class="text-sm text-gray-400"><%= course.category %></div>
-                      </div>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-300"><%= course.students %></div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-300">$<%= (course.price * course.students).toFixed(2) %></div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex items-center">
-                      <% if (course.rating > 0) { %>
-                        <div class="text-sm mr-2"><%= course.rating.toFixed(1) %></div>
-                        <div class="flex">
-                          <% for(let i = 1; i <= 5; i++) { %>
-                            <% if (i <= Math.floor(course.rating)) { %>
-                              <i class="fas fa-star text-yellow-500 text-xs"></i>
-                            <% } else if (i <= Math.floor(course.rating) + 0.5) { %>
-                              <i class="fas fa-star-half-alt text-yellow-500 text-xs"></i>
-                            <% } else { %>
-                              <i class="far fa-star text-yellow-500 text-xs"></i>
-                            <% } %>
-                          <% } %>
-                        </div>
-                        <div class="text-xs text-gray-400 ml-2">(<%= course.ratingCount || 0 %>)</div>
-                      <% } else { %>
-                        <div class="text-sm text-gray-400">Not rated yet</div>
-                      <% } %>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <a href="/instructor/courses/<%= course._id %>/edit" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
-                    <a href="/instructor/courses/<%= course._id %>/content" class="text-green-600 hover:text-green-900">Content</a>
-                  </td>
-                </tr>
-              <% }); %>
-            </tbody>
-          </table>
+      
+      <!-- Loading State for Courses -->
+      <div id="courses-loading" class="bg-gray-700 rounded-lg shadow-md p-6">
+        <div class="animate-pulse space-y-4">
+          <div class="h-4 bg-gray-600 rounded w-3/4"></div>
+          <div class="h-4 bg-gray-600 rounded w-1/2"></div>
+          <div class="h-4 bg-gray-600 rounded w-2/3"></div>
         </div>
-      <% } else { %>
-        <div class="bg-gray-700 rounded-lg shadow-md p-6 text-center">
-          <p class="text-gray-600 mb-4">You haven't created any courses yet.</p>
-          <a href="/instructor/courses/new" class="bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark">Create Your First Course</a>
-        </div>
-      <% } %>
+      </div>
+      
+      <!-- Courses Table -->
+      <div id="courses-table" class="bg-gray-700 rounded-lg shadow-md overflow-hidden" style="display: none;">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-700">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Course</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Students</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Revenue</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Rating</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="courses-tbody" class="bg-gray-700 divide-y divide-gray-200">
+            <!-- Courses will be dynamically inserted here -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Empty State -->
+      <div id="courses-empty" class="bg-gray-700 rounded-lg shadow-md p-6 text-center" style="display: none;">
+        <p class="text-gray-400 mb-4">You haven't created any courses yet.</p>
+        <a href="/instructor/courses/new" class="bg-primary text-white py-2 px-4 rounded-md hover:bg-primary-dark">Create Your First Course</a>
+      </div>
     </div>
     
     <div class="mb-8">
       <h2 class="text-xl font-bold mb-4">Recent Orders</h2>
-      <% if (recentOrders.length > 0) { %>
-        <div class="bg-gray-700 rounded-lg shadow-md overflow-hidden">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-700">
-              <tr>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Student</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Course</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Amount</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
-              </tr>
-            </thead>
-            <tbody class="bg-gray-700 divide-y divide-gray-200">
-              <% recentOrders.forEach(function(order) { %>
-                <tr>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-medium text-gray-200"><%= order.username %></div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-200"><%= order.courseTitle %></div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-200">$<%= order.amount.toFixed(2) %></div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-300"><%= new Date(order.createdAt).toLocaleDateString() %></div>
-                  </td>
-                </tr>
-              <% }); %>
-            </tbody>
-          </table>
+      
+      <!-- Loading State for Orders -->
+      <div id="orders-loading" class="bg-gray-700 rounded-lg shadow-md p-6">
+        <div class="animate-pulse space-y-4">
+          <div class="h-4 bg-gray-600 rounded w-3/4"></div>
+          <div class="h-4 bg-gray-600 rounded w-1/2"></div>
         </div>
-      <% } else { %>
-        <p class="text-gray-600">No recent orders.</p>
-      <% } %>
+      </div>
+      
+      <!-- Orders Table -->
+      <div id="orders-table" class="bg-gray-700 rounded-lg shadow-md overflow-hidden" style="display: none;">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-700">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Student</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Course</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Amount</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
+            </tr>
+          </thead>
+          <tbody id="orders-tbody" class="bg-gray-700 divide-y divide-gray-200">
+            <!-- Orders will be dynamically inserted here -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Empty State -->
+      <div id="orders-empty" class="text-gray-400" style="display: none;">
+        <p>No recent orders.</p>
+      </div>
     </div>
     
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -162,6 +140,224 @@
 
   <%- include('../partials/footer') %>
   <%- include('../partials/scripts') %>
+  
+  <script>
+    // Fetch and render instructor dashboard data
+    document.addEventListener('DOMContentLoaded', async function() {
+      try {
+        // Fetch dashboard data from API
+        const response = await fetch('/instructor/dashboard', {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch dashboard data');
+        }
+        
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+          renderDashboard(result.data);
+        } else {
+          showError('Unable to load dashboard data');
+        }
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+        showError('An error occurred while loading dashboard data');
+      }
+      
+      function renderDashboard(data) {
+        // Update stats cards
+        renderStats(data);
+        
+        // Render courses table
+        renderCourses(data.courses);
+        
+        // Render recent orders
+        renderOrders(data.recentOrders);
+      }
+      
+      function renderStats(data) {
+        const statsLoading = document.getElementById('stats-loading');
+        const statsCards = document.getElementById('stats-cards');
+        
+        // Update values
+        document.getElementById('total-courses').textContent = data.courses.length;
+        document.getElementById('total-students').textContent = data.totalStudents;
+        document.getElementById('total-revenue').textContent = '$' + data.totalRevenue.toFixed(2);
+        
+        // Hide loading, show stats
+        statsLoading.style.display = 'none';
+        statsCards.style.display = 'grid';
+      }
+      
+      function renderCourses(courses) {
+        const coursesLoading = document.getElementById('courses-loading');
+        const coursesTable = document.getElementById('courses-table');
+        const coursesEmpty = document.getElementById('courses-empty');
+        const tbody = document.getElementById('courses-tbody');
+        
+        coursesLoading.style.display = 'none';
+        
+        if (courses.length === 0) {
+          coursesEmpty.style.display = 'block';
+          return;
+        }
+        
+        // Clear tbody
+        tbody.innerHTML = '';
+        
+        // Create rows for each course
+        courses.forEach(course => {
+          const row = createCourseRow(course);
+          tbody.appendChild(row);
+        });
+        
+        coursesTable.style.display = 'block';
+      }
+      
+      function createCourseRow(course) {
+        const tr = document.createElement('tr');
+        
+        const revenue = (course.price * course.students).toFixed(2);
+        const rating = course.rating || 0;
+        const ratingCount = course.ratingCount || 0;
+        
+        tr.innerHTML = `
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 h-10 w-10">
+                <img class="h-10 w-10 rounded-full object-cover" src="${escapeHtml(course.thumbnail)}" alt="${escapeHtml(course.title)}">
+              </div>
+              <div class="ml-4">
+                <div class="text-sm font-medium text-gray-100">${escapeHtml(course.title)}</div>
+                <div class="text-sm text-gray-400">${escapeHtml(course.category)}</div>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-300">${course.students}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-300">$${revenue}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+              ${rating > 0 ? `
+                <div class="text-sm mr-2">${rating.toFixed(1)}</div>
+                <div class="flex">
+                  ${generateStars(rating)}
+                </div>
+                <div class="text-xs text-gray-400 ml-2">(${ratingCount})</div>
+              ` : `
+                <div class="text-sm text-gray-400">Not rated yet</div>
+              `}
+            </div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+            <a href="/instructor/courses/${course._id}/edit" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
+            <a href="/instructor/courses/${course._id}/content" class="text-green-600 hover:text-green-900">Content</a>
+          </td>
+        `;
+        
+        return tr;
+      }
+      
+      function generateStars(rating) {
+        let stars = '';
+        for (let i = 1; i <= 5; i++) {
+          if (i <= Math.floor(rating)) {
+            stars += '<i class="fas fa-star text-yellow-500 text-xs"></i>';
+          } else if (i <= Math.floor(rating) + 0.5) {
+            stars += '<i class="fas fa-star-half-alt text-yellow-500 text-xs"></i>';
+          } else {
+            stars += '<i class="far fa-star text-yellow-500 text-xs"></i>';
+          }
+        }
+        return stars;
+      }
+      
+      function renderOrders(orders) {
+        const ordersLoading = document.getElementById('orders-loading');
+        const ordersTable = document.getElementById('orders-table');
+        const ordersEmpty = document.getElementById('orders-empty');
+        const tbody = document.getElementById('orders-tbody');
+        
+        ordersLoading.style.display = 'none';
+        
+        if (orders.length === 0) {
+          ordersEmpty.style.display = 'block';
+          return;
+        }
+        
+        // Clear tbody
+        tbody.innerHTML = '';
+        
+        // Create rows for each order
+        orders.forEach(order => {
+          const row = createOrderRow(order);
+          tbody.appendChild(row);
+        });
+        
+        ordersTable.style.display = 'block';
+      }
+      
+      function createOrderRow(order) {
+        const tr = document.createElement('tr');
+        
+        const date = new Date(order.createdAt).toLocaleDateString();
+        
+        tr.innerHTML = `
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm font-medium text-gray-200">${escapeHtml(order.username)}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-200">${escapeHtml(order.courseTitle)}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-200">$${order.amount.toFixed(2)}</div>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-sm text-gray-300">${date}</div>
+          </td>
+        `;
+        
+        return tr;
+      }
+      
+      function showError(message) {
+        // Hide all loading states
+        document.getElementById('stats-loading').style.display = 'none';
+        document.getElementById('courses-loading').style.display = 'none';
+        document.getElementById('orders-loading').style.display = 'none';
+        
+        // Show error message
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'bg-red-800 border border-red-600 text-red-300 px-4 py-3 rounded mb-4';
+        errorDiv.textContent = message;
+        
+        const container = document.querySelector('.container');
+        const heading = container.querySelector('h1').parentElement;
+        heading.insertAdjacentElement('afterend', errorDiv);
+      }
+      
+      // Helper function to escape HTML
+      function escapeHtml(text) {
+        const map = {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#039;'
+        };
+        return String(text).replace(/[&<>"']/g, m => map[m]);
+      }
+    });
+  </script>
 </body>
 </html>
 

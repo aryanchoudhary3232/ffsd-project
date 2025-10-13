@@ -191,6 +191,65 @@
     const searchInput = document.querySelector('input[name="search"]');
     const coursesContainer = document.getElementById('courses-area');
 
+    // Function to render course cards from JSON data
+    function renderCourses(courses, searchQuery = '') {
+      coursesContainer.innerHTML = '';
+
+      if (courses.length === 0) {
+        coursesContainer.innerHTML = `
+          <div class="col-span-full text-center py-12">
+            <div class="text-gray-500 mb-4">
+              <i class="fas fa-search text-6xl"></i>
+            </div>
+            <h2 class="text-xl font-bold mb-2">No courses found</h2>
+            <p class="text-gray-600 mb-4">Try adjusting your search or filter criteria.</p>
+            <a href="/courses" class="text-primary hover:underline">View all courses</a>
+          </div>
+        `;
+        return;
+      }
+
+      if (searchQuery && searchQuery.length > 0) {
+        const searchInfo = document.createElement('div');
+        searchInfo.className = 'mb-6 col-span-full';
+        searchInfo.innerHTML = `
+          <p class="text-gray-600">
+            Showing results for "${searchQuery}" - ${courses.length} courses found
+          </p>
+        `;
+        coursesContainer.appendChild(searchInfo);
+      }
+
+      courses.forEach(course => {
+        const courseCard = document.createElement('div');
+        courseCard.className = 'bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300';
+        courseCard.innerHTML = `
+          <img src="${course.thumbnail}" alt="${course.title}" class="w-full h-48 object-cover" />
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="text-xl font-bold mb-2">${course.title}</h3>
+            </div>
+            <p class="text-gray-600 mb-2">By ${course.instructor}</p>
+            <div class="flex justify-between items-center mb-4">
+              <div class="flex items-center">
+                <span class="text-yellow-500 mr-1">★</span>
+                <span>${course.rating}</span>
+                <span class="text-gray-500 ml-1">(${course.students} students)</span>
+              </div>
+              <span class="badge badge-secondary">${course.category}</span>
+            </div>
+            <p class="text-gray-700 mb-4 line-clamp-2">${course.description}</p>
+            <div class="flex justify-between items-center">
+              <span class="text-2xl font-bold text-primary">$${course.price.toFixed(2)}</span>
+              <a href="/courses/${course._id}" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors">
+                View Course
+              </a>
+            </div>
+          </div>
+        `;
+        coursesContainer.appendChild(courseCard);
+      });
+    }
 
     searchInput.addEventListener('input', async () => {
       const query = searchInput.value;
@@ -204,9 +263,24 @@
       if (sort) url += `&sort=${encodeURIComponent(sort)}`;
 
       try {
-        const res = await fetch(url);
-        const html = await res.text();
-        coursesContainer.innerHTML = html;
+        const response = await fetch(url, {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch courses');
+        }
+
+        const data = await response.json();
+        
+        if (data.success) {
+          renderCourses(data.courses, query);
+        } else {
+          console.error('Failed to load courses');
+        }
       } catch (err) {
         console.error("Live search failed:", err);
       }

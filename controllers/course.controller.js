@@ -32,7 +32,9 @@ const CourseController = {
       } else if (category && category !== "all") {
         courses = courses.filter((course) => course.category === category);
       } else if (language && language !== "all") {
-        courses = courses.filter((course) => course.courseLanguage === language);
+        courses = courses.filter(
+          (course) => course.courseLanguage === language
+        );
       }
 
       // Apply sorting
@@ -64,10 +66,21 @@ const CourseController = {
       const languages = await CourseModel.getAllLanguages();
 
       if (ajax) {
-        // render only the course cards
-        return res.render("courses/course-cards", { courses, search }, (err, html) => {
-          if (err) return res.status(500).send("Error rendering courses");
-          res.send(html);
+        // Return JSON data instead of HTML
+        return res.json({
+          success: true,
+          courses: courses.map((course) => ({
+            _id: course._id,
+            title: course.title,
+            description: course.description,
+            instructor: course.instructor,
+            thumbnail: course.thumbnail,
+            price: course.price,
+            rating: course.rating,
+            students: course.students,
+            category: course.category,
+            courseLanguage: course.courseLanguage,
+          })),
         });
       }
 
@@ -163,19 +176,27 @@ const CourseController = {
         return res.redirect("/courses");
       }
 
-      console.log('Course found:', course.title);
-      console.log('Course has modules:', course.modules ? 'Yes' : 'No');
+      console.log("Course found:", course.title);
+      console.log("Course has modules:", course.modules ? "Yes" : "No");
       if (course.modules) {
-        console.log('Number of modules:', course.modules.length);
+        console.log("Number of modules:", course.modules.length);
         course.modules.forEach((module, idx) => {
-          console.log(`Module ${idx + 1}:`, module.title, 'Lessons:', module.lessons ? module.lessons.length : 0);
+          console.log(
+            `Module ${idx + 1}:`,
+            module.title,
+            "Lessons:",
+            module.lessons ? module.lessons.length : 0
+          );
         });
       }
 
       // Check if enrolled
-      if (!user.enrolledCourses || !user.enrolledCourses.some(
-        (enrolledCourseId) => enrolledCourseId.toString() === courseId
-      )) {
+      if (
+        !user.enrolledCourses ||
+        !user.enrolledCourses.some(
+          (enrolledCourseId) => enrolledCourseId.toString() === courseId
+        )
+      ) {
         req.flash("error_msg", "You are not enrolled in this course");
         return res.redirect(`/courses/${courseId}`);
       }
@@ -191,12 +212,10 @@ const CourseController = {
       if (lessonId && course.modules) {
         for (const module of course.modules) {
           // Ensure lessons array exists and find the lesson by _id or id
-          const lesson = module.lessons?.find(
-            (l) => {
-              const lessonIdToCheck = l._id || l.id;
-              return lessonIdToCheck && lessonIdToCheck.toString() === lessonId;
-            }
-          );
+          const lesson = module.lessons?.find((l) => {
+            const lessonIdToCheck = l._id || l.id;
+            return lessonIdToCheck && lessonIdToCheck.toString() === lessonId;
+          });
           if (lesson) {
             currentLesson = lesson;
             currentModule = module;
@@ -239,48 +258,51 @@ const CourseController = {
 
   // Mark lesson as complete
   markLessonAsComplete: async (req, res) => {
-    console.log('markLessonAsComplete called with:', req.params);
-    
+    console.log("markLessonAsComplete called with:", req.params);
+
     if (!req.session.user) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
     const { courseId, lessonId } = req.params;
     const userId = req.session.user.id;
-    
-    console.log('User ID:', userId);
-    console.log('Course ID:', courseId);
-    console.log('Lesson ID:', lessonId);
+
+    console.log("User ID:", userId);
+    console.log("Course ID:", courseId);
+    console.log("Lesson ID:", lessonId);
 
     try {
       // First verify the course exists
       const course = await CourseModel.getCourseById(courseId);
       if (!course) {
-        console.log('Course not found:', courseId);
+        console.log("Course not found:", courseId);
         return res.status(404).json({
           success: false,
           message: "Course not found",
         });
       }
 
-      console.log('Course found:', course.title);
-      
+      console.log("Course found:", course.title);
+
       // Verify the user is enrolled in this course
       const user = await User.findById(userId);
       if (!user) {
-        console.log('User not found:', userId);
+        console.log("User not found:", userId);
         return res.status(404).json({
           success: false,
           message: "User not found",
         });
       }
-      
-      const isEnrolled = user.enrolledCourses && user.enrolledCourses.some(
-        (enrolledCourseId) => enrolledCourseId.toString() === courseId.toString()
-      );
-      
+
+      const isEnrolled =
+        user.enrolledCourses &&
+        user.enrolledCourses.some(
+          (enrolledCourseId) =>
+            enrolledCourseId.toString() === courseId.toString()
+        );
+
       if (!isEnrolled) {
-        console.log('User not enrolled in course');
+        console.log("User not enrolled in course");
         return res.status(403).json({
           success: false,
           message: "You are not enrolled in this course",
@@ -292,14 +314,12 @@ const CourseController = {
       for (const module of course.modules || []) {
         if (Array.isArray(module.lessons)) {
           if (
-            module.lessons.some(
-              (lesson) => {
-                if (!lesson) return false;
-                // Check both _id and id fields to handle legacy data
-                const lessonIdToCheck = lesson._id || lesson.id;
-                return lessonIdToCheck && lessonIdToCheck.toString() === lessonId;
-              }
-            )
+            module.lessons.some((lesson) => {
+              if (!lesson) return false;
+              // Check both _id and id fields to handle legacy data
+              const lessonIdToCheck = lesson._id || lesson.id;
+              return lessonIdToCheck && lessonIdToCheck.toString() === lessonId;
+            })
           ) {
             lessonExists = true;
             break;
@@ -308,14 +328,14 @@ const CourseController = {
       }
 
       if (!lessonExists) {
-        console.log('Lesson not found in course:', lessonId);
+        console.log("Lesson not found in course:", lessonId);
         return res.status(404).json({
           success: false,
           message: "Lesson not found in this course",
         });
       }
 
-      console.log('Lesson exists, proceeding to mark as complete');
+      console.log("Lesson exists, proceeding to mark as complete");
 
       // Calculate total lessons from the fetched course
       const totalLessons = course.modules.reduce(
@@ -323,7 +343,7 @@ const CourseController = {
         0
       );
 
-      console.log('Total lessons in course:', totalLessons);
+      console.log("Total lessons in course:", totalLessons);
 
       // Now proceed with marking the lesson as complete, passing totalLessons
       const updatedProgress = await ProgressModel.markLessonAsComplete(
@@ -334,14 +354,14 @@ const CourseController = {
       );
 
       if (!updatedProgress) {
-        console.log('Failed to update progress');
+        console.log("Failed to update progress");
         return res.status(500).json({
           success: false,
           message: "Could not update progress",
         });
       }
 
-      console.log('Progress updated successfully:', updatedProgress);
+      console.log("Progress updated successfully:", updatedProgress);
 
       res.json({
         success: true,

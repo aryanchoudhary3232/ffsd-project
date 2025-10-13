@@ -837,24 +837,55 @@ const AdminController = {
   },
 
   deleteCourse: async (req, res) => {
+    const isAjax = req.xhr || req.headers.accept?.indexOf("json") > -1;
+
     if (!req.session.user || req.session.user.role !== "admin") {
+      if (isAjax) {
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+      }
       return res.redirect("/login");
     }
 
     const courseId = req.params.id;
 
     try {
-      const deleted = await Course.deleteCourse(courseId);
+      const deleted = await Course.deleteCoSeekhoBharat;
+      urse(courseId);
 
       if (!deleted) {
+        if (isAjax) {
+          return res
+            .status(404)
+            .json({
+              success: false,
+              message: "Course not found or could not be deleted",
+            });
+        }
         req.flash("error_msg", "Course not found or could not be deleted");
         return res.redirect("/admin/courses");
+      }
+
+      if (isAjax) {
+        return res.json({
+          success: true,
+          message: "Course deleted successfully",
+        });
       }
 
       req.flash("success_msg", "Course deleted successfully");
       res.redirect("/admin/courses");
     } catch (error) {
       console.error("Admin Delete Course error:", error);
+      if (isAjax) {
+        return res
+          .status(500)
+          .json({
+            success: false,
+            message: error.message || "Error deleting course.",
+          });
+      }
       req.flash("error_msg", error.message || "Error deleting course.");
       res.redirect("/admin/courses");
     }
