@@ -196,6 +196,7 @@ function populateCourse({ course, isEnrolled, progress, user }) {
   }
 
   initAddToCart(); // your existing add-to-cart function
+  loadRatings(course._id); // Load ratings for this course
 }
 
 // Module toggle
@@ -205,6 +206,160 @@ function toggleModule(idx) {
   content.classList.toggle('hidden');
   icon.classList.toggle('fa-chevron-down');
   icon.classList.toggle('fa-chevron-up');
+}
+
+// Load ratings for the course
+async function loadRatings(courseId) {
+  const reviewsContainer = document.getElementById('reviews-container');
+  const loadingReviews = document.getElementById('loading-reviews');
+  
+  try {
+    const response = await fetch(`/courses/${courseId}/ratings`);
+    const data = await response.json();
+    
+    if (loadingReviews) {
+      loadingReviews.remove();
+    }
+    
+    if (data.success && data.ratings && data.ratings.length > 0) {
+      reviewsContainer.innerHTML = data.ratings.map(rating => `
+        <div class="review-item">
+          <div class="review-header">
+            <div>
+              <strong>${rating.username || 'Anonymous User'}</strong>
+              <div class="text-yellow-500">
+                ${'★'.repeat(rating.rating)}${'☆'.repeat(5 - rating.rating)}
+              </div>
+            </div>
+            <div class="text-sm text-gray-400">
+              ${rating.createdAt ? new Date(rating.createdAt).toLocaleDateString() : ''}
+            </div>
+          </div>
+          ${rating.review ? `<p class="text-gray-300">${rating.review}</p>` : ''}
+        </div>
+      `).join('');
+    } else {
+      reviewsContainer.innerHTML = `
+        <div class="text-center py-4 text-gray-400">
+          <i class="fas fa-star-half-alt text-3xl mb-2"></i>
+          <p>No reviews yet. Be the first to review this course!</p>
+        </div>
+      `;
+    }
+  } catch (error) {
+    console.error('Error loading ratings:', error);
+    if (loadingReviews) {
+      loadingReviews.innerHTML = '<p class="text-red-500">Failed to load reviews.</p>';
+    } else {
+      reviewsContainer.innerHTML = '<p class="text-red-500">Failed to load reviews.</p>';
+    }
+  }
+}
+
+// Initialize rating submission for enrolled users
+function initRating(courseId) {
+  const ratingStars = document.getElementById('rating-stars');
+  const submitButton = document.getElementById('submit-rating');
+  const reviewTextarea = document.getElementById('review');
+  const ratingText = document.getElementById('rating-text');
+  
+  if (!ratingStars || !submitButton) return;
+  
+  let selectedRating = 0;
+  
+  // Handle star clicks
+  const stars = ratingStars.querySelectorAll('i');
+  stars.forEach(star => {
+    star.addEventListener('click', function() {
+      selectedRating = parseInt(this.getAttribute('data-rating'));
+      updateStars(selectedRating);
+    });
+    
+    star.addEventListener('mouseenter', function() {
+      const rating = parseInt(this.getAttribute('data-rating'));
+      updateStars(rating);
+    });
+  });
+  
+  ratingStars.addEventListener('mouseleave', function() {
+    updateStars(selectedRating);
+  });
+  
+  function updateStars(rating) {
+    stars.forEach((star, index) => {
+      if (index < rating) {
+        star.classList.remove('far');
+        star.classList.add('fas');
+      } else {
+        star.classList.remove('fas');
+        star.classList.add('far');
+      }
+    });
+    ratingText.textContent = rating > 0 ? `${rating} Star${rating > 1 ? 's' : ''}` : 'Select Rating';
+  }
+  
+  // Handle submit
+  submitButton.addEventListener('click', async function() {
+    if (selectedRating === 0) {
+      alert('Please select a rating');
+      return;
+    }
+    
+    const review = reviewTextarea.value.trim();
+    
+    try {
+      const response = await fetch(`/courses/${courseId}/ratings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          rating: selectedRating,
+          review: review || null
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('Thank you for your review!');
+        // Reload ratings to show the new one
+        await loadRatings(courseId);
+        // Reset form
+        selectedRating = 0;
+        updateStars(0);
+        reviewTextarea.value = '';
+      } else {
+        alert(data.message || 'Failed to submit rating');
+      }
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+      alert('Error submitting rating. Please try again.');
+    }
+  });
+  
+  // Load user's existing rating if any
+  loadUserRating(courseId, stars, reviewTextarea, (rating) => {
+    selectedRating = rating;
+    updateStars(rating);
+  });
+}
+
+// Load user's existing rating
+async function loadUserRating(courseId, stars, reviewTextarea, callback) {
+  try {
+    const response = await fetch(`/courses/${courseId}/ratings/user`);
+    const data = await response.json();
+    
+    if (data.success && data.hasRated) {
+      callback(data.rating);
+      if (data.review) {
+        reviewTextarea.value = data.review;
+      }
+    }
+  } catch (error) {
+    console.error('Error loading user rating:', error);
+  }
 }
 
 // Initialize page
