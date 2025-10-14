@@ -1,640 +1,184 @@
-<%- include('../partials/head', { title: course.title + ' - SeekoBharat' })
-%>
+<%- include('../partials/head', { title: 'Course Details - SeekoBharat' }) %>
 <style>
-  body {
-    background-color: #000;
-    color: #fff;
-  }
-  .bg-white {
-    background-color: #000 !important;
-    color: #fff;
-  }
-  .bg-white .text-gray-600,
-  .bg-white .text-gray-500,
-  .bg-white .text-gray-700,
-  .bg-white .text-gray-50,
-  .bg-white .text-yellow-500,
-  .bg-white .text-green-500,
-  .bg-white .text-red-500,
-  .bg-white .text-blue-500 {
-    color: #fff !important;
-  }
-  input,
-  select,
-  textarea {
-    background-color: #000;
-    color: #fff;
-    border: 1px solid #ccc;
-  }
-  .bg-primary {
-    background-color: #000 !important;
-    color: #fff !important;
-  }
-  .hover\:bg-primary-dark:hover {
-    background-color: #f2f2f2 !important;
-    color: #000 !important;
-  }
-  .bg-gray-50,
-  .bg-gray-100 {
-    background-color: #fff !important;
-    color: #000;
-  }
-  .bg-green-100,
-  .bg-red-100 {
-    background-color: #fff !important;
-    color: #000 !important;
-    border-color: #ccc !important;
-  }
-  .rating-stars i {
-    cursor: pointer;
-    margin-right: 5px;
-    font-size: 1.5rem;
-  }
-  .rating-stars i.fas {
-    color: #ffc107;
-  }
-  .rating-stars i.far {
-    color: #e4e5e9;
-  }
-  .reviews-section {
-    padding: 1.5rem;
-    margin-top: 2rem;
-    border-radius: 0.5rem;
-    background-color: #1a1a1a;
-  }
-  .review-item {
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border-radius: 0.5rem;
-    background-color: #2a2a2a;
-  }
-  .review-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-  }
+  body { background-color: #000; color: #fff; }
+  .bg-white { background-color: #000 !important; color: #fff; }
+  .bg-white .text-gray-600, .bg-white .text-gray-500, .bg-white .text-gray-700,
+  .bg-white .text-gray-50, .bg-white .text-yellow-500, .bg-white .text-green-500,
+  .bg-white .text-red-500, .bg-white .text-blue-500 { color: #fff !important; }
+  input, select, textarea { background-color: #000; color: #fff; border: 1px solid #ccc; }
+  .bg-primary { background-color: #000 !important; color: #fff !important; }
+  .hover\:bg-primary-dark:hover { background-color: #f2f2f2 !important; color: #000 !important; }
+  .bg-gray-50, .bg-gray-100, .bg-green-100, .bg-red-100 { background-color: #fff !important; color: #000 !important; border-color: #ccc !important; }
+  .rating-stars i { cursor: pointer; margin-right: 5px; font-size: 1.5rem; }
+  .rating-stars i.fas { color: #ffc107; }
+  .rating-stars i.far { color: #e4e5e9; }
+  .reviews-section { padding: 1.5rem; margin-top: 2rem; border-radius: 0.5rem; background-color: #1a1a1a; }
+  .review-item { padding: 1rem; margin-bottom: 1rem; border-radius: 0.5rem; background-color: #2a2a2a; }
+  .review-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
 </style>
 <body>
   <%- include('../partials/navbar') %>
   <div class="container mx-auto px-4 py-8">
-    <% if(success_msg && success_msg?.length > 0) { %>
-    <div
-      class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4"
-    >
-      <%= success_msg %>
-    </div>
-    <% } %> <% if(error_msg && error_msg?.length > 0) { %>
-    <div
-      class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
-    >
-      <%= error_msg %>
-    </div>
-    <% } %>
+    <div id="alerts"></div>
+
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
       <div class="md:flex">
         <div class="md:w-2/3 p-6">
-          <h1 class="text-3xl font-bold mb-2"><%= course.title %></h1>
-          <p class="text-gray-600 mb-4"><%= course.description %></p>
-          <div class="flex flex-wrap items-center gap-4 mb-6">
-            <div class="flex items-center">
-              <span class="text-yellow-500 mr-1">★</span>
-              <span class="font-semibold"><%= course.rating %></span>
-              <span class="text-gray-500 ml-1"
-                >(<%= course.students %> students)</span
-              >
-            </div>
-            <div class="flex items-center">
-              <i class="fas fa-user-tie text-gray-500 mr-2"></i>
-              <span>Instructor: <%= course.instructor %></span>
-            </div>
-            <div class="flex items-center">
-              <i class="fas fa-globe text-gray-500 mr-2"></i>
-              <span>Language: <%= course.courseLanguage || 'English' %></span>
-            </div>
-            <div class="flex items-center">
-              <i class="fas fa-calendar-alt text-gray-500 mr-2"></i>
-              <span
-                >Last updated: <%= new
-                Date(course.updatedAt).toLocaleDateString() %></span
-              >
-            </div>
-          </div>
-          <div class="mb-8">
-            <h2 class="text-xl font-bold mb-4">What You'll Learn</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <div class="flex items-start">
-                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
-                <span>Build real-world applications</span>
-              </div>
-              <div class="flex items-start">
-                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
-                <span>Master core concepts and techniques</span>
-              </div>
-              <div class="flex items-start">
-                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
-                <span>Understand best practices</span>
-              </div>
-              <div class="flex items-start">
-                <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
-                <span>Gain practical skills for your career</span>
-              </div>
-            </div>
-          </div>
-          <div class="mb-8">
-            <h2 class="text-xl font-bold mb-4">Course Content</h2>
-            <div class="border rounded-md overflow-hidden">
-              <div class="bg-gray-100 p-4 flex justify-between items-center">
-                <span class="font-semibold">
-                  <%= Array.isArray(course.modules) ? course.modules.length : 0
-                  %> modules • <%= Array.isArray(course.modules) ?
-                  course.modules.reduce( (total, module) => total +
-                  (Array.isArray(module.lessons) ? module.lessons.length : 0),
-                  0 ) : 0 %> lessons
-                </span>
-                <span class="text-sm text-gray-600">
-                  <%= Array.isArray(course.modules) ? course.modules.reduce(
-                  (total, module) => total + (Array.isArray(module.lessons) ?
-                  module.lessons.filter((lesson) => lesson.type === 'video')
-                  .length : 0), 0 ) : 0 %> videos • <%=
-                  Array.isArray(course.modules) ? course.modules.reduce(
-                  (total, module) => total + (Array.isArray(module.lessons) ?
-                  module.lessons.filter((lesson) => lesson.type !== 'video')
-                  .length : 0), 0 ) : 0 %> resources
-                </span>
-              </div>
-              <div class="divide-y">
-                <% if (Array.isArray(course.modules)) { %> <%
-                course.modules.forEach(function(module, moduleIndex) { %>
-                <div class="p-4">
-                  <div
-                    class="flex justify-between items-center cursor-pointer"
-                    onclick="toggleModule('<%= moduleIndex %>')"
-                  >
-                    <h3 class="font-semibold"><%= module.title %></h3>
-                    <div class="flex items-center">
-                      <span class="text-sm text-gray-600 mr-2">
-                        <%= Array.isArray(module.lessons) ?
-                        module.lessons.length : 0 %> lessons
-                      </span>
-                      <i
-                        class="fas fa-chevron-down text-gray-500 module-icon-<%= moduleIndex %>"
-                      ></i>
-                    </div>
-                  </div>
-                  <div
-                    class="mt-4 space-y-2 hidden module-content-<%= moduleIndex %>"
-                  >
-                    <% if (Array.isArray(module.lessons)) { %> <%
-                    module.lessons.forEach(function(lesson) { %>
-                    <div class="flex items-center pl-4">
-                      <% if (lesson.type === 'video') { %>
-                      <i class="fas fa-play-circle text-primary mr-2"></i>
-                      <% } else if (lesson.type === 'pdf') { %>
-                      <i class="fas fa-file-pdf text-red-500 mr-2"></i>
-                      <% } else if (lesson.type === 'quiz') { %>
-                      <i class="fas fa-question-circle text-blue-500 mr-2"></i>
-                      <% } else { %>
-                      <i class="fas fa-file-alt text-gray-500 mr-2"></i>
-                      <% } %>
-                      <span><%= lesson.title %></span>
-                      <% if (lesson.duration) { %>
-                      <span class="ml-auto text-sm text-gray-600"
-                        ><%= lesson.duration %></span
-                      >
-                      <% } %>
-                    </div>
-                    <% }); %> <% } %>
-                  </div>
-                </div>
-                <% }); %> <% } %>
-              </div>
-            </div>
-          </div>
-          <div>
-            <h2 class="text-xl font-bold mb-4">Requirements</h2>
-            <ul class="list-disc pl-5 space-y-1 text-gray-700">
-              <li>Basic understanding of programming concepts</li>
-              <li>A computer with internet access</li>
-              <li>Enthusiasm to learn and practice</li>
-            </ul>
-          </div>
-          <!-- Course Ratings and Reviews Section -->
+          <h1 id="course-title" class="text-3xl font-bold mb-2"></h1>
+          <p id="course-description" class="text-gray-600 mb-4"></p>
+
+          <div id="course-info" class="flex flex-wrap items-center gap-4 mb-6"></div>
+          <div id="what-you-learn" class="mb-8 grid grid-cols-1 md:grid-cols-2 gap-2"></div>
+          <div id="course-content" class="mb-8 border rounded-md overflow-hidden"></div>
+          <div id="requirements" class="mb-8 list-disc pl-5 space-y-1 text-gray-700"></div>
+
+          <!-- Reviews Section -->
           <div class="reviews-section mb-8">
             <h2 class="text-xl font-bold mb-4">Student Ratings & Reviews</h2>
-            <div class="flex items-center mb-6">
-              <div class="flex flex-col items-center mr-6">
-                <div class="text-5xl font-bold mb-1">
-                  <%= course.rating || '0' %>
-                </div>
-                <div class="flex">
-                  <% for(let i = 1; i <= 5; i++) { %> <% if(i <=
-                  Math.round(course.rating)) { %>
-                  <i class="fas fa-star text-yellow-500"></i>
-                  <% } else { %>
-                  <i class="far fa-star text-yellow-500"></i>
-                  <% } %> <% } %>
-                </div>
-                <div class="text-sm mt-1">
-                  (<%= course.ratingCount || 0 %> ratings)
-                </div>
-              </div>
-              <% if (isEnrolled) { %>
-              <div class="rate-course-container flex-1 ml-4">
-                <h3 class="font-semibold mb-2">Rate this course:</h3>
-                <div class="rating-stars mb-3" id="rating-stars">
-                  <i class="far fa-star" data-rating="1"></i>
-                  <i class="far fa-star" data-rating="2"></i>
-                  <i class="far fa-star" data-rating="3"></i>
-                  <i class="far fa-star" data-rating="4"></i>
-                  <i class="far fa-star" data-rating="5"></i>
-                  <span class="ml-2" id="rating-text">Select Rating</span>
-                </div>
-                <div class="mb-3">
-                  <label for="review" class="block text-sm font-medium mb-1"
-                    >Write a review (optional):</label
-                  >
-                  <textarea
-                    id="review"
-                    rows="3"
-                    class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  ></textarea>
-                </div>
-                <button
-                  id="submit-rating"
-                  class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Submit Review
-                </button>
-              </div>
-              <% } else if (user) { %>
-              <div class="flex-1 ml-4">
-                <p>You need to enroll in this course to leave a rating.</p>
-              </div>
-              <% } else { %>
-              <div class="flex-1 ml-4">
-                <p>
-                  Please
-                  <a href="/login" class="text-blue-500 hover:underline"
-                    >login</a
-                  >
-                  and enroll to leave a rating.
-                </p>
-              </div>
-              <% } %>
-            </div>
-            <!-- Reviews List -->
             <div id="reviews-container">
               <div class="text-center py-4" id="loading-reviews">
                 <i class="fas fa-spinner fa-spin mr-2"></i> Loading reviews...
               </div>
             </div>
+            <div id="rating-container" class="mt-6"></div>
           </div>
         </div>
+
         <div class="md:w-1/3 bg-gray-700 text-white p-6">
-          <div class="sticky top-6">
-            <img
-              src="<%= course.thumbnail %>"
-              alt="<%= course.title %>"
-              class="w-full h-48 object-cover rounded-md mb-4"
-            />
-            <div class="text-3xl font-bold mb-4">
-              ₹<%= course.price.toFixed(2) %>
-            </div>
-            <% if (isEnrolled) { %>
-            <div class="mb-4">
-              <div class="flex justify-between text-sm mb-1">
-                <span>Your progress</span>
-                <span><%= progress %>%</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2.5">
-                <div
-                  class="bg-primary h-2.5 rounded-full"
-                  style="width: '<%= progress %>%'"
-                ></div>
-              </div>
-            </div>
-            <a
-              href="/courses/<%= course._id %>/learn"
-              class="block w-full text-center bg-primary text-white py-3 px-4 rounded-md hover:bg-primary-dark transition-colors mb-3"
-            >
-              <i class="fas fa-play-circle mr-2"></i> Start Learning
-            </a>
-            <% } else if (user && user.id && course.instructorId &&
-            user.id.toString() === course.instructorId.toString()) { %>
-            <a
-              href="/instructor/courses/<%= course._id %>/edit"
-              class="block w-full text-center bg-primary text-white py-3 px-4 rounded-md hover:bg-primary-dark transition-colors mb-3"
-            >
-              <i class="fas fa-edit mr-2"></i> Edit Course
-            </a>
-            <a
-              href="/instructor/courses"
-              class="block w-full text-center bg-white border border-primary text-primary py-3 px-4 rounded-md hover:bg-gray-50 transition-colors mb-3"
-            >
-              <i class="fas fa-list mr-2"></i> Manage Courses
-            </a>
-            <% } else if (user && user.roler === 'student') { %>
-            <button
-              id="add-to-cart-btn"
-              data-course-id="<%= course._id %>"
-              class="block w-full text-center bg-white border border-primary text-primary py-3 px-4 rounded-md hover:bg-gray-50 transition-colors mb-3"
-            >
-              Add to Cart
-            </button>
-            <% } else { %>
-            <a
-              href="/login"
-              class="block w-full text-center bg-primary text-white py-3 px-4 rounded-md hover:bg-primary-dark transition-colors mb-3"
-            >
-              Login to Enroll
-            </a>
-            <% } %>
-            <div class="mt-6">
-              <h3 class="font-semibold mb-2">This course includes:</h3>
-              <ul class="space-y-2">
-                <li class="flex items-center">
-                  <i class="fas fa-video text-gray-500 mr-2"></i>
-                  <span>
-                    <%= Array.isArray(course.modules) ? course.modules.reduce(
-                    (total, module) => total + (Array.isArray(module.lessons) ?
-                    module.lessons.filter((lesson) => lesson.type === 'video')
-                    .length : 0), 0 ) : 0 %>
-                    on-demand videos
-                  </span>
-                </li>
-                <li class="flex items-center">
-                  <i class="fas fa-file-alt text-gray-500 mr-2"></i>
-                  <span>
-                    <%= Array.isArray(course.modules) ? course.modules.reduce(
-                    (total, module) => total + (Array.isArray(module.lessons) ?
-                    module.lessons.filter((lesson) => lesson.type === 'pdf')
-                    .length : 0), 0 ) : 0 %>
-                    downloadable resources
-                  </span>
-                </li>
-                <li class="flex items-center">
-                  <i class="fas fa-infinity text-gray-500 mr-2"></i>
-                  <span>Full lifetime access</span>
-                </li>
-                <li class="flex items-center">
-                  <i class="fas fa-mobile-alt text-gray-500 mr-2"></i>
-                  <span>Access on mobile and TV</span>
-                </li>
-                <li class="flex items-center">
-                  <i class="fas fa-certificate text-gray-500 mr-2"></i>
-                  <span>Certificate of completion</span>
-                </li>
-              </ul>
-            </div>
-            <div class="mt-6 text-center">
-              <p class="text-sm text-gray-600 mb-2">
-                Not sure? We offer a 30-day money-back guarantee
-              </p>
-              <a href="#" class="text-primary hover:underline text-sm"
-                >Gift this course</a
-              >
-            </div>
-          </div>
+          <div id="sidebar" class="sticky top-6"></div>
         </div>
       </div>
     </div>
   </div>
 
-<!-- ...existing code... -->
-<%- include('../partials/footer') %> <%- include('../partials/scripts') %>
+<%- include('../partials/footer') %> 
+<%- include('../partials/scripts') %>
 
 <script>
-  function toggleModule(moduleIndex) {
-    const content = document.querySelector(`.module-content-${moduleIndex}`);
-    const icon = document.querySelector(`.module-icon-${moduleIndex}`);
-    content.classList.toggle('hidden');
-    if (content.classList.contains('hidden')) {
-      icon.classList.remove('fa-chevron-up');
-      icon.classList.add('fa-chevron-down');
-    } else {
-      icon.classList.remove('fa-chevron-down');
-      icon.classList.add('fa-chevron-up');
+async function fetchCourseData() {
+  const courseId = window.location.pathname.split('/').pop();
+  try {
+    const res = await fetch(`api/${courseId}`);
+    const data = await res.json();
+    if(!data.success) {
+      document.getElementById('alerts').innerHTML = `<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">${data.message}</div>`;
+      return;
     }
-  }
+    populateCourse(data);
+  } catch(err) { console.error(err); }
+}
 
-  // Rating functionality with fetch and async/await
-  document.addEventListener('DOMContentLoaded', async function () {
-    const courseId = '<%= course._id %>';
-    const starsContainer = document.getElementById('rating-stars');
-    const stars = starsContainer ? starsContainer.querySelectorAll('i') : [];
-    let selectedRating = 0;
-    const ratingText = document.getElementById('rating-text');
-    const reviewTextarea = document.getElementById('review');
-    const submitButton = document.getElementById('submit-rating');
+function populateCourse({ course, isEnrolled, progress, user }) {
+  // Title & description
+  document.getElementById('course-title').textContent = course.title;
+  document.getElementById('course-description').textContent = course.description;
 
-    if (stars.length > 0) {
-      // Fetch user's existing rating using fetch with async/await
-      try {
-        const response = await fetch(`/courses/${courseId}/ratings/user`, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          }
-        });
+  // Info
+  document.getElementById('course-info').innerHTML = `
+    <div class="flex items-center">
+      <span class="text-yellow-500 mr-1">★</span>
+      <span class="font-semibold">${course.rating || 0}</span>
+      <span class="text-gray-500 ml-1">(${course.students || 0} students)</span>
+    </div>
+    <div class="flex items-center">
+      <i class="fas fa-user-tie text-gray-500 mr-2"></i>
+      <span>Instructor: ${course.instructor}</span>
+    </div>
+    <div class="flex items-center">
+      <i class="fas fa-globe text-gray-500 mr-2"></i>
+      <span>Language: ${course.courseLanguage || 'English'}</span>
+    </div>
+    <div class="flex items-center">
+      <i class="fas fa-calendar-alt text-gray-500 mr-2"></i>
+      <span>Last updated: ${new Date(course.updatedAt).toLocaleDateString()}</span>
+    </div>
+  `;
 
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.hasRated) {
-            selectedRating = data.rating;
-            updateStars(selectedRating);
-            if (ratingText) ratingText.textContent = `Your rating: ${selectedRating}/5`;
-            if (data.review && reviewTextarea) {
-              reviewTextarea.value = data.review;
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching user rating:', error);
-      }
+  // What you'll learn
+  const learnPoints = ["Build real-world applications","Master core concepts and techniques","Understand best practices","Gain practical skills for your career"];
+  document.getElementById('what-you-learn').innerHTML = learnPoints.map(p => `
+    <div class="flex items-start">
+      <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+      <span>${p}</span>
+    </div>`).join('');
 
-      // Add event listeners to stars
-      stars.forEach((star, index) => {
-        star.addEventListener('mouseover', function () {
-          const rating = parseInt(this.getAttribute('data-rating'));
-          highlightStars(rating);
-        });
-
-        star.addEventListener('click', function () {
-          selectedRating = parseInt(this.getAttribute('data-rating'));
-          if (ratingText) ratingText.textContent = `Your rating: ${selectedRating}/5`;
-        });
-      });
-
-      if (starsContainer) {
-        starsContainer.addEventListener('mouseleave', function () {
-          highlightStars(selectedRating);
-        });
-      }
-
-      // Submit rating with fetch and async/await
-      if (submitButton) {
-        submitButton.addEventListener('click', async function () {
-          if (selectedRating === 0) {
-            alert('Please select a rating');
-            return;
-          }
-          const review = reviewTextarea ? reviewTextarea.value : '';
-
-          try {
-            const response = await fetch(`/courses/${courseId}/ratings`, {
-              method: 'POST',
-              headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                rating: selectedRating,
-                review: review,
-              })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-              alert('Thank you for your rating!');
-              location.reload();
-            } else {
-              alert(data.message || 'Failed to submit rating');
-            }
-          } catch (error) {
-            console.error('Error submitting rating:', error);
-            alert('An error occurred while submitting your rating');
-          }
-        });
-      }
-    }
-
-    function highlightStars(rating) {
-      stars.forEach((star, index) => {
-        if (index < rating) {
-          star.classList.remove('far');
-          star.classList.add('fas');
-        } else {
-          star.classList.remove('fas');
-          star.classList.add('far');
-        }
-      });
-    }
-
-    function updateStars(rating) {
-      highlightStars(rating);
-    }
-
-    await loadCourseReviews(courseId);
-  });
-
-  async function loadCourseReviews(courseId) {
-    const reviewsContainer = document.getElementById('reviews-container');
-    const loadingReviews = document.getElementById('loading-reviews');
-
-    try {
-      const response = await fetch(`/courses/${courseId}/ratings`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (loadingReviews) loadingReviews.style.display = 'none';
-
-      if (!response.ok) {
-        throw new Error('Failed to load reviews');
-      }
-
-      const data = await response.json();
-
-      if (data.success && data.ratings && data.ratings.length > 0) {
-        const reviewsHTML = data.ratings
-          .map(
-            (review) => `
-          <div class="review-item">
-            <div class="review-header">
-              <div class="font-semibold">${review.username}</div>
-              <div class="flex">
-                ${getStarsHTML(review.rating)}
-                <span class="ml-2 text-sm">${new Date(
-                  review.createdAt || review.updatedAt
-                ).toLocaleDateString()}</span>
-              </div>
-            </div>
-            ${
-              review.review
-                ? `<p class="text-gray-300">${review.review}</p>`
-                : ''
-            }
+  // Course content
+  document.getElementById('course-content').innerHTML = course.modules.map((module, idx) => `
+    <div class="p-4">
+      <div class="flex justify-between items-center cursor-pointer" onclick="toggleModule(${idx})">
+        <h3 class="font-semibold">${module.title}</h3>
+        <div class="flex items-center">
+          <span class="text-sm text-gray-600 mr-2">${module.lessons.length} lessons</span>
+          <i class="fas fa-chevron-down text-gray-500 module-icon-${idx}"></i>
+        </div>
+      </div>
+      <div class="mt-4 space-y-2 hidden module-content-${idx}">
+        ${module.lessons.map(lesson => `
+          <div class="flex items-center pl-4">
+            <i class="fas ${lesson.type==='video'?'fa-play-circle text-primary':lesson.type==='pdf'?'fa-file-pdf text-red-500':lesson.type==='quiz'?'fa-question-circle text-blue-500':'fa-file-alt text-gray-500'} mr-2"></i>
+            <span>${lesson.title}</span>
+            ${lesson.duration?`<span class="ml-auto text-sm text-gray-600">${lesson.duration}</span>`:''}
           </div>
-        `
-          )
-          .join('');
-        if (reviewsContainer) reviewsContainer.innerHTML = reviewsHTML;
-      } else {
-        if (reviewsContainer) {
-          reviewsContainer.innerHTML = '<p class="text-center py-4">No reviews yet for this course.</p>';
-        }
-      }
-    } catch (error) {
-      console.error('Error loading reviews:', error);
-      if (reviewsContainer) {
-        reviewsContainer.innerHTML = '<p class="text-center py-4">Failed to load reviews. Please try again later.</p>';
-      }
-    }
+        `).join('')}
+      </div>
+    </div>`).join('');
+
+  // Requirements
+  const reqs = ["Basic understanding of programming concepts","A computer with internet access","Enthusiasm to learn and practice"];
+  document.getElementById('requirements').innerHTML = reqs.map(r => `<li>${r}</li>`).join('');
+
+  // Sidebar
+  document.getElementById('sidebar').innerHTML = `
+    <img src="${course.thumbnail}" alt="${course.title}" class="w-full h-48 object-cover rounded-md mb-4"/>
+    <div class="text-3xl font-bold mb-4">₹${course.price.toFixed(2)}</div>
+    ${isEnrolled?`
+      <div class="mb-4">
+        <div class="flex justify-between text-sm mb-1">
+          <span>Your progress</span>
+          <span>${progress}%</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2.5">
+          <div class="bg-primary h-2.5 rounded-full" style="width: ${progress}%"></div>
+        </div>
+      </div>
+      <a href="/courses/${course._id}/learn" class="block w-full text-center bg-primary text-white py-3 px-4 rounded-md hover:bg-primary-dark transition-colors mb-3">
+        <i class="fas fa-play-circle mr-2"></i> Start Learning
+      </a>` : user?`<button id="add-to-cart-btn" data-course-id="${course._id}" class="block w-full text-center bg-white border border-primary text-primary py-3 px-4 rounded-md hover:bg-gray-50 transition-colors mb-3">Add to Cart</button>`:`<a href="/login" class="block w-full text-center bg-primary text-white py-3 px-4 rounded-md hover:bg-primary-dark transition-colors mb-3">Login to Enroll</a>`}`;
+
+  // Ratings & reviews
+  if(isEnrolled) {
+    const ratingContainer = document.getElementById('rating-container');
+    ratingContainer.innerHTML = `
+      <h3 class="font-semibold mb-2">Rate this course:</h3>
+      <div class="rating-stars mb-3" id="rating-stars">
+        <i class="far fa-star" data-rating="1"></i>
+        <i class="far fa-star" data-rating="2"></i>
+        <i class="far fa-star" data-rating="3"></i>
+        <i class="far fa-star" data-rating="4"></i>
+        <i class="far fa-star" data-rating="5"></i>
+        <span class="ml-2" id="rating-text">Select Rating</span>
+      </div>
+      <div class="mb-3">
+        <label for="review" class="block text-sm font-medium mb-1">Write a review (optional):</label>
+        <textarea id="review" rows="3" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+      </div>
+      <button id="submit-rating" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Submit Review</button>
+    `;
+    initRating(course._id); // your existing rating JS function
   }
 
-  function getStarsHTML(rating) {
-    let stars = '';
-    for (let i = 1; i <= 5; i++) {
-      if (i <= rating) {
-        stars += '<i class="fas fa-star text-yellow-500 text-sm"></i>';
-      } else {
-        stars += '<i class="far fa-star text-yellow-500 text-sm"></i>';
-      }
-    }
-    return stars;
-  }
+  initAddToCart(); // your existing add-to-cart function
+}
 
+// Module toggle
+function toggleModule(idx) {
+  const content = document.querySelector(`.module-content-${idx}`);
+  const icon = document.querySelector(`.module-icon-${idx}`);
+  content.classList.toggle('hidden');
+  icon.classList.toggle('fa-chevron-down');
+  icon.classList.toggle('fa-chevron-up');
+}
 
-  // Add to cart functionality with fetch and async/await
-  const addToCartBtn = document.getElementById('add-to-cart-btn');
-  if (addToCartBtn) {
-    addToCartBtn.addEventListener('click', async function () {
-      const courseId = this.getAttribute('data-course-id');
-      
-      try {
-        const response = await fetch('/cart/add', {
-          method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ courseId })
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          const cartCount = document.getElementById('cart-count');
-          if (cartCount) {
-            cartCount.textContent = data.cartCount;
-            cartCount.classList.remove('hidden');
-          }
-          // Redirect to cart page
-          window.location.href = '/cart';
-        } else {
-          alert(data.message || 'Failed to add course to cart.');
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('Error adding course to cart.');
-      }
-    });
-  }
+// Initialize page
+fetchCourseData();
 </script>
-</body>
-</html>

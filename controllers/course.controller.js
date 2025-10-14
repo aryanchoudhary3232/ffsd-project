@@ -624,80 +624,39 @@ const CourseController = {
   // Get course details as JSON (API endpoint)
   getCourseDetailsAPI: async (req, res) => {
     const courseId = req.params.id;
+  try {
+    const course = await CourseModel.getCourseById(courseId);
+    if (!course) return res.status(404).json({ success: false, message: 'Course not found' });
 
-    try {
-      const course = await CourseModel.getCourseById(courseId);
+    let isEnrolled = false;
+    let progress = 0;
+    let user = null;
 
-      if (!course) {
-        return res.status(404).json({
-          success: false,
-          message: "Course not found"
-        });
+    if (req.session.user) {
+      user = await User.findById(req.session.user.id);
+      if (
+        user &&
+        user.enrolledCourses &&
+        user.enrolledCourses.some((cId) => cId.toString() === courseId)
+      ) {
+        isEnrolled = true;
+        const userProgress = await ProgressModel.getProgress(user._id, courseId);
+        progress = userProgress ? userProgress.progress : 0;
       }
-
-      // Get instructor info if needed
-      let instructorName = course.instructor || "Unknown Instructor";
-
-      // Check if user is enrolled
-      let isEnrolled = false;
-      let progress = 0;
-      let user = null;
-
-      if (req.session.user) {
-        user = await User.findById(req.session.user.id);
-        // Check if user exists and has enrolledCourses array
-        if (
-          user &&
-          user.enrolledCourses &&
-          user.enrolledCourses.some(
-            (enrolledCourseId) => enrolledCourseId.toString() === courseId
-          )
-        ) {
-          isEnrolled = true;
-          // Find progress record
-          const userProgress = await ProgressModel.getProgress(
-            user._id,
-            courseId
-          );
-          progress = userProgress ? userProgress.progress : 0;
-        }
-      }
-
-      // Return course data as JSON
-      res.json({
-        success: true,
-        course: {
-          _id: course._id,
-          title: course.title,
-          description: course.description,
-          thumbnail: course.thumbnail,
-          price: course.price,
-          category: course.category,
-          instructor: instructorName,
-          instructorId: course.instructorId,
-          students: course.students,
-          rating: course.rating,
-          modules: course.modules,
-          createdAt: course.createdAt,
-          updatedAt: course.updatedAt,
-          status: course.status
-        },
-        isEnrolled,
-        progress,
-        user: user ? {
-          id: user._id,
-          username: user.username,
-          email: user.email
-        } : null
-      });
-    } catch (error) {
-      console.error("Get Course Details API error:", error);
-      res.status(500).json({
-        success: false,
-        message: "Could not load course details."
-      });
     }
-  },
+
+    res.json({
+      success: true,
+      course,
+      isEnrolled,
+      progress,
+      user: user || null,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+},
 
   // Get course learning data as JSON (API endpoint)
   getCourseLearningDataAPI: async (req, res) => {
