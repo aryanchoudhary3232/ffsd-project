@@ -100,6 +100,44 @@ const CourseController = {
     }
   },
 
+  getCoursesData: async (req, res) => {
+  const { search, category, language, sort } = req.query;
+
+  try {
+    let courses;
+
+    if (search) courses = await CourseModel.searchCourses(search);
+    else courses = await CourseModel.getAllCourses();
+
+    // Filtering
+    if (category && category !== "all")
+      courses = courses.filter(c => c.category === category);
+    if (language && language !== "all")
+      courses = courses.filter(c => c.courseLanguage === language);
+
+    // Sorting
+    switch (sort) {
+      case "price-low":
+        courses.sort((a, b) => a.price - b.price);
+        break;
+      case "price-high":
+        courses.sort((a, b) => b.price - a.price);
+        break;
+      case "rating":
+        courses.sort((a, b) => b.rating - a.rating);
+        break;
+      default:
+        courses.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+
+    res.json({ success: true, courses });
+  } catch (err) {
+    console.error("getCoursesData error:", err);
+    res.status(500).json({ success: false, message: "Failed to load courses" });
+  }
+},
+
+
 
   filterCourses: async (req, res) => {
     const { search, category, language, sort } = req.body;

@@ -124,91 +124,82 @@
       </div>
     <% } %>
 
-    <% if (courses.length > 0) { %>
-      <div id="courses-area">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <% courses.forEach(function(course) { %>
-            <div class="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:transform hover:scale-105 border border-gray-300">
-              <img src="<%= course.thumbnail %>" alt="<%= course.title %>" class="w-full h-48 object-cover" />
-              <div class="p-6">
-                <div class="flex justify-between items-start mb-2">
-                  <h3 class="text-xl font-bold"><%= course.title %></h3>
-                  <span class="bg-primary px-2 py-1 rounded-full text-sm font-semibold">₹<%= course.price.toFixed(2) %></span>
-                </div>
-                <p class="text-gray-600 mb-4"><%= course.instructor %></p>
-                <div class="flex justify-between items-center mb-4">
-                  <div class="flex items-center">
-                    <span class="text-white mr-1">★</span>
-                    <span><%= course.rating %></span>
-                    <span class="text-gray-500 ml-1">(<%= course.students %>)</span>
-                  </div>
-                  <span class="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-xs"><%= course.category %></span>
-                </div>
-                <div class="flex items-center mb-4">
-                  <i class="fas fa-globe text-gray-500 mr-2"></i>
-                  <span class="text-gray-600 text-sm"><%= course.courseLanguage || 'English' %></span>
-                </div>
-                <p class="text-gray-700 mb-4 line-clamp-2"><%= course.description %></p>
-                <a href="/courses/<%= course._id || course.id %>" class="block w-full text-center bg-primary py-2 px-4 rounded-md hover:bg-primary-dark transition-colors">View Course</a>
-              </div>
-            </div>
-          <% }); %>
-        </div>
-      </div>
-    <% } else { %>
-      <div class="bg-white rounded-lg shadow-md p-8 text-center border border-gray-300">
-        <h2 class="text-xl font-bold mb-2">No courses found</h2>
-        <p class="text-gray-600 mb-4">Try adjusting your search or filter criteria.</p>
-        <a href="/courses" class="text-primary hover:underline">View all courses</a>
-      </div>
-    <% } %>
+    <div id="courses-area" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
   </div>
 
   <%- include('../partials/footer') %>
   <%- include('../partials/scripts') %>
   
   <script>
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
   const categoryFilter = document.getElementById("category-filter");
   const languageFilter = document.getElementById("language-filter");
   const sortFilter = document.getElementById("sort-filter");
   const searchInput = document.querySelector('input[name="search"]');
   const coursesContainer = document.getElementById("courses-area");
 
-  async function updateCourses() {
-    const category = categoryFilter.value;
-    const language = languageFilter.value;
-    const sort = sortFilter.value;
-    const search = searchInput.value;
+  async function fetchCourses() {
+    const params = new URLSearchParams({
+      search: searchInput.value || "",
+      category: categoryFilter.value,
+      language: languageFilter.value,
+      sort: sortFilter.value
+    });
 
-    try {
-      const res = await fetch("/courses/filter", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify({ category, language, sort, search })
-      });
+    const res = await fetch(`/courses/data?${params}`);
+    const data = await res.json();
 
-      if (!res.ok) throw new Error("Network error");
-      const data = await res.json();
-
-      // Expect backend to return: { success: true, html: "<div>...</div>" }
-      if (data.success) coursesContainer.innerHTML = data.html;
-      else console.error("Filter failed:", data.message || "Unknown error");
-    } catch (err) {
-      console.error("Courses fetch failed:", err);
+    if (!data.success) {
+      coursesContainer.innerHTML = `<p class="text-gray-400">Failed to load courses.</p>`;
+      return;
     }
+
+    if (data.courses.length === 0) {
+      coursesContainer.innerHTML = `
+        <div class="bg-white rounded-lg shadow-md p-8 text-center border border-gray-300">
+          <h2 class="text-xl font-bold mb-2">No courses found</h2>
+          <p class="text-gray-600 mb-4">Try adjusting your search or filter criteria.</p>
+          <a href="/courses" class="text-primary hover:underline">View all courses</a>
+        </div>`;
+      return;
+    }
+
+    // Build HTML
+    coursesContainer.innerHTML = data.courses.map(course => `
+      <div class="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:transform hover:scale-105 border border-gray-300">
+        <img src="${course.thumbnail}" alt="${course.title}" class="w-full h-48 object-cover" />
+        <div class="p-6">
+          <div class="flex justify-between items-start mb-2">
+            <h3 class="text-xl font-bold">${course.title}</h3>
+            <span class="bg-primary px-2 py-1 rounded-full text-sm font-semibold">₹${course.price.toFixed(2)}</span>
+          </div>
+          <p class="text-gray-600 mb-4">${course.instructor}</p>
+          <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center">
+              <span class="text-white mr-1">★</span>
+              <span>${course.rating}</span>
+              <span class="text-gray-500 ml-1">(${course.students})</span>
+            </div>
+            <span class="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-xs">${course.category}</span>
+          </div>
+          <div class="flex items-center mb-4">
+            <i class="fas fa-globe text-gray-500 mr-2"></i>
+            <span class="text-gray-600 text-sm">${course.courseLanguage || 'English'}</span>
+          </div>
+          <p class="text-gray-700 mb-4 line-clamp-2">${course.description}</p>
+          <a href="/courses/${course._id}" class="block w-full text-center bg-primary py-2 px-4 rounded-md hover:bg-primary-dark transition-colors">View Course</a>
+        </div>
+      </div>
+    `).join('');
   }
 
-  // Listen for filter changes
-  categoryFilter.addEventListener("change", updateCourses);
-  languageFilter.addEventListener("change", updateCourses);
-  sortFilter.addEventListener("change", updateCourses);
+  // Initial load
+  fetchCourses();
 
-  // Live search
-  searchInput.addEventListener("input", updateCourses);
+  // Filters and search
+  [categoryFilter, languageFilter, sortFilter].forEach(el => el.addEventListener("change", fetchCourses));
+  searchInput.addEventListener("input", fetchCourses);
 });
 </script>
 
