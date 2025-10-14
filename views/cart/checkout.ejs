@@ -229,28 +229,34 @@
     });
 
     function showMessage(message, type) {
-      const existingMessage = document.querySelector('.payment-message');
-      if (existingMessage) {
-        existingMessage.remove();
-      }
+  const existingMessage = document.querySelector('.payment-message');
+  if (existingMessage) existingMessage.remove();
 
-      const messageDiv = document.createElement('div');
-      messageDiv.className = `payment-message px-4 py-3 rounded mb-4 ${
-        type === 'success' 
-          ? 'bg-green-800 border border-green-600 text-green-300' 
-          : 'bg-red-800 border border-red-600 text-red-300'
-      }`;
-      messageDiv.textContent = message;
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `payment-message px-4 py-3 rounded mb-4 ${
+    type === 'success' 
+      ? 'bg-green-800 border border-green-600 text-green-300' 
+      : 'bg-red-800 border border-red-600 text-red-300'
+  }`;
+  messageDiv.textContent = message;
 
-      const container = document.querySelector('.container');
-      const heading = container.querySelector('h1');
+  const container = document.querySelector('.container');
+  if (container) {
+    const heading = container.querySelector('h1');
+    if (heading) {
       heading.insertAdjacentElement('afterend', messageDiv);
-
-      // Auto-remove after 5 seconds
-      setTimeout(() => {
-        messageDiv.remove();
-      }, 5000);
+    } else {
+      container.prepend(messageDiv); // fallback
     }
+  } else {
+    document.body.prepend(messageDiv); // last resort
+  }
+
+  setTimeout(() => {
+    messageDiv.remove();
+  }, 5000);
+}
+
 
     // Format expiry date as MM/YYYY
     function formatExpiryDate(input) {
